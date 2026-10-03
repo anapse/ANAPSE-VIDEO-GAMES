@@ -173,4 +173,14 @@ El dashboard de ANAPSE analiza automáticamente el repositorio mediante el botó
 
 ---
 
+## 📄 Licencia / License
+
+**© 2026 ANAPSE. Todos los derechos reservados.**
+
+Este proyecto es software propietario. El código, diseño, assets, imágenes, sprites, personajes, logos y demás recursos no pueden ser copiados, redistribuidos, modificados, comercializados o reutilizados sin autorización expresa de ANAPSE.
+
+La visualización de este repositorio en GitHub no concede ninguna licencia de copia o reutilización. Consulta el archivo `LICENSE` para ver los términos completos.
+
+---
+
 © 2026 **ANAPSE VIDEO GAMES**. Todos los derechos reservados.

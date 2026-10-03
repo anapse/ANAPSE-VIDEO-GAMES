@@ -1,0 +1,6 @@
+# Carpeta para recursos visuales de FOX THIEF:
+# - logo.png
+# - icon.png
+# - cover.png
+# - banner.png
+# - screenshots/

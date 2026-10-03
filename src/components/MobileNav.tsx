@@ -1,6 +1,5 @@
 import React from 'react';
-import { Gamepad2, Lightbulb, Vote, Trophy, MessageSquare, Shield } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { Home, Gamepad2, Lightbulb, MessageSquare, Heart } from 'lucide-react';
 import { useGameData } from '../context/GameDataContext';
 
 interface MobileNavProps {
@@ -9,20 +8,15 @@ interface MobileNavProps {
 }
 
 export const MobileNav: React.FC<MobileNavProps> = ({ currentTab, setCurrentTab }) => {
-  const { isModerator } = useAuth();
   const { setSelectedGame } = useGameData();
 
   const navItems = [
-    { id: 'catalog', label: 'Juegos', icon: Gamepad2 },
-    { id: 'proposals', label: 'Propuestas', icon: Lightbulb },
-    { id: 'polls', label: 'Encuestas', icon: Vote },
-    { id: 'rankings', label: 'Rankings', icon: Trophy },
+    { id: 'home', label: 'Inicio', icon: Home },
+    { id: 'games', label: 'Juegos', icon: Gamepad2 },
+    { id: 'proposals', label: 'Proponer', icon: Lightbulb },
     { id: 'community', label: 'Comunidad', icon: MessageSquare },
+    { id: 'support', label: 'Apoyar', icon: Heart },
   ];
-
-  if (isModerator) {
-    navItems.push({ id: 'admin', label: 'Admin', icon: Shield });
-  }
 
   const handleTabClick = (tabId: string) => {
     setSelectedGame(null);
@@ -31,7 +25,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ currentTab, setCurrentTab 
   };
 
   return (
-    <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 backdrop-blur-lg border-t border-slate-800 px-2 py-1.5 shadow-2xl safe-area-pb">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200/80 dark:border-slate-800 px-2 py-1.5 shadow-lg safe-area-pb transition-colors">
       <div className="flex items-center justify-around">
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -41,13 +35,15 @@ export const MobileNav: React.FC<MobileNavProps> = ({ currentTab, setCurrentTab 
             <button
               key={item.id}
               onClick={() => handleTabClick(item.id)}
-              className={`flex flex-col items-center justify-center py-1 px-2 rounded-xl transition-all ${
-                isActive ? 'text-cyan-400 font-bold' : 'text-slate-400 hover:text-slate-200'
+              className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all ${
+                isActive
+                  ? 'text-cyan-600 dark:text-cyan-400 font-bold'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
               }`}
             >
               <div
                 className={`p-1 rounded-lg ${
-                  isActive ? 'bg-cyan-500/20 shadow-sm shadow-cyan-500/30' : ''
+                  isActive ? 'bg-cyan-50 dark:bg-cyan-500/20' : ''
                 }`}
               >
                 <Icon className="w-4 h-4" />

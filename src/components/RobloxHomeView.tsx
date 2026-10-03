@@ -1,27 +1,20 @@
 import React from 'react';
 import {
   Play,
-  Gamepad2,
   Flame,
   Sparkles,
-  Wrench,
-  Clock,
   Hammer,
   Lightbulb,
-  Vote,
   MessageSquare,
   Heart,
-  ArrowRight,
-  Star,
-  Trophy,
   ChevronRight,
-  Shield,
-  Layers,
+  Gamepad2,
+  Trophy,
 } from 'lucide-react';
 import { Game } from '../types';
 import { useGameData } from '../context/GameDataContext';
 import { GameCard } from './GameCard';
-import confetti from 'canvas-confetti';
+import { ASSETS } from '../lib/assets';
 
 interface RobloxHomeViewProps {
   onPlayGame: (game: Game) => void;
@@ -40,108 +33,78 @@ export const RobloxHomeView: React.FC<RobloxHomeViewProps> = ({
   onNavigateTab,
   onOpenNewProposal,
 }) => {
-  const { games, proposals, polls, votePoll, userPollVotes, donations, announcements } = useGameData();
+  const { games, proposals, comments } = useGameData();
 
-  const featuredGame = games.find((g) => g.gameId === 'fox-thief') || games[0];
+  const featuredGames = games.filter((g) => g.featured || g.status === 'PUBLICADO').slice(0, 4);
   const newGames = games.filter((g) => g.isNew || g.status === 'BETA' || g.status === 'PUBLICADO').slice(0, 4);
-  const promoGames = games.filter((g) => g.inPromotion);
-  const inCreationGames = games.filter((g) => g.status === 'EN CREACIÓN');
-  const inRepairGames = games.filter((g) => g.status === 'EN REPARACIÓN');
-  const upcomingGames = games.filter((g) => g.status === 'PRÓXIMAMENTE');
+  const mostPlayedGames = [...games].sort((a, b) => b.playsCount - a.playsCount).slice(0, 4);
+  const creatingGames = games.filter((g) => g.status === 'EN CREACIÓN' || g.status === 'EN REPARACIÓN').slice(0, 4);
+  const recentComments = comments.slice(0, 3);
 
-  const mainPoll = polls[0];
-  const userVoteIdx = mainPoll ? userPollVotes[mainPoll.id] : undefined;
-
-  const handleVoteQuickPoll = (pollId: string, idx: number) => {
-    votePoll(pollId, idx);
-    confetti({ particleCount: 30, spread: 45, origin: { y: 0.7 } });
+  const scrollToGames = () => {
+    const el = document.getElementById('featured-section');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
-    <div className="space-y-12 sm:space-y-16 pb-12">
+    <div className="space-y-10 sm:space-y-12 pb-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
       
-      {/* 1. JUEGO DESTACADO HERO BANNER */}
-      {featuredGame && (
-        <div className="relative overflow-hidden pt-2">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="relative rounded-3xl overflow-hidden bg-slate-900 border border-cyan-500/30 shadow-2xl group">
-              
-              {/* Hero Panoramic Image */}
-              <div className="relative h-72 sm:h-96 lg:h-[460px] w-full overflow-hidden bg-slate-950">
-                <img
-                  src={featuredGame.bannerImage || featuredGame.mainImage}
-                  alt={featuredGame.name}
-                  className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent" />
-                <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/40 to-transparent" />
+      {/* 1. HERO BANNER PRINCIPAL (Compacto, alegre, sin oscurecerlo en exceso) */}
+      <section className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-cyan-600 via-indigo-600 to-amber-500 shadow-sm text-white p-6 sm:p-10 flex flex-col items-center justify-center text-center space-y-3 min-h-[180px] sm:min-h-[220px]">
+        {/* Official Banner Image */}
+        <img
+          src={ASSETS.banner}
+          alt="ANAPSE Banner"
+          onError={(e) => {
+            (e.target as HTMLElement).style.display = 'none';
+          }}
+          className="absolute inset-0 w-full h-full object-cover opacity-35 pointer-events-none mix-blend-overlay"
+        />
 
-                {/* Badges on Top */}
-                <div className="absolute top-4 left-4 flex items-center gap-2 z-10">
-                  <span className="px-3 py-1 rounded-full text-xs font-black bg-gradient-to-r from-cyan-500 to-indigo-500 text-slate-950 font-['Orbitron'] shadow-md">
-                    🎮 JUEGO DESTACADO
-                  </span>
-                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-slate-950/80 backdrop-blur-md text-cyan-300 border border-slate-700">
-                    {featuredGame.category}
-                  </span>
-                </div>
-              </div>
+        <div className="relative z-10 space-y-2 max-w-2xl">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-xs font-bold font-['Orbitron']">
+            <Gamepad2 className="w-3.5 h-3.5" />
+            ANAPSE VIDEO GAMES
+          </span>
 
-              {/* Hero Content Overlay */}
-              <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 lg:p-10 space-y-3 z-10">
-                <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white font-['Orbitron'] tracking-tight drop-shadow-md">
-                  {featuredGame.name}
-                </h1>
-                <p className="text-xs sm:text-sm lg:text-base text-slate-200 max-w-2xl font-medium line-clamp-2 leading-relaxed drop-shadow">
-                  {featuredGame.tagline || featuredGame.description}
-                </p>
+          <h1 className="text-2xl sm:text-4xl font-extrabold font-['Orbitron'] tracking-tight drop-shadow-sm">
+            Juegos gratis para jugar y descubrir
+          </h1>
 
-                {/* Big Roblox-style Play Button */}
-                <div className="flex flex-wrap items-center gap-3 pt-2">
-                  <button
-                    onClick={() => onPlayGame(featuredGame)}
-                    className="px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-black text-base sm:text-lg font-['Orbitron'] tracking-wider flex items-center gap-3 shadow-xl shadow-emerald-500/25 active:scale-95 transition-all"
-                  >
-                    <Play className="w-6 h-6 fill-slate-950" />
-                    <span>▶ JUGAR GRATIS</span>
-                  </button>
+          <p className="text-xs sm:text-sm text-slate-100 font-medium max-w-md mx-auto">
+            Explora nuestro catálogo independiente, comparte con amigos y diviértete al instante.
+          </p>
 
-                  <button
-                    onClick={() => onViewGameDetails(featuredGame)}
-                    className="px-6 py-4 rounded-2xl bg-slate-950/80 hover:bg-slate-900 border border-slate-700 text-white font-bold text-sm backdrop-blur-md transition-all"
-                  >
-                    Ver detalles e instrucciones
-                  </button>
-                </div>
-              </div>
-            </div>
+          <div className="pt-2">
+            <button
+              onClick={scrollToGames}
+              className="px-6 py-2.5 rounded-xl bg-white text-slate-900 hover:bg-slate-100 font-extrabold text-xs sm:text-sm shadow-md active:scale-95 transition-all inline-flex items-center gap-2"
+            >
+              <Play className="w-4 h-4 fill-slate-900" />
+              <span>VER JUEGOS</span>
+            </button>
           </div>
         </div>
-      )}
+      </section>
 
-      {/* 2. 🎮 DESCUBRE NUESTROS JUEGOS (Grid Principal) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-black text-white font-['Orbitron'] flex items-center gap-2">
-              <Gamepad2 className="w-6 h-6 text-cyan-400" />
-              <span>DESCUBRE NUESTROS JUEGOS</span>
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-400">
-              Juegos gratis listos para jugar en tu navegador o celular
-            </p>
-          </div>
+      {/* 2. 🔥 JUEGOS DESTACADOS */}
+      <section id="featured-section" className="space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-slate-800 pb-2.5">
+          <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white font-['Orbitron'] flex items-center gap-2">
+            <Flame className="w-5 h-5 text-orange-500" />
+            <span>Juegos Destacados</span>
+          </h2>
           <button
             onClick={() => onNavigateTab('games')}
-            className="text-xs font-bold text-cyan-400 hover:text-cyan-300 flex items-center gap-1"
+            className="text-xs font-bold text-cyan-600 dark:text-cyan-400 hover:underline flex items-center gap-1"
           >
             <span>Ver todos</span>
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {games.slice(0, 6).map((game) => (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+          {featuredGames.map((game) => (
             <GameCard
               key={game.gameId}
               game={game}
@@ -156,20 +119,15 @@ export const RobloxHomeView: React.FC<RobloxHomeViewProps> = ({
 
       {/* 3. 🆕 JUEGOS NUEVOS */}
       {newGames.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-black text-white font-['Orbitron'] flex items-center gap-2">
-                <Sparkles className="w-6 h-6 text-amber-400" />
-                <span>🆕 JUEGOS NUEVOS</span>
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-400">
-                Lanzamientos recientes y versiones recién actualizadas
-              </p>
-            </div>
+        <section className="space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-slate-800 pb-2.5">
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white font-['Orbitron'] flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-amber-500" />
+              <span>Juegos Nuevos</span>
+            </h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
             {newGames.map((game) => (
               <GameCard
                 key={game.gameId}
@@ -184,23 +142,18 @@ export const RobloxHomeView: React.FC<RobloxHomeViewProps> = ({
         </section>
       )}
 
-      {/* 4. 🔥 JUEGOS EN PROMOCIÓN */}
-      {promoGames.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-black text-white font-['Orbitron'] flex items-center gap-2">
-                <Flame className="w-6 h-6 text-orange-500 animate-pulse" />
-                <span>🔥 JUEGOS EN PROMOCIÓN</span>
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-400">
-                Juegos con recompensas especiales y torneos comunitarios activos
-              </p>
-            </div>
+      {/* 4. 🔥 MÁS JUGADOS */}
+      {mostPlayedGames.length > 0 && (
+        <section className="space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-slate-800 pb-2.5">
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white font-['Orbitron'] flex items-center gap-2">
+              <Trophy className="w-5 h-5 text-amber-500" />
+              <span>Más Jugados</span>
+            </h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {promoGames.map((game) => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+            {mostPlayedGames.map((game) => (
               <GameCard
                 key={game.gameId}
                 game={game}
@@ -215,22 +168,17 @@ export const RobloxHomeView: React.FC<RobloxHomeViewProps> = ({
       )}
 
       {/* 5. 🚧 ESTAMOS CREANDO */}
-      {inCreationGames.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-black text-white font-['Orbitron'] flex items-center gap-2">
-                <Hammer className="w-6 h-6 text-indigo-400" />
-                <span>🚧 ESTAMOS CREANDO</span>
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-400">
-                Proyectos actualmente en fase de producción y diseño
-              </p>
-            </div>
+      {creatingGames.length > 0 && (
+        <section className="space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-slate-800 pb-2.5">
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white font-['Orbitron'] flex items-center gap-2">
+              <Hammer className="w-5 h-5 text-indigo-500" />
+              <span>Estamos Creando</span>
+            </h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {inCreationGames.map((game) => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+            {creatingGames.map((game) => (
               <GameCard
                 key={game.gameId}
                 game={game}
@@ -244,83 +192,23 @@ export const RobloxHomeView: React.FC<RobloxHomeViewProps> = ({
         </section>
       )}
 
-      {/* 6. 🔧 ESTAMOS REPARANDO */}
-      {inRepairGames.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+      {/* 6. 💡 TÚ PUEDES ELEGIR EL PRÓXIMO */}
+      <section className="space-y-4">
+        <div className="rounded-2xl p-6 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h2 className="text-xl sm:text-2xl font-black text-white font-['Orbitron'] flex items-center gap-2">
-                <Wrench className="w-6 h-6 text-amber-400" />
-                <span>🔧 ESTAMOS REPARANDO</span>
+              <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white font-['Orbitron'] flex items-center gap-2">
+                <Lightbulb className="w-5 h-5 text-amber-500" />
+                <span>Tú puedes elegir el próximo juego</span>
               </h2>
-              <p className="text-xs sm:text-sm text-slate-400">
-                Juegos en mantenimiento técnico o ajustes de balance
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {inRepairGames.map((game) => (
-              <GameCard
-                key={game.gameId}
-                game={game}
-                onPlay={onPlayGame}
-                onViewDetails={onViewGameDetails}
-                onShare={onShareGame}
-                onDonate={onDonateGame}
-              />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* 7. 👀 PRÓXIMAMENTE */}
-      {upcomingGames.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-black text-white font-['Orbitron'] flex items-center gap-2">
-                <Clock className="w-6 h-6 text-purple-400" />
-                <span>👀 PRÓXIMAMENTE</span>
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-400">
-                Nuevas experiencias que llegarán muy pronto a ANAPSE
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {upcomingGames.map((game) => (
-              <GameCard
-                key={game.gameId}
-                game={game}
-                onPlay={onPlayGame}
-                onViewDetails={onViewGameDetails}
-                onShare={onShareGame}
-                onDonate={onDonateGame}
-              />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* 8. 💡 TÚ ELIGES EL PRÓXIMO JUEGO (Propuestas Destacadas) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-        <div className="relative rounded-3xl p-6 sm:p-8 bg-gradient-to-r from-amber-950/40 via-slate-900 to-orange-950/40 border border-amber-500/30">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-            <div>
-              <h2 className="text-xl sm:text-3xl font-black text-white font-['Orbitron'] flex items-center gap-2">
-                <Lightbulb className="w-7 h-7 text-amber-400" />
-                <span>💡 TÚ ELIGES EL PRÓXIMO JUEGO</span>
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-300 mt-1">
-                La comunidad propone y vota. Las ideas ganadoras se convierten en juegos reales de ANAPSE.
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                Propón tu idea de juego o vota por las propuestas de la comunidad.
               </p>
             </div>
 
             <button
               onClick={onOpenNewProposal}
-              className="px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black text-xs font-['Orbitron'] shadow-md shadow-orange-500/20 self-start md:self-auto shrink-0"
+              className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-xs active:scale-95 transition-all shrink-0"
             >
               + PROPONER UN JUEGO
             </button>
@@ -328,16 +216,16 @@ export const RobloxHomeView: React.FC<RobloxHomeViewProps> = ({
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {proposals.slice(0, 3).map((p) => (
-              <div key={p.id} className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2">
-                <h3 className="font-bold text-white text-sm line-clamp-1">{p.title}</h3>
-                <p className="text-xs text-slate-300 line-clamp-2">{p.description}</p>
-                <div className="flex items-center justify-between text-xs pt-2 border-t border-slate-800/60">
-                  <span className="text-amber-400 font-bold">👍 {p.votesCount} votos</span>
+              <div key={p.id} className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 space-y-2">
+                <h3 className="font-bold text-slate-900 dark:text-white text-xs line-clamp-1">{p.title}</h3>
+                <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2">{p.description}</p>
+                <div className="flex items-center justify-between text-xs pt-1.5 border-t border-slate-200/60 dark:border-slate-700/60">
+                  <span className="text-amber-600 dark:text-amber-400 font-bold">👍 {p.votesCount} votos</span>
                   <button
                     onClick={() => onNavigateTab('proposals')}
-                    className="text-cyan-400 font-bold text-[11px]"
+                    className="text-cyan-600 dark:text-cyan-400 font-bold hover:underline"
                   >
-                    Votar en Comunidad →
+                    Votar →
                   </button>
                 </div>
               </div>
@@ -346,69 +234,55 @@ export const RobloxHomeView: React.FC<RobloxHomeViewProps> = ({
         </div>
       </section>
 
-      {/* 9. 🗳️ ¿QUÉ JUEGO HACEMOS DESPUÉS? (Encuesta visual) */}
-      {mainPoll && (
-        <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
-          <div className="p-6 sm:p-8 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl space-y-4">
-            <div className="flex items-center justify-between">
+      {/* 7. 💬 COMUNIDAD */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-slate-800 pb-2.5">
+          <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white font-['Orbitron'] flex items-center gap-2">
+            <MessageSquare className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
+            <span>Comunidad</span>
+          </h2>
+          <button
+            onClick={() => onNavigateTab('community')}
+            className="text-xs font-bold text-cyan-600 dark:text-cyan-400 hover:underline flex items-center gap-1"
+          >
+            <span>Ver muro completo</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {recentComments.map((c) => (
+            <div key={c.id} className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-2">
               <div className="flex items-center gap-2">
-                <Vote className="w-6 h-6 text-cyan-400" />
-                <h3 className="text-lg sm:text-xl font-black text-white font-['Orbitron']">
-                  🗳️ {mainPoll.question}
-                </h3>
+                <img
+                  src={c.userPhoto || `https://api.dicebear.com/7.x/bottts/svg?seed=${c.userId}`}
+                  alt={c.userName}
+                  className="w-6 h-6 rounded-lg bg-slate-100 dark:bg-slate-800"
+                />
+                <span className="text-xs font-bold text-slate-800 dark:text-white truncate">{c.userName}</span>
               </div>
-              <span className="text-xs font-mono font-bold text-amber-300">{mainPoll.totalVotes} votos</span>
+              <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2">"{c.content}"</p>
             </div>
+          ))}
+        </div>
+      </section>
 
-            <div className="space-y-3">
-              {mainPoll.options.map((opt, idx) => {
-                const pct = mainPoll.totalVotes > 0 ? Math.round((opt.votes / mainPoll.totalVotes) * 100) : 0;
-                const isSelected = userVoteIdx === idx;
-
-                return (
-                  <button
-                    key={idx}
-                    onClick={() => handleVoteQuickPoll(mainPoll.id, idx)}
-                    className={`relative w-full p-4 rounded-2xl border text-left overflow-hidden transition-all duration-200 group ${
-                      isSelected
-                        ? 'bg-cyan-950/60 border-cyan-400 shadow-md'
-                        : 'bg-slate-950/70 border-slate-800 hover:border-slate-700'
-                    }`}
-                  >
-                    <div
-                      className={`absolute left-0 top-0 bottom-0 transition-all duration-500 rounded-2xl ${
-                        isSelected ? 'bg-cyan-500/20' : 'bg-slate-800/40'
-                      }`}
-                      style={{ width: `${pct}%` }}
-                    />
-                    <div className="relative z-10 flex items-center justify-between gap-3 text-xs sm:text-sm font-bold text-slate-200">
-                      <span>{opt.text}</span>
-                      <span className="font-mono text-cyan-300">{pct}%</span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* 10. ❤️ APOYA ANAPSE VIDEO GAMES */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="rounded-3xl p-6 sm:p-8 bg-gradient-to-r from-rose-950/40 via-slate-900 to-pink-950/40 border border-rose-500/30 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-2 text-center md:text-left">
-            <h3 className="text-xl sm:text-2xl font-black text-white font-['Orbitron'] flex items-center justify-center md:justify-start gap-2">
-              <Heart className="w-6 h-6 text-rose-400 fill-rose-400" />
-              <span>APOYA ANAPSE VIDEO GAMES</span>
+      {/* 8. ❤️ APOYA ANAPSE VIDEO GAMES */}
+      <section>
+        <div className="rounded-2xl p-6 bg-gradient-to-r from-rose-500/10 via-amber-500/10 to-cyan-500/10 dark:from-slate-900 dark:to-slate-900 border border-rose-200 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="space-y-1 text-center md:text-left">
+            <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white font-['Orbitron'] flex items-center justify-center md:justify-start gap-2">
+              <Heart className="w-5 h-5 text-rose-500 fill-rose-500" />
+              <span>Apoya ANAPSE VIDEO GAMES</span>
             </h3>
-            <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
-              Somos un estudio independiente de videojuegos. Tus donaciones nos permiten seguir creando juegos gratuitos y sin publicidad invasiva para toda la comunidad.
+            <p className="text-xs text-slate-600 dark:text-slate-400 max-w-xl">
+              Somos un estudio independiente. Tus aportes nos permiten seguir creando videojuegos gratuitos para todos.
             </p>
           </div>
 
           <button
             onClick={() => onNavigateTab('support')}
-            className="px-8 py-4 rounded-2xl bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-400 hover:to-pink-400 text-white font-black text-sm font-['Orbitron'] shadow-xl shadow-rose-500/20 active:scale-95 transition-all shrink-0"
+            className="px-6 py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-xs active:scale-95 transition-all shrink-0"
           >
             ❤️ APOYAR AHORA
           </button>
