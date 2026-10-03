@@ -10,8 +10,7 @@ import {
   Heart,
   Shield,
   ChevronRight,
-  Compass,
-  Trophy,
+  Menu,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useGameData } from '../context/GameDataContext';
@@ -21,6 +20,8 @@ interface SidebarProps {
   setCurrentTab: (tab: string) => void;
   selectedFilterCategory: string;
   setSelectedFilterCategory: (cat: string) => void;
+  collapsed: boolean;
+  onToggleCollapse: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -28,6 +29,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   setCurrentTab,
   selectedFilterCategory,
   setSelectedFilterCategory,
+  collapsed,
+  onToggleCollapse,
 }) => {
   const { isStaff } = useAuth();
   const { proposals, games, setSelectedGame } = useGameData();
@@ -67,13 +70,34 @@ export const Sidebar: React.FC<SidebarProps> = ({
   };
 
   return (
-    <aside className="hidden md:flex flex-col w-56 lg:w-60 shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-r border-slate-200/80 dark:border-slate-800/80 min-h-[calc(100vh-4.5rem)] p-3 lg:p-4 space-y-6 select-none sticky top-18 transition-colors">
-      
+    <aside
+      className={`hidden md:flex flex-col shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-r border-slate-200/80 dark:border-slate-800/80 min-h-[calc(100vh-4.5rem)] p-2 sm:p-3 select-none sticky top-18 transition-all duration-300 ${
+        collapsed ? 'w-16 items-center' : 'w-56 lg:w-60'
+      }`}
+    >
+      {/* Sidebar Header with Hamburger Toggle */}
+      <div className={`w-full flex items-center mb-3 ${collapsed ? 'justify-center' : 'justify-between px-2'}`}>
+        {!collapsed && (
+          <span className="font-extrabold text-xs uppercase tracking-wider text-slate-800 dark:text-slate-200 font-['Orbitron'] truncate">
+            MENÚ ANAPSE
+          </span>
+        )}
+        <button
+          onClick={onToggleCollapse}
+          className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors shadow-xs"
+          title={collapsed ? 'Expandir menú (☰)' : 'Contraer menú'}
+        >
+          <Menu className="w-4 h-4" />
+        </button>
+      </div>
+
       {/* Primary Discovery Navigation */}
-      <div className="space-y-1">
-        <p className="px-3 text-[10px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2 font-['Orbitron']">
-          Descubrir
-        </p>
+      <div className="w-full space-y-1">
+        {!collapsed && (
+          <p className="px-2 text-[10px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1 font-['Orbitron']">
+            Descubrir
+          </p>
+        )}
 
         {mainNavItems.map((item) => {
           const Icon = item.icon;
@@ -83,26 +107,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <button
               key={item.id}
               onClick={() => handleNav(item.id)}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-2xl text-xs sm:text-sm font-semibold transition-all text-left group ${
+              title={collapsed ? item.label : undefined}
+              className={`w-full flex items-center rounded-2xl text-xs sm:text-sm font-semibold transition-all group relative ${
+                collapsed ? 'justify-center p-2.5' : 'justify-between px-3 py-2 text-left'
+              } ${
                 isActive
-                  ? 'bg-cyan-500/10 dark:bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 font-bold border border-cyan-500/30'
-                  : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/80'
+                  ? 'bg-amber-500 text-slate-950 font-bold shadow-xs'
+                  : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/80'
               }`}
             >
-              <div className="flex items-center gap-2.5">
+              <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-2.5'}`}>
                 <Icon
                   className={`w-4 h-4 transition-transform group-hover:scale-110 ${
-                    isActive ? 'text-cyan-600 dark:text-cyan-400' : 'text-slate-500 dark:text-slate-400'
+                    isActive ? 'text-slate-950' : 'text-slate-500 dark:text-slate-400'
                   }`}
                 />
-                <span className="truncate">{item.label}</span>
+                {!collapsed && <span className="truncate">{item.label}</span>}
               </div>
 
-              {item.count !== undefined && item.count > 0 && (
+              {!collapsed && item.count !== undefined && item.count > 0 && (
                 <span
                   className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
                     isActive
-                      ? 'bg-cyan-600 text-white'
+                      ? 'bg-slate-950/20 text-slate-950'
                       : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
                   }`}
                 >
@@ -115,10 +142,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Category Navigation Section */}
-      <div className="pt-3 border-t border-slate-200/80 dark:border-slate-800/80 space-y-1">
-        <p className="px-3 text-[10px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2 font-['Orbitron']">
-          Categorías
-        </p>
+      <div className="w-full pt-3 border-t border-slate-200/80 dark:border-slate-800/80 space-y-1">
+        {!collapsed && (
+          <p className="px-2 text-[10px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1 font-['Orbitron']">
+            Categorías
+          </p>
+        )}
 
         {categories.map((cat) => {
           const isSelected = selectedFilterCategory === cat.id && currentTab === 'games';
@@ -127,14 +156,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <button
               key={cat.id}
               onClick={() => handleCategorySelect(cat.id)}
-              className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all text-left ${
+              title={collapsed ? cat.label : undefined}
+              className={`w-full flex items-center rounded-xl text-xs font-medium transition-all group ${
+                collapsed ? 'justify-center p-2' : 'gap-2.5 px-3 py-1.5 text-left'
+              } ${
                 isSelected
-                  ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 font-bold border border-amber-500/30'
+                  ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300 font-bold border border-amber-500/30'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
               }`}
             >
               <span className="text-sm">{cat.icon}</span>
-              <span className="truncate">{cat.label}</span>
+              {!collapsed && <span className="truncate">{cat.label}</span>}
             </button>
           );
         })}
@@ -142,33 +174,40 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Admin / Staff Access (Discrete at bottom) */}
       {isStaff && (
-        <div className="pt-3 border-t border-slate-200/80 dark:border-slate-800/80">
-          <p className="px-3 text-[10px] font-extrabold uppercase tracking-widest text-orange-600 dark:text-orange-400 mb-1.5 font-['Orbitron']">
-            Administración
-          </p>
+        <div className="w-full pt-3 border-t border-slate-200/80 dark:border-slate-800/80">
+          {!collapsed && (
+            <p className="px-2 text-[10px] font-extrabold uppercase tracking-widest text-orange-600 dark:text-orange-400 mb-1 font-['Orbitron']">
+              Administración
+            </p>
+          )}
           <button
             onClick={() => handleNav('admin')}
-            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left ${
+            title={collapsed ? 'Dashboard Admin' : undefined}
+            className={`w-full flex items-center rounded-xl text-xs font-bold transition-all ${
+              collapsed ? 'justify-center p-2' : 'justify-between px-3 py-2 text-left'
+            } ${
               currentTab === 'admin'
                 ? 'bg-orange-500/20 text-orange-700 dark:text-orange-300 border border-orange-500/40'
                 : 'text-orange-600/80 dark:text-orange-400/80 hover:text-orange-600 dark:hover:text-orange-300 hover:bg-orange-500/10'
             }`}
           >
-            <div className="flex items-center gap-2.5">
+            <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-2.5'}`}>
               <Shield className="w-4 h-4 text-orange-500" />
-              <span>Dashboard Admin</span>
+              {!collapsed && <span>Dashboard Admin</span>}
             </div>
-            <ChevronRight className="w-3.5 h-3.5 opacity-60" />
+            {!collapsed && <ChevronRight className="w-3.5 h-3.5 opacity-60" />}
           </button>
         </div>
       )}
 
       {/* Footer Tagline */}
-      <div className="mt-auto pt-4 border-t border-slate-200/60 dark:border-slate-800/60 px-3 text-[11px] text-slate-500 dark:text-slate-400 space-y-1">
-        <p className="font-bold text-slate-700 dark:text-slate-300">ANAPSE VIDEO GAMES</p>
-        <p className="text-[10px] leading-relaxed">Juegos gratis para jugar y descubrir.</p>
-        <p className="text-[9px] text-slate-400 dark:text-slate-500 pt-1">© 2026 ANAPSE</p>
-      </div>
+      {!collapsed && (
+        <div className="mt-auto pt-4 border-t border-slate-200/60 dark:border-slate-800/60 px-2 text-[11px] text-slate-500 dark:text-slate-400 space-y-0.5">
+          <p className="font-bold text-slate-700 dark:text-slate-300">ANAPSE VIDEO GAMES</p>
+          <p className="text-[10px] leading-relaxed">Juegos gratis para jugar y descubrir.</p>
+          <p className="text-[9px] text-slate-400 dark:text-slate-500 pt-0.5">© 2026 ANAPSE</p>
+        </div>
+      )}
     </aside>
   );
 };

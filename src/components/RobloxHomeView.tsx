@@ -49,8 +49,8 @@ export const RobloxHomeView: React.FC<RobloxHomeViewProps> = ({
   return (
     <div className="space-y-10 sm:space-y-12 pb-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
       
-      {/* 1. HERO BANNER PRINCIPAL (Compacto, alegre, sin oscurecerlo en exceso) */}
-      <section className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-cyan-600 via-indigo-600 to-amber-500 shadow-sm text-white p-6 sm:p-10 flex flex-col items-center justify-center text-center space-y-3 min-h-[180px] sm:min-h-[220px]">
+      {/* 1. HERO BANNER PRINCIPAL (Compacto, alegre, limpio, estilo portada web) */}
+      <section className="relative rounded-3xl overflow-hidden shadow-sm text-white p-6 sm:p-10 flex flex-col items-center justify-center text-center space-y-3 min-h-[180px] sm:min-h-[220px] border border-slate-200/60 dark:border-slate-800">
         {/* Official Banner Image */}
         <img
           src={ASSETS.banner}
@@ -58,8 +58,10 @@ export const RobloxHomeView: React.FC<RobloxHomeViewProps> = ({
           onError={(e) => {
             (e.target as HTMLElement).style.display = 'none';
           }}
-          className="absolute inset-0 w-full h-full object-cover opacity-35 pointer-events-none mix-blend-overlay"
+          className="absolute inset-0 w-full h-full object-cover"
         />
+        {/* Gradiente suave para asegurar legibilidad sobre la portada */}
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-900/30 to-slate-900/40" />
 
         <div className="relative z-10 space-y-2 max-w-2xl">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-xs font-bold font-['Orbitron']">
@@ -87,7 +89,7 @@ export const RobloxHomeView: React.FC<RobloxHomeViewProps> = ({
         </div>
       </section>
 
-      {/* 2. 🔥 JUEGOS DESTACADOS */}
+      {/* 2. 🔥 JUEGOS DESTACADOS O ESTADO VACÍO */}
       <section id="featured-section" className="space-y-4">
         <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-slate-800 pb-2.5">
           <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white font-['Orbitron'] flex items-center gap-2">
@@ -96,25 +98,47 @@ export const RobloxHomeView: React.FC<RobloxHomeViewProps> = ({
           </h2>
           <button
             onClick={() => onNavigateTab('games')}
-            className="text-xs font-bold text-cyan-600 dark:text-cyan-400 hover:underline flex items-center gap-1"
+            className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1"
           >
             <span>Ver todos</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
-          {featuredGames.map((game) => (
-            <GameCard
-              key={game.gameId}
-              game={game}
-              onPlay={onPlayGame}
-              onViewDetails={onViewGameDetails}
-              onShare={onShareGame}
-              onDonate={onDonateGame}
-            />
-          ))}
-        </div>
+        {games.length === 0 ? (
+          <div className="p-12 text-center rounded-3xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-dashed border-slate-200 dark:border-slate-800 space-y-3">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center mx-auto">
+              <Gamepad2 className="w-6 h-6" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white font-['Orbitron']">
+                🎮 Todavía no hay juegos publicados
+              </h3>
+              <p className="text-xs text-slate-600 dark:text-slate-400 max-w-sm mx-auto">
+                Estamos preparando nuevos juegos. Vuelve muy pronto o propone una idea en la sección de Propuestas.
+              </p>
+            </div>
+            <button
+              onClick={onOpenNewProposal}
+              className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-xs"
+            >
+              + Proponer una Idea
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+            {featuredGames.map((game) => (
+              <GameCard
+                key={game.gameId}
+                game={game}
+                onPlay={onPlayGame}
+                onViewDetails={onViewGameDetails}
+                onShare={onShareGame}
+                onDonate={onDonateGame}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* 3. 🆕 JUEGOS NUEVOS */}
@@ -223,7 +247,7 @@ export const RobloxHomeView: React.FC<RobloxHomeViewProps> = ({
                   <span className="text-amber-600 dark:text-amber-400 font-bold">👍 {p.votesCount} votos</span>
                   <button
                     onClick={() => onNavigateTab('proposals')}
-                    className="text-cyan-600 dark:text-cyan-400 font-bold hover:underline"
+                    className="text-amber-600 dark:text-amber-400 font-bold hover:underline"
                   >
                     Votar →
                   </button>
@@ -238,12 +262,12 @@ export const RobloxHomeView: React.FC<RobloxHomeViewProps> = ({
       <section className="space-y-4">
         <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-slate-800 pb-2.5">
           <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white font-['Orbitron'] flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
+            <MessageSquare className="w-5 h-5 text-amber-500" />
             <span>Comunidad</span>
           </h2>
           <button
             onClick={() => onNavigateTab('community')}
-            className="text-xs font-bold text-cyan-600 dark:text-cyan-400 hover:underline flex items-center gap-1"
+            className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1"
           >
             <span>Ver muro completo</span>
             <ChevronRight className="w-3.5 h-3.5" />
@@ -269,7 +293,7 @@ export const RobloxHomeView: React.FC<RobloxHomeViewProps> = ({
 
       {/* 8. ❤️ APOYA ANAPSE VIDEO GAMES */}
       <section>
-        <div className="rounded-2xl p-6 bg-gradient-to-r from-rose-500/10 via-amber-500/10 to-cyan-500/10 dark:from-slate-900 dark:to-slate-900 border border-rose-200 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="rounded-2xl p-6 bg-gradient-to-r from-rose-500/10 via-amber-500/10 to-orange-500/10 dark:from-slate-900 dark:to-slate-900 border border-rose-200 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-1 text-center md:text-left">
             <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white font-['Orbitron'] flex items-center justify-center md:justify-start gap-2">
               <Heart className="w-5 h-5 text-rose-500 fill-rose-500" />

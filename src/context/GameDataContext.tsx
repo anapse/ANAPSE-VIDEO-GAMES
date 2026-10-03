@@ -20,7 +20,33 @@ import {
   GameStatus,
   GlobalAnalytics,
   MascotConfig,
+  SupportSettings,
 } from '../types';
+
+export const DEFAULT_SUPPORT_SETTINGS: SupportSettings = {
+  enabled: true,
+  title: 'Apoya ANAPSE VIDEO GAMES',
+  subtitle: 'Ayúdanos a seguir creando videojuegos independientes.',
+  yape: {
+    enabled: true,
+    phone: '+51 912391502',
+    holderName: 'ANAPSE GAMES',
+  },
+  paypal: {
+    enabled: true,
+    email: 'anapse_j@yahoo.es',
+    url: 'https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anapse_j%40yahoo.es',
+  },
+  qr: {
+    enabled: false,
+    imageUrl: '',
+  },
+  whatsapp: {
+    enabled: false,
+    phone: '',
+  },
+  customAmounts: [2, 5, 10, 20],
+};
 import {
   INITIAL_GAMES,
   INITIAL_CATEGORIES,
@@ -68,6 +94,8 @@ interface GameDataContextType {
   userRatings: Record<string, number>;
   mascotConfig: MascotConfig;
   updateMascotConfig: (newConfig: Partial<MascotConfig>) => void;
+  supportSettings: SupportSettings;
+  updateSupportSettings: (newSettings: Partial<SupportSettings>) => void;
   setSelectedGame: (game: Game | null) => void;
   setActiveGameModal: (game: Game | null) => void;
   addOrUpdateGame: (game: Partial<Game> & { gameId: string; name: string }) => Promise<void>;
@@ -115,64 +143,11 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   });
   const [comments, setComments] = useState<Comment[]>(() => {
     const saved = localStorage.getItem('anapse_comments');
-    return saved
-      ? JSON.parse(saved)
-      : [
-          {
-            id: 'c-1',
-            targetType: 'game',
-            targetId: 'fox-thief',
-            userId: 'user-valeria',
-            userName: 'Valeria Gamer',
-            userPhoto: 'https://api.dicebear.com/7.x/bottts/svg?seed=valeria',
-            content: '¡Me encanta el sigilo y la música retro de Fox Thief! El nivel 4 es súper desafiante 🦊🔥',
-            likesCount: 15,
-            createdAt: '2026-04-02T12:00:00Z',
-          },
-          {
-            id: 'c-2',
-            targetType: 'game',
-            targetId: 'fox-thief',
-            parentId: 'c-1',
-            userId: 'user-admin',
-            userName: 'ANAPSE Team',
-            userPhoto: 'https://api.dicebear.com/7.x/bottts/svg?seed=anapseTeam',
-            content: '¡Gracias Valeria! La próxima semana lanzaremos la actualización v1.3 con nuevas trampas y skins.',
-            likesCount: 8,
-            createdAt: '2026-04-02T13:30:00Z',
-          },
-        ];
+    return saved ? JSON.parse(saved) : [];
   });
   const [donations, setDonations] = useState<Donation[]>(() => {
     const saved = localStorage.getItem('anapse_donations');
-    return saved
-      ? JSON.parse(saved)
-      : [
-          {
-            id: 'don-1',
-            gameId: 'fox-thief',
-            gameName: 'FOX THIEF',
-            amount: 10,
-            currency: 'S/',
-            userName: 'Juan Carlos',
-            message: '¡Excelente juego peruano! Sigan adelante con más niveles.',
-            isPublic: true,
-            paymentMethod: 'Yape / Plin',
-            createdAt: '2026-04-01T15:00:00Z',
-          },
-          {
-            id: 'don-2',
-            gameId: 'crazy-monkey-balloons',
-            gameName: 'CRAZY MONKEY BALLOONS',
-            amount: 5,
-            currency: 'S/',
-            userName: 'Andrea R.',
-            message: 'Mis sobrinos no paran de jugarlo en la tablet ❤️',
-            isPublic: true,
-            paymentMethod: 'Tarjeta',
-            createdAt: '2026-04-02T18:20:00Z',
-          },
-        ];
+    return saved ? JSON.parse(saved) : [];
   });
   const [announcements, setAnnouncements] = useState<Announcement[]>(() => {
     const saved = localStorage.getItem('anapse_announcements');
@@ -207,6 +182,31 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const saved = localStorage.getItem('anapse_mascot_config');
     return saved ? { ...DEFAULT_MASCOT_CONFIG, ...JSON.parse(saved) } : DEFAULT_MASCOT_CONFIG;
   });
+
+  const [supportSettings, setSupportSettings] = useState<SupportSettings>(() => {
+    const saved = localStorage.getItem('anapse_support_settings');
+    return saved ? { ...DEFAULT_SUPPORT_SETTINGS, ...JSON.parse(saved) } : DEFAULT_SUPPORT_SETTINGS;
+  });
+
+  const updateSupportSettings = (newSettings: Partial<SupportSettings>) => {
+    setSupportSettings((prev) => {
+      const updated = {
+        ...prev,
+        ...newSettings,
+        yape: { ...prev.yape, ...(newSettings.yape || {}) },
+        paypal: { ...prev.paypal, ...(newSettings.paypal || {}) },
+        qr: { ...prev.qr, ...(newSettings.qr || {}) },
+        whatsapp: { ...prev.whatsapp, ...(newSettings.whatsapp || {}) },
+      };
+      localStorage.setItem('anapse_support_settings', JSON.stringify(updated));
+      try {
+        setDoc(doc(db, 'settings', 'supportSettings'), updated, { merge: true });
+      } catch (e) {
+        // ok
+      }
+      return updated;
+    });
+  };
 
   // Local storage sync
   useEffect(() => {
@@ -692,6 +692,8 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         userRatings,
         mascotConfig,
         updateMascotConfig,
+        supportSettings,
+        updateSupportSettings,
         setSelectedGame,
         setActiveGameModal,
         addOrUpdateGame,

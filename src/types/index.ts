@@ -162,6 +162,31 @@ export interface Donation {
   createdAt: string;
 }
 
+export interface SupportSettings {
+  enabled: boolean;
+  title?: string;
+  subtitle?: string;
+  yape: {
+    enabled: boolean;
+    phone: string; // "+51 912391502"
+    holderName?: string;
+  };
+  paypal: {
+    enabled: boolean;
+    email: string; // "anapse_j@yahoo.es"
+    url?: string;
+  };
+  qr: {
+    enabled: boolean; // default false
+    imageUrl?: string;
+  };
+  whatsapp: {
+    enabled: boolean; // default false
+    phone?: string;
+  };
+  customAmounts?: number[];
+}
+
 export interface Announcement {
   id: string;
   title: string;

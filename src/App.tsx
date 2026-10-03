@@ -32,6 +32,7 @@ const MainAppContent: React.FC = () => {
   const [shareModalGame, setShareModalGame] = useState<Game | null>(null);
   const [donationModalGame, setDonationModalGame] = useState<Game | null>(null);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
   // Hash-based routing check for #game-fox-thief etc.
   useEffect(() => {
@@ -80,9 +81,9 @@ const MainAppContent: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F7F8FA] dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-white relative overflow-x-hidden transition-colors">
+    <div className="min-h-screen bg-transparent text-slate-900 dark:text-slate-100 flex flex-col font-sans selection:bg-amber-500 selection:text-slate-950 relative overflow-x-hidden transition-colors">
       
-      {/* Official Fantasy Valley Background (Fondo visible con transparencia detrás de la plataforma) */}
+      {/* Official Fantasy Valley Background (Fondo visible detrás de la plataforma) */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <img
           src={ASSETS.background}
@@ -90,9 +91,10 @@ const MainAppContent: React.FC = () => {
           onError={(e) => {
             (e.target as HTMLElement).style.display = 'none';
           }}
-          className="w-full h-full object-cover opacity-25 dark:opacity-30 scale-102"
+          className="w-full h-full object-cover opacity-95 dark:opacity-75 scale-102"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#F7F8FA]/75 via-[#F7F8FA]/85 to-[#F7F8FA]/90 dark:from-slate-950/80 dark:via-slate-950/85 dark:to-slate-950" />
+        {/* Capa ultra sutil e iluminada para ver el paisaje como un mapa de fondo */}
+        <div className="absolute inset-0 bg-white/20 dark:bg-slate-950/50 backdrop-blur-[1px]" />
       </div>
       
       {/* Topbar */}
@@ -125,6 +127,8 @@ const MainAppContent: React.FC = () => {
             }}
             selectedFilterCategory={selectedFilterCategory}
             setSelectedFilterCategory={setSelectedFilterCategory}
+            collapsed={sidebarCollapsed}
+            onToggleCollapse={() => setSidebarCollapsed((prev) => !prev)}
           />
         )}
 
@@ -191,7 +195,7 @@ const MainAppContent: React.FC = () => {
           <div className="w-72 bg-white dark:bg-slate-900 h-full p-4 space-y-4 border-r border-slate-200 dark:border-slate-800 flex flex-col justify-between animate-in slide-in-from-left duration-200 shadow-2xl">
             <div className="space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-                <span className="font-bold font-['Orbitron'] text-slate-900 dark:text-cyan-400 text-sm">MENÚ ANAPSE</span>
+                <span className="font-bold font-['Orbitron'] text-slate-900 dark:text-amber-400 text-sm">MENÚ ANAPSE</span>
                 <button
                   onClick={() => setMobileDrawerOpen(false)}
                   className="p-1 text-slate-400 hover:text-slate-900 dark:hover:text-white"
@@ -214,7 +218,7 @@ const MainAppContent: React.FC = () => {
                       }}
                       className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-left ${
                         isActive
-                          ? 'bg-cyan-600 text-white'
+                          ? 'bg-amber-500 text-slate-950'
                           : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
                       }`}
                     >

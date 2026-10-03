@@ -140,9 +140,9 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
             {/* BOTÓN PROTAGONISTA ▶ JUGAR */}
             <button
               onClick={() => onPlay(game)}
-              className="px-8 py-3.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-base font-['Orbitron'] tracking-wider shadow-md active:scale-95 transition-all flex items-center justify-center gap-2.5 shrink-0"
+              className="px-8 py-3.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-base font-['Orbitron'] tracking-wider shadow-md active:scale-95 transition-all flex items-center justify-center gap-2.5 shrink-0"
             >
-              <Play className="w-5 h-5 fill-white" />
+              <Play className="w-5 h-5 fill-slate-950" />
               <span>▶ JUGAR GRATIS</span>
             </button>
           </div>
@@ -175,10 +175,10 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
 
             <button
               onClick={() => onDonate(game)}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-xs transition-all"
             >
               <Heart className="w-4 h-4 fill-white" />
-              <span>Apoyar</span>
+              <span>❤️ Apoyar ANAPSE</span>
             </button>
 
             <button
@@ -245,7 +245,7 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
         {/* ¿Cómo se juega? */}
         <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 space-y-2.5">
           <h2 className="text-base font-bold text-slate-900 dark:text-white font-['Orbitron'] flex items-center gap-2">
-            <HelpCircle className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+            <HelpCircle className="w-4 h-4 text-amber-500" />
             <span>¿Cómo se juega?</span>
           </h2>
           <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line">
@@ -285,7 +285,7 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
       {/* Comentarios */}
       <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 space-y-4">
         <h2 className="text-base font-bold text-slate-900 dark:text-white font-['Orbitron'] flex items-center gap-2">
-          <MessageSquare className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+          <MessageSquare className="w-4 h-4 text-amber-500" />
           <span>Comentarios ({gameComments.length})</span>
         </h2>
 
@@ -295,13 +295,13 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
             onChange={(e) => setNewComment(e.target.value)}
             placeholder="Escribe tu comentario sobre este juego..."
             rows={2}
-            className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-cyan-500 resize-none"
+            className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-amber-500 resize-none"
           />
           <div className="flex justify-end">
             <button
               type="submit"
               disabled={!newComment.trim()}
-              className="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-700 disabled:opacity-40 text-white font-bold text-xs flex items-center gap-1.5"
+              className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-40 text-slate-950 font-bold text-xs flex items-center gap-1.5"
             >
               <Send className="w-3.5 h-3.5" />
               <span>Publicar</span>

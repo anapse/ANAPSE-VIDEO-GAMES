@@ -55,6 +55,8 @@ export const AdminDashboard: React.FC = () => {
     deleteCategory,
     mascotConfig,
     updateMascotConfig,
+    supportSettings,
+    updateSupportSettings,
   } = useGameData();
 
   const { profile, simulateRoleChange } = useAuth();
@@ -631,6 +633,125 @@ export const AdminDashboard: React.FC = () => {
                   Agregar
                 </button>
               </form>
+            </div>
+          </div>
+
+          {/* Configuración del Sistema de Apoyo (Yape, PayPal, QR, WhatsApp) */}
+          <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Heart className="w-5 h-5 text-rose-500 fill-rose-500" />
+                <h3 className="font-extrabold text-base text-slate-900 dark:text-white font-['Orbitron']">
+                  Configuración del Sistema de Apoyo
+                </h3>
+              </div>
+              <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/30">
+                Ajustes de Donación
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+              {/* YAPE Config */}
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-xs text-purple-700 dark:text-purple-400 font-['Orbitron']">📱 YAPE</span>
+                  <label className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
+                    <span>Activar</span>
+                    <input
+                      type="checkbox"
+                      checked={supportSettings?.yape?.enabled ?? true}
+                      onChange={(e) => updateSupportSettings({ yape: { ...supportSettings.yape, enabled: e.target.checked } })}
+                      className="rounded text-purple-600"
+                    />
+                  </label>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-slate-500">Número de Celular Yape:</label>
+                  <input
+                    type="text"
+                    value={supportSettings?.yape?.phone || ''}
+                    onChange={(e) => updateSupportSettings({ yape: { ...supportSettings.yape, phone: e.target.value } })}
+                    className="w-full p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white font-mono"
+                  />
+                </div>
+              </div>
+
+              {/* PAYPAL Config */}
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-xs text-sky-700 dark:text-sky-400 font-['Orbitron']">💙 PAYPAL</span>
+                  <label className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
+                    <span>Activar</span>
+                    <input
+                      type="checkbox"
+                      checked={supportSettings?.paypal?.enabled ?? true}
+                      onChange={(e) => updateSupportSettings({ paypal: { ...supportSettings.paypal, enabled: e.target.checked } })}
+                      className="rounded text-sky-600"
+                    />
+                  </label>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-slate-500">Correo PayPal:</label>
+                  <input
+                    type="text"
+                    value={supportSettings?.paypal?.email || ''}
+                    onChange={(e) => updateSupportSettings({ paypal: { ...supportSettings.paypal, email: e.target.value } })}
+                    className="w-full p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white font-mono"
+                  />
+                </div>
+              </div>
+
+              {/* QR CONFIG (OFF BY DEFAULT) */}
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-xs text-amber-700 dark:text-amber-400 font-['Orbitron']">🖼️ QR DE PAGO</span>
+                  <label className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
+                    <span>Activar QR</span>
+                    <input
+                      type="checkbox"
+                      checked={supportSettings?.qr?.enabled ?? false}
+                      onChange={(e) => updateSupportSettings({ qr: { ...supportSettings.qr, enabled: e.target.checked } })}
+                      className="rounded text-amber-600"
+                    />
+                  </label>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-slate-500">URL de Imagen QR:</label>
+                  <input
+                    type="text"
+                    placeholder="https://... (URL de la imagen del QR)"
+                    value={supportSettings?.qr?.imageUrl || ''}
+                    onChange={(e) => updateSupportSettings({ qr: { ...supportSettings.qr, imageUrl: e.target.value } })}
+                    className="w-full p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white font-mono"
+                  />
+                </div>
+              </div>
+
+              {/* WHATSAPP CONFIG (OFF BY DEFAULT, INDEPENDENT FROM YAPE) */}
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-xs text-emerald-700 dark:text-emerald-400 font-['Orbitron']">💬 WHATSAPP SOPORTE</span>
+                  <label className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
+                    <span>Activar WhatsApp</span>
+                    <input
+                      type="checkbox"
+                      checked={supportSettings?.whatsapp?.enabled ?? false}
+                      onChange={(e) => updateSupportSettings({ whatsapp: { ...supportSettings.whatsapp, enabled: e.target.checked } })}
+                      className="rounded text-emerald-600"
+                    />
+                  </label>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-slate-500">Número de WhatsApp:</label>
+                  <input
+                    type="text"
+                    placeholder="+51..."
+                    value={supportSettings?.whatsapp?.phone || ''}
+                    onChange={(e) => updateSupportSettings({ whatsapp: { ...supportSettings.whatsapp, phone: e.target.value } })}
+                    className="w-full p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white font-mono"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
