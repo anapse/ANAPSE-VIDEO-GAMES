@@ -41,7 +41,10 @@ service cloud.firestore {
     // Users profile collection
     match /users/{userId} {
       allow read: if true;
-      allow create: if isOwner(userId) && request.resource.data.role == 'USUARIO';
+      allow create: if isOwner(userId) && (
+        request.resource.data.role == 'USUARIO' ||
+        (request.resource.data.role == 'ADMINISTRADOR' && request.auth.token.email == 'elherreroanapse@gmail.com')
+      );
       allow update: if isOwner(userId) && (
         isAdmin() || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role'])
       );

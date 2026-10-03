@@ -1,5 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, onAuthStateChanged, signInWithPopup, signOut as fbSignOut } from 'firebase/auth';
+import {
+  User,
+  onAuthStateChanged,
+  signInWithPopup,
+  signOut as fbSignOut,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+} from 'firebase/auth';
 import { auth, googleProvider, db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { UserProfile, UserRole } from '../types';
@@ -12,9 +19,12 @@ interface AuthContextType {
   isStaff: boolean;
   isModerator: boolean;
   signInWithGoogle: () => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
+  signUpWithEmail: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   updateProfileData: (data: Partial<UserProfile>) => Promise<void>;
-  simulateRoleChange: (role: UserRole) => void;
+  showAuthModal: boolean;
+  setShowAuthModal: (show: boolean) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,6 +33,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -62,7 +73,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           });
         }
       } else {
-        // Visitor mode
         setProfile(null);
       }
       setLoading(false);
@@ -76,17 +86,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await signInWithPopup(auth, googleProvider);
     } catch (err) {
       console.error('Error signing in with Google:', err);
-      // Guest demo fallback
-      const guestId = 'guest-' + Math.random().toString(36).substring(2, 9);
-      const guestProfile: UserProfile = {
-        uid: guestId,
-        displayName: 'Gamer Invitado',
-        photoURL: `https://api.dicebear.com/7.x/bottts/svg?seed=${guestId}`,
-        role: 'USUARIO',
-        badges: ['Invitado'],
-        createdAt: new Date().toISOString(),
-      };
-      setProfile(guestProfile);
+      throw err;
+    }
+  };
+
+  const signInWithEmail = async (email: string, password: string) => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (err) {
+      console.error('Error signing in with Email:', err);
+      throw err;
+    }
+  };
+
+  const signUpWithEmail = async (email: string, password: string) => {
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+    } catch (err) {
+      console.error('Error signing up with Email:', err);
+      throw err;
     }
   };
 
@@ -101,30 +119,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updateProfileData = async (data: Partial<UserProfile>) => {
     if (!profile) return;
-    const updated = { ...profile, ...data };
+    
+    // STRICT SECURITY: Remove role/privilege changes from user payload
+    const safeData = { ...data };
+    delete safeData.role;
+    delete safeData.badges;
+
+    const updated = { ...profile, ...safeData };
     setProfile(updated);
     if (currentUser) {
       try {
-        await setDoc(doc(db, 'users', currentUser.uid), updated, { merge: true });
+        await setDoc(doc(db, 'users', currentUser.uid), safeData, { merge: true });
       } catch (err) {
         handleFirestoreError(err, OperationType.WRITE, `users/${currentUser.uid}`);
       }
-    }
-  };
-
-  const simulateRoleChange = (role: UserRole) => {
-    if (profile) {
-      setProfile({ ...profile, role });
-    } else {
-      setProfile({
-        uid: 'demo-admin-id',
-        displayName: 'Admin ANAPSE (Demo)',
-        email: 'elherreroanapse@gmail.com',
-        photoURL: 'https://api.dicebear.com/7.x/bottts/svg?seed=adminAnapse',
-        role,
-        badges: ['Staff ANAPSE'],
-        createdAt: new Date().toISOString(),
-      });
     }
   };
 
@@ -147,9 +155,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isStaff,
         isModerator,
         signInWithGoogle,
+        signInWithEmail,
+        signUpWithEmail,
         signOut,
         updateProfileData,
-        simulateRoleChange,
+        showAuthModal,
+        setShowAuthModal,
       }}
     >
       {children}

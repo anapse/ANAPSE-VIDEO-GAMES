@@ -59,7 +59,7 @@ export const AdminDashboard: React.FC = () => {
     updateSupportSettings,
   } = useGameData();
 
-  const { profile, simulateRoleChange } = useAuth();
+  const { profile } = useAuth();
 
   const [activeTab, setActiveTab] = useState<
     | 'resumen'

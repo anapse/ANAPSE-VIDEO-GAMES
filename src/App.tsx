@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { GameDataProvider, useGameData } from './context/GameDataContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
+import { AuthModal } from './components/AuthModal';
 import { RobloxHomeView } from './components/RobloxHomeView';
 import { Catalog } from './components/Catalog';
 import { GameDetailView } from './components/GameDetailView';
@@ -24,6 +25,7 @@ import { X, Home, Gamepad2, Sparkles, Flame, Hammer, Lightbulb, MessageSquare, H
 
 const MainAppContent: React.FC = () => {
   const { games, selectedGame, setSelectedGame, activeGameModal, setActiveGameModal } = useGameData();
+  const { isAdmin } = useAuth();
 
   const [currentTab, setCurrentTab] = useState<string>('home');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -33,6 +35,13 @@ const MainAppContent: React.FC = () => {
   const [donationModalGame, setDonationModalGame] = useState<Game | null>(null);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+
+  // Redirect non-admins to home if they attempt to access admin tab
+  useEffect(() => {
+    if (currentTab === 'admin' && !isAdmin) {
+      setCurrentTab('home');
+    }
+  }, [currentTab, isAdmin]);
 
   // Hash-based routing check for #game-fox-thief etc.
   useEffect(() => {
@@ -239,6 +248,7 @@ const MainAppContent: React.FC = () => {
       )}
 
       {/* Game Modal Launcher */}
+      <AuthModal />
       {activeGameModal && (
         <GameModalPlayer
           game={activeGameModal}
