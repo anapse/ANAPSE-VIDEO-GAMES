@@ -118,6 +118,8 @@ interface GameDataContextType {
   deleteCategory: (categoryId: string) => Promise<void>;
   submitScore: (gameId: string, score: number, playerName?: string) => Promise<void>;
   globalAnalytics: GlobalAnalytics;
+  loadingGames?: boolean;
+  gamesError?: string | null;
 }
 
 const GameDataContext = createContext<GameDataContextType | undefined>(undefined);
@@ -125,10 +127,9 @@ const GameDataContext = createContext<GameDataContextType | undefined>(undefined
 export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { profile, currentUser } = useAuth();
 
-  const [games, setGames] = useState<Game[]>(() => {
-    const saved = localStorage.getItem('anapse_games');
-    return saved ? JSON.parse(saved) : INITIAL_GAMES;
-  });
+  const [games, setGames] = useState<Game[]>([]);
+  const [loadingGames, setLoadingGames] = useState<boolean>(true);
+  const [gamesError, setGamesError] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>(() => {
     const saved = localStorage.getItem('anapse_categories');
     return saved ? JSON.parse(saved) : INITIAL_CATEGORIES;
@@ -210,9 +211,6 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // Local storage sync
   useEffect(() => {
-    localStorage.setItem('anapse_games', JSON.stringify(games));
-  }, [games]);
-  useEffect(() => {
     localStorage.setItem('anapse_categories', JSON.stringify(categories));
   }, [categories]);
   useEffect(() => {
@@ -256,15 +254,18 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Firestore Realtime listeners
   useEffect(() => {
     try {
+      setLoadingGames(true);
       const unsubGames = onSnapshot(
         collection(db, 'games'),
         (snapshot) => {
-          if (!snapshot.empty) {
-            const remoteGames = snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Game));
-            setGames(remoteGames);
-          }
+          const remoteGames = snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Game));
+          setGames(remoteGames);
+          setLoadingGames(false);
+          setGamesError(null);
         },
         (error) => {
+          setLoadingGames(false);
+          setGamesError('No se pudo cargar el catálogo de juegos de Firebase Firestore.');
           handleFirestoreError(error, OperationType.LIST, 'games');
         }
       );
@@ -716,6 +717,8 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         deleteCategory,
         submitScore,
         globalAnalytics,
+        loadingGames,
+        gamesError,
       }}
     >
       {children}

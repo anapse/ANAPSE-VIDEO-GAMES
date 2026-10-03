@@ -26,7 +26,7 @@ export const Catalog: React.FC<CatalogProps> = ({
   onShareGame,
   onDonateGame,
 }) => {
-  const { games, categories } = useGameData();
+  const { games, categories, loadingGames, gamesError } = useGameData();
 
   const [selectedStatus, setSelectedStatus] = useState<string>('TODOS');
   const [selectedCategory, setSelectedCategory] = useState<string>('TODAS');
@@ -169,7 +169,24 @@ export const Catalog: React.FC<CatalogProps> = ({
       )}
 
       {/* Grid of Game Cards (4 columns on PC) */}
-      {filteredGames.length > 0 ? (
+      {gamesError ? (
+        <div className="p-12 text-center rounded-2xl bg-white dark:bg-slate-900 border border-red-200 dark:border-red-900/50 space-y-4">
+          <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-950/50 flex items-center justify-center mx-auto text-red-500">
+            <Gamepad2 className="w-6 h-6" />
+          </div>
+          <div className="space-y-1">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white font-['Orbitron']">No se pudo cargar el catálogo</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
+              {gamesError}
+            </p>
+          </div>
+        </div>
+      ) : loadingGames ? (
+        <div className="p-12 text-center rounded-2xl bg-white dark:bg-slate-900 border border-dashed border-slate-200 dark:border-slate-800 space-y-4">
+          <div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Cargando catálogo oficial desde Firebase...</p>
+        </div>
+      ) : filteredGames.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 pt-2">
           {filteredGames.map((game) => (
             <GameCard

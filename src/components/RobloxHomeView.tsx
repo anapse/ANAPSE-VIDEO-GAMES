@@ -33,7 +33,7 @@ export const RobloxHomeView: React.FC<RobloxHomeViewProps> = ({
   onNavigateTab,
   onOpenNewProposal,
 }) => {
-  const { games, proposals, comments } = useGameData();
+  const { games, proposals, comments, loadingGames, gamesError } = useGameData();
 
   const featuredGames = games.filter((g) => g.featured || g.status === 'PUBLICADO').slice(0, 4);
   const newGames = games.filter((g) => g.isNew || g.status === 'BETA' || g.status === 'PUBLICADO').slice(0, 4);
@@ -105,7 +105,26 @@ export const RobloxHomeView: React.FC<RobloxHomeViewProps> = ({
           </button>
         </div>
 
-        {games.length === 0 ? (
+        {gamesError ? (
+          <div className="p-12 text-center rounded-3xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-red-200 dark:border-red-900/50 space-y-3">
+            <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-950/50 flex items-center justify-center mx-auto text-red-500">
+              <Gamepad2 className="w-6 h-6" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white font-['Orbitron']">
+                No se pudo cargar el catálogo
+              </h3>
+              <p className="text-xs text-slate-600 dark:text-slate-400 max-w-sm mx-auto">
+                {gamesError}
+              </p>
+            </div>
+          </div>
+        ) : loadingGames ? (
+          <div className="p-12 text-center rounded-3xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-dashed border-slate-200 dark:border-slate-800 space-y-3">
+            <div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Cargando catálogo oficial desde Firebase...</p>
+          </div>
+        ) : games.length === 0 ? (
           <div className="p-12 text-center rounded-3xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-dashed border-slate-200 dark:border-slate-800 space-y-3">
             <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center mx-auto">
               <Gamepad2 className="w-6 h-6" />
