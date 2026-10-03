@@ -229,32 +229,40 @@ export const AdminDashboard: React.FC = () => {
             <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
               <h3 className="text-base font-black text-white font-['Orbitron']">Top Juegos Más Jugados</h3>
               <div className="space-y-2">
-                {globalAnalytics.topGamesByPlays.map((g, i) => (
-                  <div key={i} className="flex items-center justify-between p-3 rounded-2xl bg-slate-950 border border-slate-800 text-xs">
-                    <span className="font-bold text-slate-200">#{i + 1} {g.name}</span>
-                    <span className="font-mono text-cyan-300 font-bold">{g.count.toLocaleString()} partidas</span>
-                  </div>
-                ))}
+                {globalAnalytics.topGamesByPlays.length === 0 ? (
+                  <p className="text-xs text-slate-500 font-bold p-4 text-center">No hay juegos publicados todavía.</p>
+                ) : (
+                  globalAnalytics.topGamesByPlays.map((g, i) => (
+                    <div key={i} className="flex items-center justify-between p-3 rounded-2xl bg-slate-950 border border-slate-800 text-xs">
+                      <span className="font-bold text-slate-200">#{i + 1} {g.name}</span>
+                      <span className="font-mono text-cyan-300 font-bold">{g.count.toLocaleString()} partidas</span>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 
             <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
               <h3 className="text-base font-black text-white font-['Orbitron']">Últimas Propuestas por Moderar</h3>
               <div className="space-y-2">
-                {proposals.slice(0, 3).map((p) => (
-                  <div key={p.id} className="p-3 rounded-2xl bg-slate-950 border border-slate-800 text-xs flex items-center justify-between">
-                    <div>
-                      <p className="font-bold text-slate-200">{p.title}</p>
-                      <p className="text-[10px] text-slate-400">{p.votesCount} votos • {p.authorName}</p>
+                {proposals.length === 0 ? (
+                  <p className="text-xs text-slate-500 font-bold p-4 text-center">No hay propuestas todavía.</p>
+                ) : (
+                  proposals.slice(0, 3).map((p) => (
+                    <div key={p.id} className="p-3 rounded-2xl bg-slate-950 border border-slate-800 text-xs flex items-center justify-between">
+                      <div>
+                        <p className="font-bold text-slate-200">{p.title}</p>
+                        <p className="text-[10px] text-slate-400">{p.votesCount} votos • {p.authorName}</p>
+                      </div>
+                      <button
+                        onClick={() => setActiveTab('propuestas')}
+                        className="text-xs font-bold text-cyan-400"
+                      >
+                        Revisar
+                      </button>
                     </div>
-                    <button
-                      onClick={() => setActiveTab('propuestas')}
-                      className="text-xs font-bold text-cyan-400"
-                    >
-                      Revisar
-                    </button>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -279,80 +287,84 @@ export const AdminDashboard: React.FC = () => {
           </div>
 
           <div className="overflow-x-auto rounded-3xl border border-slate-800 bg-slate-900">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-950 text-slate-400 font-mono uppercase text-[10px] border-b border-slate-800">
-                <tr>
-                  <th className="p-3.5">Juego</th>
-                  <th className="p-3.5">Categoría</th>
-                  <th className="p-3.5">Estado</th>
-                  <th className="p-3.5">Partidas</th>
-                  <th className="p-3.5">Rating</th>
-                  <th className="p-3.5 text-right">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800 text-slate-200">
-                {games.map((g) => (
-                  <tr key={g.gameId} className="hover:bg-slate-850/50">
-                    <td className="p-3.5 flex items-center gap-3">
-                      <img src={g.mainImage} alt={g.name} className="w-10 h-10 rounded-xl object-cover bg-slate-950" />
-                      <div>
-                        <p className="font-bold text-white font-['Orbitron']">{g.name}</p>
-                        <span className="font-mono text-[10px] text-slate-400">ID: {g.gameId}</span>
-                      </div>
-                    </td>
-                    <td className="p-3.5 font-bold text-cyan-300">{g.category}</td>
-                    <td className="p-3.5">
-                      <select
-                        value={g.status}
-                        onChange={(e) => updateGameStatus(g.gameId, e.target.value as GameStatus)}
-                        className="bg-slate-950 border border-slate-800 rounded-lg p-1.5 text-[11px] font-bold text-cyan-400"
-                      >
-                        {[
-                          'SIN CATEGORÍA',
-                          'PROPUESTO',
-                          'EN ENCUESTA',
-                          'SELECCIONADO',
-                          'EN CREACIÓN',
-                          'BETA',
-                          'PUBLICADO',
-                          'EN REPARACIÓN',
-                          'EN PROMOCIÓN',
-                          'PRÓXIMAMENTE',
-                          'ARCHIVADO',
-                        ].map((st) => (
-                          <option key={st} value={st}>
-                            {st}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                    <td className="p-3.5 font-mono">{g.playsCount.toLocaleString()}</td>
-                    <td className="p-3.5 font-mono text-amber-300">⭐ {g.ratingAvg}</td>
-                    <td className="p-3.5 text-right space-x-2">
-                      <button
-                        onClick={() => {
-                          setEditingGame(g);
-                          setIsGameEditorOpen(true);
-                        }}
-                        className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-400"
-                        title="Editar"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => {
-                          if (confirm(`¿Eliminar ${g.name}?`)) deleteGame(g.gameId);
-                        }}
-                        className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400"
-                        title="Eliminar"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </td>
+            {games.length === 0 ? (
+              <p className="text-sm text-slate-500 font-bold p-12 text-center">No hay juegos publicados todavía.</p>
+            ) : (
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-950 text-slate-400 font-mono uppercase text-[10px] border-b border-slate-800">
+                  <tr>
+                    <th className="p-3.5">Juego</th>
+                    <th className="p-3.5">Categoría</th>
+                    <th className="p-3.5">Estado</th>
+                    <th className="p-3.5">Partidas</th>
+                    <th className="p-3.5">Rating</th>
+                    <th className="p-3.5 text-right">Acciones</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-800 text-slate-200">
+                  {games.map((g) => (
+                    <tr key={g.gameId} className="hover:bg-slate-850/50">
+                      <td className="p-3.5 flex items-center gap-3">
+                        <img src={g.mainImage} alt={g.name} className="w-10 h-10 rounded-xl object-cover bg-slate-950" />
+                        <div>
+                          <p className="font-bold text-white font-['Orbitron']">{g.name}</p>
+                          <span className="font-mono text-[10px] text-slate-400">ID: {g.gameId}</span>
+                        </div>
+                      </td>
+                      <td className="p-3.5 font-bold text-cyan-300">{g.category}</td>
+                      <td className="p-3.5">
+                        <select
+                          value={g.status}
+                          onChange={(e) => updateGameStatus(g.gameId, e.target.value as GameStatus)}
+                          className="bg-slate-950 border border-slate-800 rounded-lg p-1.5 text-[11px] font-bold text-cyan-400"
+                        >
+                          {[
+                            'SIN CATEGORÍA',
+                            'PROPUESTO',
+                            'EN ENCUESTA',
+                            'SELECCIONADO',
+                            'EN CREACIÓN',
+                            'BETA',
+                            'PUBLICADO',
+                            'EN REPARACIÓN',
+                            'EN PROMOCIÓN',
+                            'PRÓXIMAMENTE',
+                            'ARCHIVADO',
+                          ].map((st) => (
+                            <option key={st} value={st}>
+                              {st}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                      <td className="p-3.5 font-mono">{g.playsCount.toLocaleString()}</td>
+                      <td className="p-3.5 font-mono text-amber-300">⭐ {g.ratingAvg}</td>
+                      <td className="p-3.5 text-right space-x-2">
+                        <button
+                          onClick={() => {
+                            setEditingGame(g);
+                            setIsGameEditorOpen(true);
+                          }}
+                          className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-400"
+                          title="Editar"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (confirm(`¿Eliminar ${g.name}?`)) deleteGame(g.gameId);
+                          }}
+                          className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400"
+                          title="Eliminar"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       )}
@@ -361,36 +373,40 @@ export const AdminDashboard: React.FC = () => {
       {activeTab === 'propuestas' && (
         <div className="space-y-4">
           <h3 className="text-lg font-black text-white font-['Orbitron']">Propuestas de la Comunidad ({proposals.length})</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {proposals.map((p) => (
-              <div key={p.id} className="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-3">
-                <div className="flex items-start justify-between gap-2">
-                  <h4 className="font-bold text-white text-sm">{p.title}</h4>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                    {p.votesCount} votos
-                  </span>
-                </div>
-                <p className="text-xs text-slate-300">{p.description}</p>
-                <div className="flex items-center justify-between pt-2 border-t border-slate-800 text-xs">
-                  <span className="text-slate-400">Por {p.authorName}</span>
-                  <div className="flex gap-1.5">
-                    <button
-                      onClick={() => updateProposalStatus(p.id, 'APPROVED')}
-                      className="px-2.5 py-1 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 font-bold rounded-lg"
-                    >
-                      Aprobar
-                    </button>
-                    <button
-                      onClick={() => updateProposalStatus(p.id, 'IN_DEVELOPMENT')}
-                      className="px-2.5 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-bold rounded-lg"
-                    >
-                      A Creación
-                    </button>
+          {proposals.length === 0 ? (
+            <p className="text-sm text-slate-500 font-bold p-12 text-center bg-slate-900 rounded-3xl border border-slate-800">No hay propuestas todavía.</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {proposals.map((p) => (
+                <div key={p.id} className="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <h4 className="font-bold text-white text-sm">{p.title}</h4>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                      {p.votesCount} votos
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-300">{p.description}</p>
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-800 text-xs">
+                    <span className="text-slate-400">Por {p.authorName}</span>
+                    <div className="flex gap-1.5">
+                      <button
+                        onClick={() => updateProposalStatus(p.id, 'APPROVED')}
+                        className="px-2.5 py-1 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 font-bold rounded-lg"
+                      >
+                        Aprobar
+                      </button>
+                      <button
+                        onClick={() => updateProposalStatus(p.id, 'IN_DEVELOPMENT')}
+                        className="px-2.5 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-bold rounded-lg"
+                      >
+                        A Creación
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -460,6 +476,124 @@ export const AdminDashboard: React.FC = () => {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* 🗳️ ENCUESTAS */}
+      {activeTab === 'encuestas' && (
+        <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4 text-xs">
+          <h3 className="text-base font-black text-white font-['Orbitron']">Encuestas activas de la comunidad ({polls.length})</h3>
+          {polls.length === 0 ? (
+            <p className="text-slate-500 font-bold p-8 text-center">No hay encuestas todavía.</p>
+          ) : (
+            <div className="space-y-3">
+              {polls.map((poll) => (
+                <div key={poll.id} className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+                  <p className="font-bold text-slate-200">{poll.question}</p>
+                  {poll.description && <p className="text-[11px] text-slate-400">{poll.description}</p>}
+                  <div className="text-[10px] text-cyan-400 font-bold">{poll.totalVotes} votos totales</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 💬 COMENTARIOS */}
+      {activeTab === 'comentarios' && (
+        <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4 text-xs">
+          <h3 className="text-base font-black text-white font-['Orbitron']">Comentarios registrados ({comments.length})</h3>
+          {comments.length === 0 ? (
+            <p className="text-slate-500 font-bold p-8 text-center">No hay comentarios todavía.</p>
+          ) : (
+            <div className="space-y-3">
+              {comments.map((comment) => (
+                <div key={comment.id} className="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex items-start justify-between">
+                  <div>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="font-bold text-amber-400">{comment.userName}</span>
+                      <span className="text-[10px] text-slate-500">{new Date(comment.createdAt).toLocaleString()}</span>
+                    </div>
+                    <p className="text-slate-300">"{comment.content}"</p>
+                  </div>
+                  <button
+                    onClick={() => deleteComment(comment.id)}
+                    className="p-1 text-rose-400 hover:bg-rose-500/10 rounded"
+                    title="Eliminar comentario"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 👥 USUARIOS */}
+      {activeTab === 'usuarios' && (
+        <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4 text-xs">
+          <h3 className="text-base font-black text-white font-['Orbitron']">Usuarios Registrados ({globalAnalytics.totalUsers})</h3>
+          <p className="text-slate-400">Total de cuentas en la base de datos de Firebase Authentication sincronizadas con Firestore.</p>
+          {globalAnalytics.totalUsers === 0 ? (
+            <p className="text-slate-500 font-bold p-8 text-center">No hay usuarios registrados todavía.</p>
+          ) : (
+            <p className="text-emerald-400 font-mono font-bold">🟢 {globalAnalytics.totalUsers} jugadores oficiales registrados en tiempo real.</p>
+          )}
+        </div>
+      )}
+
+      {/* ❤️ APOYOS */}
+      {activeTab === 'apoyos' && (
+        <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4 text-xs">
+          <h3 className="text-base font-black text-white font-['Orbitron']">Apoyos & Donaciones de la Comunidad ({donations.length})</h3>
+          {donations.length === 0 ? (
+            <p className="text-slate-500 font-bold p-8 text-center">No hay apoyos todavía.</p>
+          ) : (
+            <div className="space-y-2">
+              {donations.map((don) => (
+                <div key={don.id} className="p-3 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+                  <div>
+                    <p className="font-bold text-slate-200">{don.userName} apoyó al juego <span className="text-amber-400">"{don.gameName}"</span></p>
+                    {don.message && <p className="text-[11px] text-slate-400">"{don.message}"</p>}
+                  </div>
+                  <span className="font-mono font-black text-rose-400 text-sm">S/ {don.amount}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 🏆 RANKINGS */}
+      {activeTab === 'rankings' && (
+        <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4 text-xs">
+          <h3 className="text-base font-black text-white font-['Orbitron']">Clasificaciones & Rankings Globales</h3>
+          <p className="text-slate-400">Las clasificaciones se derivan en tiempo real de las puntuaciones registradas por los juegos.</p>
+          {games.length === 0 ? (
+            <p className="text-slate-500 font-bold p-8 text-center">No hay juegos publicados todavía.</p>
+          ) : (
+            <p className="text-cyan-400 font-bold font-mono">🟢 Los rankings globales se sincronizan individualmente en el portal de cada juego.</p>
+          )}
+        </div>
+      )}
+
+      {/* 📢 ANUNCIOS */}
+      {activeTab === 'anuncios' && (
+        <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4 text-xs">
+          <h3 className="text-base font-black text-white font-['Orbitron']">Anuncios de la Plataforma ({announcements.length})</h3>
+          {announcements.length === 0 ? (
+            <p className="text-slate-500 font-bold p-8 text-center">No hay anuncios todavía.</p>
+          ) : (
+            <div className="space-y-3">
+              {announcements.map((ann) => (
+                <div key={ann.id} className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
+                  <p className="font-bold text-white">{ann.title}</p>
+                  <p className="text-slate-300">{ann.content}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

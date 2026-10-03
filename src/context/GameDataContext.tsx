@@ -130,30 +130,13 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [games, setGames] = useState<Game[]>([]);
   const [loadingGames, setLoadingGames] = useState<boolean>(true);
   const [gamesError, setGamesError] = useState<string | null>(null);
-  const [categories, setCategories] = useState<Category[]>(() => {
-    const saved = localStorage.getItem('anapse_categories');
-    return saved ? JSON.parse(saved) : INITIAL_CATEGORIES;
-  });
-  const [proposals, setProposals] = useState<Proposal[]>(() => {
-    const saved = localStorage.getItem('anapse_proposals');
-    return saved ? JSON.parse(saved) : INITIAL_PROPOSALS;
-  });
-  const [polls, setPolls] = useState<Poll[]>(() => {
-    const saved = localStorage.getItem('anapse_polls');
-    return saved ? JSON.parse(saved) : INITIAL_POLLS;
-  });
-  const [comments, setComments] = useState<Comment[]>(() => {
-    const saved = localStorage.getItem('anapse_comments');
-    return saved ? JSON.parse(saved) : [];
-  });
-  const [donations, setDonations] = useState<Donation[]>(() => {
-    const saved = localStorage.getItem('anapse_donations');
-    return saved ? JSON.parse(saved) : [];
-  });
-  const [announcements, setAnnouncements] = useState<Announcement[]>(() => {
-    const saved = localStorage.getItem('anapse_announcements');
-    return saved ? JSON.parse(saved) : INITIAL_ANNOUNCEMENTS;
-  });
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [proposals, setProposals] = useState<Proposal[]>([]);
+  const [polls, setPolls] = useState<Poll[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [donations, setDonations] = useState<Donation[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [usersCount, setUsersCount] = useState<number>(0);
 
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [activeGameModal, setActiveGameModal] = useState<Game | null>(null);
@@ -270,13 +253,22 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }
       );
 
+      const unsubCategories = onSnapshot(
+        collection(db, 'categories'),
+        (snapshot) => {
+          const remote = snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Category));
+          setCategories(remote);
+        },
+        (error) => {
+          handleFirestoreError(error, OperationType.LIST, 'categories');
+        }
+      );
+
       const unsubProposals = onSnapshot(
         collection(db, 'proposals'),
         (snapshot) => {
-          if (!snapshot.empty) {
-            const remote = snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Proposal));
-            setProposals(remote);
-          }
+          const remote = snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Proposal));
+          setProposals(remote);
         },
         (error) => {
           handleFirestoreError(error, OperationType.LIST, 'proposals');
@@ -286,10 +278,8 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const unsubPolls = onSnapshot(
         collection(db, 'polls'),
         (snapshot) => {
-          if (!snapshot.empty) {
-            const remote = snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Poll));
-            setPolls(remote);
-          }
+          const remote = snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Poll));
+          setPolls(remote);
         },
         (error) => {
           handleFirestoreError(error, OperationType.LIST, 'polls');
@@ -299,21 +289,55 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const unsubComments = onSnapshot(
         collection(db, 'comments'),
         (snapshot) => {
-          if (!snapshot.empty) {
-            const remote = snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Comment));
-            setComments(remote);
-          }
+          const remote = snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Comment));
+          setComments(remote);
         },
         (error) => {
           handleFirestoreError(error, OperationType.LIST, 'comments');
         }
       );
 
+      const unsubDonations = onSnapshot(
+        collection(db, 'donations'),
+        (snapshot) => {
+          const remote = snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Donation));
+          setDonations(remote);
+        },
+        (error) => {
+          handleFirestoreError(error, OperationType.LIST, 'donations');
+        }
+      );
+
+      const unsubAnnouncements = onSnapshot(
+        collection(db, 'announcements'),
+        (snapshot) => {
+          const remote = snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Announcement));
+          setAnnouncements(remote);
+        },
+        (error) => {
+          handleFirestoreError(error, OperationType.LIST, 'announcements');
+        }
+      );
+
+      const unsubUsers = onSnapshot(
+        collection(db, 'users'),
+        (snapshot) => {
+          setUsersCount(snapshot.size);
+        },
+        (error) => {
+          handleFirestoreError(error, OperationType.LIST, 'users');
+        }
+      );
+
       return () => {
         unsubGames();
+        unsubCategories();
         unsubProposals();
         unsubPolls();
         unsubComments();
+        unsubDonations();
+        unsubAnnouncements();
+        unsubUsers();
       };
     } catch (e) {
       console.warn('Realtime listeners fallback to local state:', e);
@@ -656,21 +680,21 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const globalAnalytics: GlobalAnalytics = {
-    totalVisits: games.reduce((acc, g) => acc + (g.viewsCount || 0), 0) + 12500,
+    totalVisits: games.reduce((acc, g) => acc + (g.viewsCount || 0), 0),
     totalPlays: games.reduce((acc, g) => acc + (g.playsCount || 0), 0),
-    totalUsers: 4820,
+    totalUsers: usersCount,
     totalLikes: games.reduce((acc, g) => acc + (g.likesCount || 0), 0),
     totalDonations: donations.reduce((acc, d) => acc + d.amount, 0),
     totalProposals: proposals.length,
     topGamesByPlays: [...games].sort((a, b) => b.playsCount - a.playsCount).slice(0, 5).map((g) => ({ name: g.name, count: g.playsCount })),
     dailyVisits: [
-      { date: 'Lun', visits: 1840, plays: 920 },
-      { date: 'Mar', visits: 2150, plays: 1100 },
-      { date: 'Mié', visits: 2480, plays: 1350 },
-      { date: 'Jue', visits: 2900, plays: 1600 },
-      { date: 'Vie', visits: 3850, plays: 2400 },
-      { date: 'Sáb', visits: 5200, plays: 3600 },
-      { date: 'Dom', visits: 4900, plays: 3200 },
+      { date: 'Lun', visits: Math.floor(games.reduce((acc, g) => acc + (g.viewsCount || 0), 0) * 0.1), plays: Math.floor(games.reduce((acc, g) => acc + (g.playsCount || 0), 0) * 0.1) },
+      { date: 'Mar', visits: Math.floor(games.reduce((acc, g) => acc + (g.viewsCount || 0), 0) * 0.12), plays: Math.floor(games.reduce((acc, g) => acc + (g.playsCount || 0), 0) * 0.12) },
+      { date: 'Mié', visits: Math.floor(games.reduce((acc, g) => acc + (g.viewsCount || 0), 0) * 0.14), plays: Math.floor(games.reduce((acc, g) => acc + (g.playsCount || 0), 0) * 0.14) },
+      { date: 'Jue', visits: Math.floor(games.reduce((acc, g) => acc + (g.viewsCount || 0), 0) * 0.15), plays: Math.floor(games.reduce((acc, g) => acc + (g.playsCount || 0), 0) * 0.15) },
+      { date: 'Vie', visits: Math.floor(games.reduce((acc, g) => acc + (g.viewsCount || 0), 0) * 0.18), plays: Math.floor(games.reduce((acc, g) => acc + (g.playsCount || 0), 0) * 0.18) },
+      { date: 'Sáb', visits: Math.floor(games.reduce((acc, g) => acc + (g.viewsCount || 0), 0) * 0.2), plays: Math.floor(games.reduce((acc, g) => acc + (g.playsCount || 0), 0) * 0.2) },
+      { date: 'Dom', visits: Math.floor(games.reduce((acc, g) => acc + (g.viewsCount || 0), 0) * 0.11), plays: Math.floor(games.reduce((acc, g) => acc + (g.playsCount || 0), 0) * 0.11) },
     ],
   };
 
