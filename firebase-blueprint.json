@@ -1,0 +1,242 @@
+{
+  "entities": {
+    "Game": {
+      "title": "Game",
+      "description": "ANAPSE registered video game",
+      "type": "object",
+      "properties": {
+        "gameId": { "type": "string", "maxLength": 64 },
+        "name": { "type": "string", "maxLength": 100 },
+        "tagline": { "type": "string", "maxLength": 200 },
+        "description": { "type": "string", "maxLength": 2000 },
+        "mainImage": { "type": "string", "maxLength": 500 },
+        "bannerImage": { "type": "string", "maxLength": 500 },
+        "screenshots": { "type": "array" },
+        "category": { "type": "string", "maxLength": 50 },
+        "tags": { "type": "array" },
+        "status": {
+          "type": "string",
+          "enum": [
+            "SIN CATEGORÍA",
+            "PROPUESTO",
+            "EN ENCUESTA",
+            "SELECCIONADO",
+            "EN CREACIÓN",
+            "BETA",
+            "PUBLICADO",
+            "EN REPARACIÓN",
+            "EN PROMOCIÓN",
+            "PRÓXIMAMENTE",
+            "ARCHIVADO"
+          ]
+        },
+        "webUrl": { "type": "string", "maxLength": 500 },
+        "embedAllowed": { "type": "boolean" },
+        "repository": { "type": "object" },
+        "firebaseConfig": { "type": "object" },
+        "version": { "type": "string", "maxLength": 20 },
+        "platforms": { "type": "array" },
+        "featured": { "type": "boolean" },
+        "inPromotion": { "type": "boolean" },
+        "visible": { "type": "boolean" },
+        "likesCount": { "type": "number" },
+        "playsCount": { "type": "number" },
+        "viewsCount": { "type": "number" },
+        "ratingAvg": { "type": "number" },
+        "ratingsCount": { "type": "number" },
+        "rankingConfig": { "type": "object" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["gameId", "name", "category", "status"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile and gamer account",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "displayName": { "type": "string", "maxLength": 100 },
+        "photoURL": { "type": "string", "maxLength": 500 },
+        "email": { "type": "string", "maxLength": 150 },
+        "role": { "type": "string", "enum": ["ADMIN", "MODERADOR", "EDITOR", "USUARIO"] },
+        "bio": { "type": "string", "maxLength": 300 },
+        "favoriteCategory": { "type": "string", "maxLength": 50 },
+        "badges": { "type": "array" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["uid", "displayName", "role"]
+    },
+    "Proposal": {
+      "title": "Proposal",
+      "description": "Community proposal for a new game",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 120 },
+        "description": { "type": "string", "maxLength": 1500 },
+        "category": { "type": "string", "maxLength": 50 },
+        "idea": { "type": "string", "maxLength": 1000 },
+        "imageUrl": { "type": "string", "maxLength": 500 },
+        "authorId": { "type": "string", "maxLength": 128 },
+        "authorName": { "type": "string", "maxLength": 100 },
+        "authorPhoto": { "type": "string", "maxLength": 500 },
+        "votesCount": { "type": "number" },
+        "commentsCount": { "type": "number" },
+        "status": { "type": "string", "enum": ["PENDING", "APPROVED", "REJECTED", "IN_DEVELOPMENT", "COMPLETED"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "title", "description", "authorId", "authorName"]
+    },
+    "ProposalVote": {
+      "title": "ProposalVote",
+      "description": "Vote on a proposal",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "proposalId": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "proposalId", "userId"]
+    },
+    "Poll": {
+      "title": "Poll",
+      "description": "Community poll",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "question": { "type": "string", "maxLength": 200 },
+        "description": { "type": "string", "maxLength": 500 },
+        "options": { "type": "array" },
+        "active": { "type": "boolean" },
+        "totalVotes": { "type": "number" },
+        "expiresAt": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "question", "options", "active"]
+    },
+    "PollVote": {
+      "title": "PollVote",
+      "description": "Vote on a community poll",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "pollId": { "type": "string", "maxLength": 128 },
+        "optionIndex": { "type": "number" },
+        "userId": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "pollId", "optionIndex", "userId"]
+    },
+    "Comment": {
+      "title": "Comment",
+      "description": "Comment on game or proposal or community post",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "targetType": { "type": "string", "enum": ["game", "proposal", "community", "poll"] },
+        "targetId": { "type": "string", "maxLength": 128 },
+        "parentId": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "userName": { "type": "string", "maxLength": 100 },
+        "userPhoto": { "type": "string", "maxLength": 500 },
+        "content": { "type": "string", "maxLength": 1000 },
+        "likesCount": { "type": "number" },
+        "hidden": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "targetType", "targetId", "userId", "userName", "content"]
+    },
+    "Donation": {
+      "title": "Donation",
+      "description": "Community support or donation for a game",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "gameId": { "type": "string", "maxLength": 64 },
+        "gameName": { "type": "string", "maxLength": 100 },
+        "amount": { "type": "number" },
+        "currency": { "type": "string", "maxLength": 10 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "userName": { "type": "string", "maxLength": 100 },
+        "message": { "type": "string", "maxLength": 500 },
+        "isPublic": { "type": "boolean" },
+        "paymentMethod": { "type": "string", "maxLength": 50 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "gameId", "amount", "currency", "userName"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "Game category",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "name": { "type": "string", "maxLength": 50 },
+        "icon": { "type": "string", "maxLength": 50 },
+        "description": { "type": "string", "maxLength": 200 },
+        "order": { "type": "number" }
+      },
+      "required": ["id", "name"]
+    },
+    "Announcement": {
+      "title": "Announcement",
+      "description": "Platform announcement or banner",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 150 },
+        "content": { "type": "string", "maxLength": 1000 },
+        "type": { "type": "string", "enum": ["info", "release", "event", "maintenance"] },
+        "actionUrl": { "type": "string", "maxLength": 500 },
+        "actionLabel": { "type": "string", "maxLength": 50 },
+        "active": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "title", "content", "type"]
+    }
+  },
+  "firestore": {
+    "/games/{gameId}": {
+      "schema": "Game",
+      "description": "Collection of all registered ANAPSE video games"
+    },
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Gamer user profiles"
+    },
+    "/proposals/{proposalId}": {
+      "schema": "Proposal",
+      "description": "Community game ideas and proposals"
+    },
+    "/proposalVotes/{voteId}": {
+      "schema": "ProposalVote",
+      "description": "User votes on game proposals"
+    },
+    "/polls/{pollId}": {
+      "schema": "Poll",
+      "description": "Community surveys and polls"
+    },
+    "/pollVotes/{voteId}": {
+      "schema": "PollVote",
+      "description": "Votes on polls"
+    },
+    "/comments/{commentId}": {
+      "schema": "Comment",
+      "description": "Comments and replies on games, proposals, and posts"
+    },
+    "/donations/{donationId}": {
+      "schema": "Donation",
+      "description": "Community support donations"
+    },
+    "/categories/{categoryId}": {
+      "schema": "Category",
+      "description": "Configurable game categories"
+    },
+    "/announcements/{announcementId}": {
+      "schema": "Announcement",
+      "description": "Platform news and releases"
+    }
+  }
+}
