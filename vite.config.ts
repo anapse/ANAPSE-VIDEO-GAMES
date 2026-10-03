@@ -5,6 +5,7 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
+    base: '/ANAPSE-VIDEO-GAMES/',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {

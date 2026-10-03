@@ -2,5 +2,7 @@
   "name": "ANAPSE VIDEO GAMES",
   "description": "Portal central de videojuegos de ANAPSE: catálogo interactivo, juego web directo, propuestas de la comunidad, encuestas, rankings, donaciones y analítica.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }
