@@ -41,6 +41,7 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
     rateGame,
     userFollows,
     toggleFollowGame,
+    scores,
   } = useGameData();
 
   const [newComment, setNewComment] = useState('');
@@ -260,25 +261,37 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
             <Trophy className="w-4 h-4 text-amber-500" />
             <span>Récords y Ranking</span>
           </h2>
-          {game.sampleLeaderboard && game.sampleLeaderboard.length > 0 ? (
-            <div className="space-y-1.5">
-              {game.sampleLeaderboard.slice(0, 3).map((player, idx) => (
-                <div
-                  key={idx}
-                  className="p-2 rounded-lg bg-slate-50 dark:bg-slate-800/60 flex items-center justify-between text-xs"
-                >
-                  <span className="font-semibold text-slate-800 dark:text-slate-200">
-                    {idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉'} {player.playerName}
-                  </span>
-                  <span className="font-mono font-bold text-amber-600 dark:text-amber-400">
-                    {player.score.toLocaleString()} pts
-                  </span>
+          {(() => {
+            const gameScores = scores
+              .filter((s) => s.gameId === game.gameId)
+              .sort((a, b) => {
+                const order = game.rankingConfig?.order || 'desc';
+                return order === 'asc' ? a.score - b.score : b.score - a.score;
+              })
+              .slice(0, 3);
+
+            if (gameScores.length > 0) {
+              return (
+                <div className="space-y-1.5">
+                  {gameScores.map((player, idx) => (
+                    <div
+                      key={player.id || idx}
+                      className="p-2 rounded-lg bg-slate-50 dark:bg-slate-800/60 flex items-center justify-between text-xs"
+                    >
+                      <span className="font-semibold text-slate-800 dark:text-slate-200">
+                        {idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉'} {player.playerName}
+                      </span>
+                      <span className="font-mono font-bold text-amber-600 dark:text-amber-400">
+                        {player.score.toLocaleString()} {game.rankingConfig?.unit || 'pts'}
+                      </span>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-xs text-slate-500">Sin récords registrados aún. ¡Sé el primero en jugar!</p>
-          )}
+              );
+            }
+
+            return <p className="text-xs text-slate-500">Este juego todavía no tiene puntuaciones. ¡Sé el primero en jugar!</p>;
+          })()}
         </div>
       </div>
 

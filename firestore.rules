@@ -113,6 +113,27 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    // Game Likes registry
+    match /gameLikes/{likeId} {
+      allow read: if true;
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // Comment Likes registry
+    match /commentLikes/{likeId} {
+      allow read: if true;
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // Scores (Rankings)
+    match /scores/{scoreId} {
+      allow read: if true;
+      allow create: if true; // Allow guests and logged-in users to submit scores
+      allow update, delete: if isAdmin();
+    }
+
     // Categories
     match /categories/{categoryId} {
       allow read: if true;

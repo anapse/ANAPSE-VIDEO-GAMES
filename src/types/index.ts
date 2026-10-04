@@ -222,3 +222,12 @@ export interface MascotConfig {
   customSpriteUrl?: string;
   frameSpeedMs?: number;
 }
+
+export interface Score {
+  id: string;
+  gameId: string;
+  userId: string;
+  playerName: string;
+  score: number;
+  createdAt: string;
+}

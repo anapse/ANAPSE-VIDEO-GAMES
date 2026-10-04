@@ -9,7 +9,7 @@ interface GlobalRankingsProps {
 }
 
 export const GlobalRankings: React.FC<GlobalRankingsProps> = ({ onPlayGame, onViewGame }) => {
-  const { games } = useGameData();
+  const { games, scores } = useGameData();
   const [selectedGameId, setSelectedGameId] = useState<string>('all');
   const [period, setPeriod] = useState<'global' | 'weekly' | 'monthly'>('global');
 
@@ -128,15 +128,27 @@ export const GlobalRankings: React.FC<GlobalRankingsProps> = ({ onPlayGame, onVi
 
               {/* Leaderboard Entries */}
               <div className="space-y-2">
-                {game.sampleLeaderboard && game.sampleLeaderboard.length > 0 ? (
-                  game.sampleLeaderboard.map((item, idx) => {
+                {(() => {
+                  const gameScores = scores
+                    .filter((s) => s.gameId === game.gameId)
+                    .sort((a, b) => {
+                      const order = game.rankingConfig?.order || 'desc';
+                      return order === 'asc' ? a.score - b.score : b.score - a.score;
+                    })
+                    .slice(0, game.rankingConfig?.limit || 50);
+
+                  if (gameScores.length === 0) {
+                    return <p className="text-xs text-slate-500 text-center py-6">Este juego todavía no tiene puntuaciones.</p>;
+                  }
+
+                  return gameScores.map((item, idx) => {
                     const isTop1 = idx === 0;
                     const isTop2 = idx === 1;
                     const isTop3 = idx === 2;
 
                     return (
                       <div
-                        key={idx}
+                        key={item.id || idx}
                         className={`p-3 rounded-2xl border text-xs flex items-center justify-between gap-3 ${
                           isTop1
                             ? 'bg-amber-500/15 border-amber-500/50 text-amber-300'
@@ -160,10 +172,8 @@ export const GlobalRankings: React.FC<GlobalRankingsProps> = ({ onPlayGame, onVi
                         </div>
                       </div>
                     );
-                  })
-                ) : (
-                  <p className="text-xs text-slate-500 text-center py-6">Sin récords registrados aún.</p>
-                )}
+                  });
+                })()}
               </div>
             </div>
           )

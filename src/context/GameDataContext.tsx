@@ -21,6 +21,7 @@ import {
   GlobalAnalytics,
   MascotConfig,
   SupportSettings,
+  Score,
 } from '../types';
 
 export const DEFAULT_SUPPORT_SETTINGS: SupportSettings = {
@@ -117,6 +118,7 @@ interface GameDataContextType {
   addCategory: (category: Category) => Promise<void>;
   deleteCategory: (categoryId: string) => Promise<void>;
   submitScore: (gameId: string, score: number, playerName?: string) => Promise<void>;
+  scores: Score[];
   globalAnalytics: GlobalAnalytics;
   loadingGames?: boolean;
   gamesError?: string | null;
@@ -137,6 +139,8 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [donations, setDonations] = useState<Donation[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [usersCount, setUsersCount] = useState<number>(0);
+  const [scores, setScores] = useState<Score[]>([]);
+  const [userCommentLikes, setUserCommentLikes] = useState<Record<string, boolean>>({});
 
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [activeGameModal, setActiveGameModal] = useState<Game | null>(null);
@@ -184,7 +188,7 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       };
       localStorage.setItem('anapse_support_settings', JSON.stringify(updated));
       try {
-        setDoc(doc(db, 'settings', 'supportSettings'), updated, { merge: true });
+        setDoc(doc(db, 'systemConfig', 'supportSettings'), updated, { merge: true });
       } catch (e) {
         // ok
       }
@@ -231,7 +235,16 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [mascotConfig]);
 
   const updateMascotConfig = (newConfig: Partial<MascotConfig>) => {
-    setMascotConfig((prev) => ({ ...prev, ...newConfig }));
+    setMascotConfig((prev) => {
+      const updated = { ...prev, ...newConfig };
+      localStorage.setItem('anapse_mascot_config', JSON.stringify(updated));
+      try {
+        setDoc(doc(db, 'systemConfig', 'mascotConfig'), updated, { merge: true });
+      } catch (e) {
+        // ignore
+      }
+      return updated;
+    });
   };
 
   // Firestore Realtime listeners
@@ -329,6 +342,35 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }
       );
 
+      const unsubScores = onSnapshot(
+        collection(db, 'scores'),
+        (snapshot) => {
+          const remote = snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as any));
+          setScores(remote);
+        },
+        (error) => {
+          handleFirestoreError(error, OperationType.LIST, 'scores');
+        }
+      );
+
+      const unsubSupportSettings = onSnapshot(
+        doc(db, 'systemConfig', 'supportSettings'),
+        (docSnap) => {
+          if (docSnap.exists()) {
+            setSupportSettings(docSnap.data() as SupportSettings);
+          }
+        }
+      );
+
+      const unsubMascotConfig = onSnapshot(
+        doc(db, 'systemConfig', 'mascotConfig'),
+        (docSnap) => {
+          if (docSnap.exists()) {
+            setMascotConfig(docSnap.data() as MascotConfig);
+          }
+        }
+      );
+
       return () => {
         unsubGames();
         unsubCategories();
@@ -338,11 +380,72 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         unsubDonations();
         unsubAnnouncements();
         unsubUsers();
+        unsubScores();
+        unsubSupportSettings();
+        unsubMascotConfig();
       };
     } catch (e) {
       console.warn('Realtime listeners fallback to local state:', e);
     }
   }, []);
+
+  // Listen to user-specific likes, votes, and comment likes in real-time from Firestore
+  useEffect(() => {
+    if (!currentUser) {
+      setUserLikes({});
+      setUserPollVotes({});
+      setUserCommentLikes({});
+      return;
+    }
+
+    const unsubUserLikes = onSnapshot(
+      collection(db, 'gameLikes'),
+      (snapshot) => {
+        const likes: Record<string, boolean> = {};
+        snapshot.docs.forEach((d) => {
+          const data = d.data();
+          if (data.userId === currentUser.uid) {
+            likes[data.gameId] = true;
+          }
+        });
+        setUserLikes(likes);
+      }
+    );
+
+    const unsubUserCommentLikes = onSnapshot(
+      collection(db, 'commentLikes'),
+      (snapshot) => {
+        const likes: Record<string, boolean> = {};
+        snapshot.docs.forEach((d) => {
+          const data = d.data();
+          if (data.userId === currentUser.uid) {
+            likes[data.commentId] = true;
+          }
+        });
+        setUserCommentLikes(likes);
+      }
+    );
+
+    const unsubUserPollVotes = onSnapshot(
+      collection(db, 'pollVotes'),
+      (snapshot) => {
+        const votes: Record<string, number> = {};
+        snapshot.docs.forEach((d) => {
+          const data = d.data();
+          if (data.userId === currentUser.uid) {
+            votes[data.pollId] = data.optionIndex;
+          }
+        });
+        setUserPollVotes(votes);
+      }
+    );
+
+    return () => {
+      unsubUserLikes();
+      unsubUserCommentLikes();
+      unsubUserPollVotes();
+    };
+  }, [currentUser]);
 
   const addOrUpdateGame = async (gameData: Partial<Game> & { gameId: string; name: string }) => {
     const existingIndex = games.findIndex((g) => g.gameId === gameData.gameId);
@@ -430,6 +533,20 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     );
 
     try {
+      if (currentUser) {
+        const likeDocId = `${currentUser.uid}_${gameId}`;
+        const likeDocRef = doc(db, 'gameLikes', likeDocId);
+        if (isLiked) {
+          await deleteDoc(likeDocRef);
+        } else {
+          await setDoc(likeDocRef, {
+            userId: currentUser.uid,
+            gameId,
+            createdAt: new Date().toISOString()
+          });
+        }
+      }
+
       await updateDoc(doc(db, 'games', gameId), {
         likesCount: increment(isLiked ? -1 : 1),
       });
@@ -545,6 +662,36 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         return { ...poll, options: newOptions, totalVotes: total };
       })
     );
+
+    try {
+      if (currentUser) {
+        const voteDocId = `${currentUser.uid}_${pollId}`;
+        await setDoc(doc(db, 'pollVotes', voteDocId), {
+          userId: currentUser.uid,
+          pollId,
+          optionIndex,
+          createdAt: new Date().toISOString()
+        });
+      }
+
+      const pollRef = doc(db, 'polls', pollId);
+      const pollObj = polls.find(p => p.id === pollId);
+      if (pollObj) {
+        const updatedOptions = pollObj.options.map((opt, idx) => {
+          let count = opt.votes;
+          if (idx === optionIndex) count += 1;
+          if (prevOption !== undefined && idx === prevOption) count = Math.max(0, count - 1);
+          return { ...opt, votes: count };
+        });
+        const updatedTotal = prevOption === undefined ? pollObj.totalVotes + 1 : pollObj.totalVotes;
+        await updateDoc(pollRef, {
+          options: updatedOptions,
+          totalVotes: updatedTotal
+        });
+      }
+    } catch (err) {
+      handleFirestoreError(err, OperationType.UPDATE, `polls/${pollId}`);
+    }
   };
 
   const createPoll = async (pollData: { question: string; description?: string; options: string[] }) => {
@@ -602,9 +749,35 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const toggleLikeComment = async (commentId: string) => {
+    const isLiked = !!userCommentLikes[commentId];
+    const newLikes = { ...userCommentLikes, [commentId]: !isLiked };
+    setUserCommentLikes(newLikes);
+
     setComments((prev) =>
-      prev.map((c) => (c.id === commentId ? { ...c, likesCount: c.likesCount + 1 } : c))
+      prev.map((c) => (c.id === commentId ? { ...c, likesCount: Math.max(0, c.likesCount + (isLiked ? -1 : 1)) } : c))
     );
+
+    try {
+      if (currentUser) {
+        const likeDocId = `${currentUser.uid}_${commentId}`;
+        const likeDocRef = doc(db, 'commentLikes', likeDocId);
+        if (isLiked) {
+          await deleteDoc(likeDocRef);
+        } else {
+          await setDoc(likeDocRef, {
+            userId: currentUser.uid,
+            commentId,
+            createdAt: new Date().toISOString()
+          });
+        }
+      }
+
+      await updateDoc(doc(db, 'comments', commentId), {
+        likesCount: increment(isLiked ? -1 : 1)
+      });
+    } catch (err) {
+      handleFirestoreError(err, OperationType.UPDATE, `comments/${commentId}`);
+    }
   };
 
   const deleteComment = async (commentId: string) => {
@@ -666,17 +839,22 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const submitScore = async (gameId: string, score: number, playerName?: string) => {
     const name = playerName || profile?.displayName || 'Gamer Anapse';
-    setGames((prev) =>
-      prev.map((g) => {
-        if (g.gameId !== gameId) return g;
-        const currentBoard = g.sampleLeaderboard || [];
-        const newBoard = [...currentBoard, { rank: 0, playerName: name, score, date: new Date().toISOString().split('T')[0] }]
-          .sort((a, b) => b.score - a.score)
-          .slice(0, 50)
-          .map((item, idx) => ({ ...item, rank: idx + 1 }));
-        return { ...g, sampleLeaderboard: newBoard };
-      })
-    );
+    const uid = currentUser?.uid || 'guest-' + Date.now();
+    const scoreId = 'score-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+    const scoreDoc: Score = {
+      id: scoreId,
+      gameId,
+      userId: uid,
+      playerName: name,
+      score,
+      createdAt: new Date().toISOString()
+    };
+
+    try {
+      await setDoc(doc(db, 'scores', scoreId), scoreDoc);
+    } catch (err) {
+      handleFirestoreError(err, OperationType.WRITE, `scores/${scoreId}`);
+    }
   };
 
   const globalAnalytics: GlobalAnalytics = {
@@ -740,6 +918,7 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         addCategory,
         deleteCategory,
         submitScore,
+        scores,
         globalAnalytics,
         loadingGames,
         gamesError,
