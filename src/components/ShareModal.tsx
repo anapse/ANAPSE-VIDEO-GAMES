@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Share2, Mail, Copy, Check, MessageCircle } from 'lucide-react';
+import { X, Share2, Mail, Copy, Check } from 'lucide-react';
 import { Game } from '../types';
 
 interface ShareModalProps {
@@ -12,8 +12,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({ game, onClose }) => {
 
   if (!game) return null;
 
-  const currentUrl = `${window.location.origin}/#game-${game.gameId}`;
-  const shareText = `¡Ven a jugar ${game.name} en ANAPSE VIDEO GAMES! 🎮\n${game.tagline || game.description}\nJuega gratis aquí: ${currentUrl}`;
+  const currentUrl = `${window.location.origin}${window.location.pathname}#game-${game.gameId}`;
+  const shareText = `¡Juega ${game.name} gratis en ANAPSE VIDEO GAMES! 🦊🥚\n\n${currentUrl}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(currentUrl);
@@ -26,7 +26,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ game, onClose }) => {
       try {
         await navigator.share({
           title: `${game.name} — ANAPSE VIDEO GAMES`,
-          text: game.tagline || game.description,
+          text: `¡Juega ${game.name} gratis en ANAPSE VIDEO GAMES!`,
           url: currentUrl,
         });
       } catch (e) {
@@ -37,9 +37,9 @@ export const ShareModal: React.FC<ShareModalProps> = ({ game, onClose }) => {
 
   const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
   const emailUrl = `mailto:?subject=${encodeURIComponent(
-    `Juega ${game.name} en ANAPSE VIDEO GAMES`
+    `🎮 Juega ${game.name} gratis`
   )}&body=${encodeURIComponent(
-    `Hola!\n\nTe comparto este juego: ${game.name}\n\n${game.description}\n\nEnlace directo: ${currentUrl}`
+    `Te invito a jugar ${game.name} gratis en ANAPSE VIDEO GAMES:\n\n${currentUrl}`
   )}`;
 
   return (
@@ -56,7 +56,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ game, onClose }) => {
               <h3 className="text-base font-black text-white font-['Orbitron']">
                 COMPARTIR {game.name}
               </h3>
-              <p className="text-xs text-slate-400">Invita a tus amigos a jugar</p>
+              <p className="text-xs text-slate-400">Invita a tus amigos a jugar en el portal</p>
             </div>
           </div>
           <button
@@ -104,7 +104,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ game, onClose }) => {
 
         {/* Copy Link Input */}
         <div className="space-y-1.5">
-          <label className="text-[11px] font-bold text-slate-400">Enlace directo:</label>
+          <label className="text-[11px] font-bold text-slate-400">Enlace directo al portal:</label>
           <div className="flex items-center gap-2">
             <input
               type="text"

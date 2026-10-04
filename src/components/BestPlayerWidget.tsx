@@ -21,6 +21,8 @@ export const BestPlayerWidget: React.FC<BestPlayerWidgetProps> = ({ game }) => {
         const playerField = config?.playerField || 'playerName';
         const orderDir = config?.order || 'desc';
 
+        console.log(`[BestPlayer] Game: ${game.gameId}, Collection: ${targetCollection}, ScoreField: ${scoreField}, PlayerField: ${playerField}, Order: ${orderDir}`);
+
         const colRef = collection(db, targetCollection);
         let q;
 
@@ -35,11 +37,14 @@ export const BestPlayerWidget: React.FC<BestPlayerWidgetProps> = ({ game }) => {
           const docData = snapshot.docs[0].data();
           const name = docData[playerField] || docData['playerName'] || docData['name'] || 'Jugador Anónimo';
           const score = Number(docData[scoreField] ?? docData['score'] ?? 0);
+          console.log(`[BestPlayer] Top score found for ${game.gameId}:`, name, score);
           setTopPlayer({ name, score });
-        } else if (isMounted) {
-          setTopPlayer(null);
+        } else {
+          console.log(`[BestPlayer] No documents found in collection ${targetCollection} for ${game.gameId}`);
+          if (isMounted) setTopPlayer(null);
         }
       } catch (err) {
+        console.error(`[BestPlayer] Error querying ranking for ${game.gameId}:`, err);
         if (isMounted) setTopPlayer(null);
       }
     };

@@ -66,17 +66,19 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
     confetti({ particleCount: 30, spread: 40, origin: { y: 0.6 } });
   };
 
+  const getPortalShareUrl = () => `${window.location.origin}${window.location.pathname}#game-${game.gameId}`;
+
   const getWhatsAppShareUrl = () => {
     const text = encodeURIComponent(
-      `¡Mira este juego en ANAPSE VIDEO GAMES! 🎮 ${game.name}\n${game.tagline || game.description}\n¡Juégalo gratis aquí! 👉 ${window.location.href}`
+      `¡Juega ${game.name} gratis en ANAPSE VIDEO GAMES! 🦊🥚\n\n${getPortalShareUrl()}`
     );
     return `https://api.whatsapp.com/send?text=${text}`;
   };
 
   const getEmailShareUrl = () => {
-    const subject = encodeURIComponent(`Te recomiendo jugar: ${game.name} en ANAPSE VIDEO GAMES`);
+    const subject = encodeURIComponent(`🎮 Juega ${game.name} gratis`);
     const body = encodeURIComponent(
-      `Hola!\n\nTe recomiendo probar "${game.name}" gratis en ANAPSE VIDEO GAMES.\n\nDescripción: ${game.description}\n\nEnlace: ${window.location.href}\n\n¡Que lo disfrutes!`
+      `Te invito a jugar ${game.name} gratis en ANAPSE VIDEO GAMES:\n\n${getPortalShareUrl()}`
     );
     return `mailto:?subject=${subject}&body=${body}`;
   };

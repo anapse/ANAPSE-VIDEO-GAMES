@@ -56,8 +56,7 @@ export const GameEditorModal: React.FC<GameEditorModalProps> = ({ gameToEdit, on
     e.preventDefault();
     if (!gameId.trim() || !name.trim()) return;
 
-    setIsSubmitting(true);
-    await addOrUpdateGame({
+    const payload = {
       gameId: gameId.trim().toLowerCase().replace(/\s+/g, '-'),
       name: name.trim(),
       tagline: tagline.trim(),
@@ -82,12 +81,25 @@ export const GameEditorModal: React.FC<GameEditorModalProps> = ({ gameToEdit, on
         playerField: rankingPlayerField.trim() || undefined,
       } as any,
       dashboardUrl: dashboardUrl.trim() || undefined,
-    });
+    };
 
-    setIsSubmitting(false);
-    confetti({ particleCount: 40, spread: 60, origin: { y: 0.6 } });
-    alert('¡Juego, configuración de ranking y dashboard guardados con éxito en Firestore!');
-    onClose();
+    console.log(`[GameEditor] Guardando juego: ${payload.gameId}`);
+    console.log(`[GameEditor] rankingConfig:`, JSON.stringify(payload.rankingConfig));
+    console.log(`[GameEditor] dashboardUrl:`, payload.dashboardUrl);
+
+    setIsSubmitting(true);
+    try {
+      await addOrUpdateGame(payload);
+      console.log('[GameEditor] Firestore update: OK');
+      setIsSubmitting(false);
+      confetti({ particleCount: 40, spread: 60, origin: { y: 0.6 } });
+      alert('✅ Cambios guardados correctamente');
+      onClose();
+    } catch (err) {
+      console.error('[GameEditor] Firestore update error:', err);
+      setIsSubmitting(false);
+      alert('❌ No se pudieron guardar los cambios');
+    }
   };
 
   return (
