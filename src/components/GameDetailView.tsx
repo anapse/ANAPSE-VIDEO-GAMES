@@ -16,6 +16,7 @@ import { Game } from '../types';
 import { useGameData } from '../context/GameDataContext';
 import { useAuth } from '../context/AuthContext';
 import confetti from 'canvas-confetti';
+import { BestPlayerWidget } from './BestPlayerWidget';
 
 interface GameDetailViewProps {
   game: Game;
@@ -41,7 +42,6 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
     rateGame,
     userFollows,
     toggleFollowGame,
-    scores,
   } = useGameData();
 
   const [newComment, setNewComment] = useState('');
@@ -253,7 +253,7 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
           </h2>
           <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line">
             {game.howToPlay ||
-              '1. Pulsa ▶ JUGAR GRATIS para iniciar el juego en tu navegador.\n2. Sigue las instrucciones del nivel.\n3. Intenta lograr el mejor récord posible.'}
+              '1. Pulsa ▶ JUGAR para iniciar el juego en tu navegador.\n2. Sigue las instrucciones del nivel.\n3. Intenta lograr el mejor récord posible.'}
           </p>
         </div>
 
@@ -263,37 +263,7 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
             <Trophy className="w-4 h-4 text-amber-500" />
             <span>Récords y Ranking</span>
           </h2>
-          {(() => {
-            const gameScores = scores
-              .filter((s) => s.gameId === game.gameId)
-              .sort((a, b) => {
-                const order = game.rankingConfig?.order || 'desc';
-                return order === 'asc' ? a.score - b.score : b.score - a.score;
-              })
-              .slice(0, 3);
-
-            if (gameScores.length > 0) {
-              return (
-                <div className="space-y-1.5">
-                  {gameScores.map((player, idx) => (
-                    <div
-                      key={player.id || idx}
-                      className="p-2 rounded-lg bg-slate-50 dark:bg-slate-800/60 flex items-center justify-between text-xs"
-                    >
-                      <span className="font-semibold text-slate-800 dark:text-slate-200">
-                        {idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉'} {player.playerName}
-                      </span>
-                      <span className="font-mono font-bold text-amber-600 dark:text-amber-400">
-                        {player.score.toLocaleString()} {game.rankingConfig?.unit || 'pts'}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              );
-            }
-
-            return <p className="text-xs text-slate-500">Este juego todavía no tiene puntuaciones. ¡Sé el primero en jugar!</p>;
-          })()}
+          <BestPlayerWidget game={game} />
         </div>
       </div>
 
