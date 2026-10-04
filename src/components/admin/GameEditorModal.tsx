@@ -137,17 +137,35 @@ export const GameEditorModal: React.FC<GameEditorModalProps> = ({ gameToEdit, on
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block font-bold text-slate-300 mb-1">Categoría</label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white font-bold focus:outline-none focus:border-cyan-400"
-              >
-                {categories.map((c) => (
-                  <option key={c.id} value={c.name}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
+              {(() => {
+                const defaultCategories = [
+                  'SIN CATEGORÍA',
+                  'Arcade',
+                  'Acción',
+                  'Aventura',
+                  'Estrategia',
+                  'Deportes',
+                  'Plataformas',
+                  'Puzzles',
+                ];
+                const availableCategories = categories && categories.length > 0
+                  ? Array.from(new Set([...categories.map((c) => c.name), ...defaultCategories]))
+                  : defaultCategories;
+
+                return (
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white font-bold focus:outline-none focus:border-cyan-400"
+                  >
+                    {availableCategories.map((catName) => (
+                      <option key={catName} value={catName}>
+                        {catName}
+                      </option>
+                    ))}
+                  </select>
+                );
+              })()}
             </div>
 
             <div>
