@@ -205,15 +205,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </button>
         </div>
       )}
-
-      {/* Footer Tagline */}
-      {!collapsed && (
-        <div className="mt-auto pt-4 border-t border-slate-200/60 dark:border-slate-800/60 px-2 text-[11px] text-slate-500 dark:text-slate-400 space-y-0.5">
-          <p className="font-bold text-slate-700 dark:text-slate-300">ANAPSE VIDEO GAMES</p>
-          <p className="text-[10px] leading-relaxed">Juegos gratis para jugar y descubrir.</p>
-          <p className="text-[9px] text-slate-400 dark:text-slate-500 pt-0.5">© 2026 ANAPSE</p>
-        </div>
-      )}
     </aside>
   );
 };

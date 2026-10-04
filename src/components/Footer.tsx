@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Heart, Shield, Users } from 'lucide-react';
 import { ASSETS } from '../lib/assets';
 import { useGameData } from '../context/GameDataContext';
@@ -11,10 +11,19 @@ interface FooterProps {
 export const Footer: React.FC<FooterProps> = ({ onTabChange }) => {
   const { users } = useGameData();
 
+  // Periodic heartbeat timer to re-evaluate presence every 30 seconds
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTick((t) => t + 1);
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   // 1. Total registered users
   const totalUsers = users.length;
 
-  // 2. All moderators registered (Total)
+  // 2. All moderators registered (Total count, both online & offline)
   const allModerators = users.filter((u) => u.role === 'MODERADOR');
   const totalModeratorsCount = allModerators.length;
 
@@ -32,7 +41,7 @@ export const Footer: React.FC<FooterProps> = ({ onTabChange }) => {
   const remainingOnlineCount = onlineModerators.length - 3;
 
   return (
-    <footer className="bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs mt-16 pb-20 lg:pb-12 pt-12 transition-colors">
+    <footer className="relative z-10 w-full bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs mt-16 pb-20 lg:pb-12 pt-12 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8">
           
