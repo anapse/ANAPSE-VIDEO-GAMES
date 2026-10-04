@@ -73,6 +73,7 @@ export interface Game {
     unit?: string;
     collection?: string;
     playerField?: string;
+    databaseId?: string;
   };
   dashboardUrl?: string;
   sampleLeaderboard?: {

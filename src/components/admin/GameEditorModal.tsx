@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { X, Save, Gamepad2, Image as ImageIcon, Link2, Trophy, Layers } from 'lucide-react';
 import { Game, GameStatus } from '../../types';
 import { useGameData } from '../../context/GameDataContext';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
 import confetti from 'canvas-confetti';
 
 interface GameEditorModalProps {
@@ -31,6 +33,7 @@ export const GameEditorModal: React.FC<GameEditorModalProps> = ({ gameToEdit, on
   const [rankingEnabled, setRankingEnabled] = useState(gameToEdit?.rankingConfig?.enabled ?? true);
   const [rankingType, setRankingType] = useState(gameToEdit?.rankingConfig?.type || 'score');
   const [rankingUnit, setRankingUnit] = useState(gameToEdit?.rankingConfig?.unit || 'pts');
+  const [rankingDatabaseId, setRankingDatabaseId] = useState(gameToEdit?.rankingConfig?.databaseId || '');
   const [rankingCollection, setRankingCollection] = useState(gameToEdit?.rankingConfig?.collection || '');
   const [rankingPlayerField, setRankingPlayerField] = useState(gameToEdit?.rankingConfig?.playerField || 'playerName');
   const [rankingScoreField, setRankingScoreField] = useState(gameToEdit?.rankingConfig?.scoreField || 'score');
@@ -77,6 +80,7 @@ export const GameEditorModal: React.FC<GameEditorModalProps> = ({ gameToEdit, on
         order: rankingOrder,
         limit: 50,
         unit: rankingUnit,
+        databaseId: rankingDatabaseId.trim() || undefined,
         collection: rankingCollection.trim() || undefined,
         playerField: rankingPlayerField.trim() || undefined,
       } as any,
@@ -91,9 +95,20 @@ export const GameEditorModal: React.FC<GameEditorModalProps> = ({ gameToEdit, on
     try {
       await addOrUpdateGame(payload);
       console.log('[GameEditor] Firestore update: OK');
+
+      // Verify read back from Firestore
+      const docRef = doc(db, 'games', payload.gameId);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        console.log('[GameEditor] Verified stored game document in Firestore:', docSnap.data());
+      } else {
+        console.warn('[GameEditor] Warning: Document not immediately found on read back');
+      }
+
       setIsSubmitting(false);
       confetti({ particleCount: 40, spread: 60, origin: { y: 0.6 } });
-      alert('✅ Cambios guardados correctamente');
+      const msg = gameToEdit ? '✅ Juego actualizado correctamente' : '✅ Juego creado correctamente';
+      alert(msg);
       onClose();
     } catch (err) {
       console.error('[GameEditor] Firestore update error:', err);
@@ -219,7 +234,7 @@ export const GameEditorModal: React.FC<GameEditorModalProps> = ({ gameToEdit, on
           </div>
 
           <div>
-            <label className="block font-bold text-slate-300 mb-1">Lema o Tagline Breve</label>
+            <label className="block font-bold text-slate-300 mb-1">Frase Corta (Tagline)</label>
             <input
               type="text"
               value={tagline}
@@ -281,6 +296,19 @@ export const GameEditorModal: React.FC<GameEditorModalProps> = ({ gameToEdit, on
               <span>🏆 CONFIGURACIÓN DEL RANKING</span>
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="sm:col-span-2">
+                <label className="block text-[11px] font-semibold text-slate-400 mb-1">Base de datos Firestore:</label>
+                <input
+                  type="text"
+                  value={rankingDatabaseId}
+                  onChange={(e) => setRankingDatabaseId(e.target.value)}
+                  placeholder="default"
+                  className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
+                />
+                <p className="text-[10px] text-slate-500 mt-1">
+                  Base de datos Firestore donde se encuentra el ranking. Déjalo vacío para utilizar la base de datos predeterminada.
+                </p>
+              </div>
               <div>
                 <label className="block text-[11px] font-semibold text-slate-400 mb-1">Colección / tabla del ranking:</label>
                 <input
@@ -369,38 +397,28 @@ export const GameEditorModal: React.FC<GameEditorModalProps> = ({ gameToEdit, on
                 type="checkbox"
                 checked={inPromotion}
                 onChange={(e) => setInPromotion(e.target.checked)}
-                className="rounded text-orange-500"
+                className="rounded text-cyan-500"
               />
-              <span className="font-bold text-orange-400">En Promoción</span>
-            </label>
-
-            <label className="flex items-center gap-2 p-2 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={rankingEnabled}
-                onChange={(e) => setRankingEnabled(e.target.checked)}
-                className="rounded text-amber-500"
-              />
-              <span className="font-bold text-amber-400">Activar Ranking</span>
+              <span className="font-bold text-slate-300">En Promoción</span>
             </label>
           </div>
 
-          {/* Submit Buttons */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+          {/* Footer Submit */}
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold"
+              className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold hover:bg-slate-700"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-black text-xs font-['Orbitron'] flex items-center gap-2 shadow-md shadow-cyan-500/20"
+              className="px-6 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black font-['Orbitron'] flex items-center gap-2 shadow-lg shadow-cyan-500/20 disabled:opacity-50"
             >
               <Save className="w-4 h-4" />
-              <span>{isSubmitting ? 'GUARDANDO...' : 'GUARDAR JUEGO'}</span>
+              <span>{isSubmitting ? 'Guardando...' : 'Guardar Cambios'}</span>
             </button>
           </div>
         </form>

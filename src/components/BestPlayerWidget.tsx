@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, orderBy, limit, getDocs, where } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { collection, query, orderBy, limit, getDocs, where, getFirestore } from 'firebase/firestore';
+import { db, app } from '../lib/firebase';
 import { Game } from '../types';
 import { Trophy } from 'lucide-react';
 
@@ -16,14 +16,22 @@ export const BestPlayerWidget: React.FC<BestPlayerWidgetProps> = ({ game }) => {
     const fetchTop = async () => {
       try {
         const config = game.rankingConfig;
+        const databaseId = config?.databaseId?.trim();
         const targetCollection = config?.collection || 'scores';
         const scoreField = config?.scoreField || 'score';
         const playerField = config?.playerField || 'playerName';
         const orderDir = config?.order || 'desc';
 
-        console.log(`[BestPlayer] Game: ${game.gameId}, Collection: ${targetCollection}, ScoreField: ${scoreField}, PlayerField: ${playerField}, Order: ${orderDir}`);
+        console.log('[BestPlayer]');
+        console.log(`Game: ${game.gameId}`);
+        console.log(`Database: ${databaseId || '(default)'}`);
+        console.log(`Collection: ${targetCollection}`);
+        console.log(`PlayerField: ${playerField}`);
+        console.log(`ScoreField: ${scoreField}`);
+        console.log(`Order: ${orderDir}`);
 
-        const colRef = collection(db, targetCollection);
+        const targetDb = databaseId ? getFirestore(app, databaseId) : db;
+        const colRef = collection(targetDb, targetCollection);
         let q;
 
         if (config?.collection) {
@@ -37,14 +45,22 @@ export const BestPlayerWidget: React.FC<BestPlayerWidgetProps> = ({ game }) => {
           const docData = snapshot.docs[0].data();
           const name = docData[playerField] || docData['playerName'] || docData['name'] || 'Jugador Anónimo';
           const score = Number(docData[scoreField] ?? docData['score'] ?? 0);
-          console.log(`[BestPlayer] Top score found for ${game.gameId}:`, name, score);
+          console.log('[BestPlayer] Best player found');
+          console.log(`[BestPlayer] Player: ${name}`);
+          console.log(`[BestPlayer] Score: ${score}`);
           setTopPlayer({ name, score });
         } else {
-          console.log(`[BestPlayer] No documents found in collection ${targetCollection} for ${game.gameId}`);
+          console.log('[BestPlayer] No documents found');
           if (isMounted) setTopPlayer(null);
         }
-      } catch (err) {
-        console.error(`[BestPlayer] Error querying ranking for ${game.gameId}:`, err);
+      } catch (err: any) {
+        console.error('[BestPlayer] Error:', err);
+        const errMsg = err?.message || String(err);
+        if (errMsg.includes('permission') || errMsg.includes('Missing or insufficient permissions')) {
+          console.log('[BestPlayer] Permission denied');
+        } else {
+          console.log('[BestPlayer] Database error');
+        }
         if (isMounted) setTopPlayer(null);
       }
     };
