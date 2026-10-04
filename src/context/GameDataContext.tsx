@@ -449,6 +449,22 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const addOrUpdateGame = async (gameData: Partial<Game> & { gameId: string; name: string }) => {
     const existingIndex = games.findIndex((g) => g.gameId === gameData.gameId);
+    
+    // Recursive cleaner helper to eliminate any 'undefined' values from object tree before writing to Firestore
+    const cleanObj = (obj: any): any => {
+      const result: any = {};
+      Object.keys(obj).forEach((key) => {
+        if (obj[key] !== undefined) {
+          if (obj[key] !== null && typeof obj[key] === 'object' && !Array.isArray(obj[key])) {
+            result[key] = cleanObj(obj[key]);
+          } else {
+            result[key] = obj[key];
+          }
+        }
+      });
+      return result;
+    };
+
     const newGame: Game = {
       id: gameData.gameId,
       gameId: gameData.gameId,
@@ -456,7 +472,7 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       tagline: gameData.tagline || '',
       description: gameData.description || 'Nuevo videojuego de ANAPSE.',
       mainImage: gameData.mainImage || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&auto=format&fit=crop&q=80',
-      bannerImage: gameData.bannerImage,
+      bannerImage: gameData.bannerImage || '',
       category: gameData.category || 'SIN CATEGORÍA',
       tags: gameData.tags || ['Nuevo'],
       status: gameData.status || 'SIN CATEGORÍA',
@@ -496,7 +512,8 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
 
     try {
-      await setDoc(doc(db, 'games', newGame.gameId), newGame, { merge: true });
+      const sanitizedGame = cleanObj(newGame);
+      await setDoc(doc(db, 'games', newGame.gameId), sanitizedGame, { merge: true });
     } catch (err) {
       handleFirestoreError(err, OperationType.WRITE, `games/${newGame.gameId}`);
     }
