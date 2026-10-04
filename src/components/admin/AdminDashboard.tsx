@@ -1455,7 +1455,7 @@ export const AdminDashboard: React.FC = () => {
             </header>
 
             {/* Modal Body: Área del iframe con flex-1 y min-h-0 para permitir scroll interno completo */}
-            <main className="flex-1 min-h-0 w-full bg-slate-950 relative">
+        <main className="flex-1 min-h-0 w-full h-full bg-slate-950 relative overflow-hidden">
               {activeDashboardGame.dashboardUrl ? (
                 <iframe
                   src={activeDashboardGame.dashboardUrl}
