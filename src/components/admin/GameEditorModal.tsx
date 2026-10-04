@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Save, Gamepad2, Image as ImageIcon, Link2, Trophy, Layers } from 'lucide-react';
 import { Game, GameStatus } from '../../types';
 import { useGameData } from '../../context/GameDataContext';
+import confetti from 'canvas-confetti';
 
 interface GameEditorModalProps {
   gameToEdit?: Game | null;
@@ -84,6 +85,8 @@ export const GameEditorModal: React.FC<GameEditorModalProps> = ({ gameToEdit, on
     });
 
     setIsSubmitting(false);
+    confetti({ particleCount: 40, spread: 60, origin: { y: 0.6 } });
+    alert('¡Juego, configuración de ranking y dashboard guardados con éxito en Firestore!');
     onClose();
   };
 
