@@ -40,6 +40,8 @@ export const GameEditorModal: React.FC<GameEditorModalProps> = ({ gameToEdit, on
   const [rankingOrder, setRankingOrder] = useState<'desc' | 'asc'>(gameToEdit?.rankingConfig?.order || 'desc');
   const [dashboardUrl, setDashboardUrl] = useState(gameToEdit?.dashboardUrl || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
+  const [saveMessage, setSaveMessage] = useState('');
 
   const allStatuses: GameStatus[] = [
     'SIN CATEGORÍA',
@@ -92,6 +94,8 @@ export const GameEditorModal: React.FC<GameEditorModalProps> = ({ gameToEdit, on
     console.log(`[GameEditor] dashboardUrl: ${payload.dashboardUrl}`);
 
     setIsSubmitting(true);
+    setSaveStatus('saving');
+    setSaveMessage('Guardando...');
     try {
       await addOrUpdateGame(payload);
       console.log('[GameEditor] Firestore update: OK');
@@ -109,15 +113,17 @@ export const GameEditorModal: React.FC<GameEditorModalProps> = ({ gameToEdit, on
       }
 
       setIsSubmitting(false);
+      setSaveStatus('success');
+      setSaveMessage('✓ Cambios guardados correctamente');
       confetti({ particleCount: 40, spread: 60, origin: { y: 0.6 } });
-      const msg = gameToEdit ? '✅ Juego actualizado correctamente' : '✅ Juego creado correctamente';
-      alert(msg);
-      onClose();
+      // Keep modal open, do not call onClose()
     } catch (err) {
       console.error('[GameEditor] Firestore update: ERROR');
       console.error('[GameEditor] Error:', err);
       setIsSubmitting(false);
-      alert('❌ No se pudieron guardar los cambios');
+      setSaveStatus('error');
+      setSaveMessage('❌ No se pudieron guardar los cambios');
+      // Keep modal open
     }
   };
 
@@ -145,6 +151,17 @@ export const GameEditorModal: React.FC<GameEditorModalProps> = ({ gameToEdit, on
             <X className="w-4 h-4" />
           </button>
         </div>
+
+        {/* Status Feedback Banner */}
+        {saveMessage && (
+          <div className={`p-3 rounded-xl text-xs font-bold text-center ${
+            saveStatus === 'success' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' :
+            saveStatus === 'error' ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' :
+            'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+          }`}>
+            {saveMessage}
+          </div>
+        )}
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
@@ -306,11 +323,11 @@ export const GameEditorModal: React.FC<GameEditorModalProps> = ({ gameToEdit, on
                   type="text"
                   value={rankingDatabaseId}
                   onChange={(e) => setRankingDatabaseId(e.target.value)}
-                  placeholder="default"
+                  placeholder="ai-studio-foxtiefoelzorrol-..."
                   className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
                 />
                 <p className="text-[10px] text-slate-500 mt-1">
-                  Base de datos Firestore donde se encuentra el ranking. Déjalo vacío para utilizar la base de datos predeterminada.
+                  ID exacto de la base de datos Firestore donde está el ranking. Déjalo vacío o usa default para la base predeterminada.
                 </p>
               </div>
               <div>
@@ -319,7 +336,7 @@ export const GameEditorModal: React.FC<GameEditorModalProps> = ({ gameToEdit, on
                   type="text"
                   value={rankingCollection}
                   onChange={(e) => setRankingCollection(e.target.value)}
-                  placeholder="ej: scores, fox_thief_ranking"
+                  placeholder="ej: fox_thief_ranking"
                   className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
                 />
               </div>
@@ -329,7 +346,7 @@ export const GameEditorModal: React.FC<GameEditorModalProps> = ({ gameToEdit, on
                   type="text"
                   value={rankingPlayerField}
                   onChange={(e) => setRankingPlayerField(e.target.value)}
-                  placeholder="ej: playerName, name"
+                  placeholder="ej: name"
                   className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
                 />
               </div>
@@ -368,7 +385,7 @@ export const GameEditorModal: React.FC<GameEditorModalProps> = ({ gameToEdit, on
                 type="url"
                 value={dashboardUrl}
                 onChange={(e) => setDashboardUrl(e.target.value)}
-                placeholder="https://... (URL del dashboard de analíticas)"
+                placeholder="https://..."
                 className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
               />
             </div>
@@ -414,7 +431,7 @@ export const GameEditorModal: React.FC<GameEditorModalProps> = ({ gameToEdit, on
               onClick={onClose}
               className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold hover:bg-slate-700"
             >
-              Cancelar
+              Cerrar
             </button>
             <button
               type="submit"
@@ -422,7 +439,13 @@ export const GameEditorModal: React.FC<GameEditorModalProps> = ({ gameToEdit, on
               className="px-6 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black font-['Orbitron'] flex items-center gap-2 shadow-lg shadow-cyan-500/20 disabled:opacity-50"
             >
               <Save className="w-4 h-4" />
-              <span>{isSubmitting ? 'Guardando...' : 'Guardar Cambios'}</span>
+              <span>
+                {saveStatus === 'saving'
+                  ? 'Guardando...'
+                  : saveStatus === 'success'
+                  ? '✓ Guardado correctamente'
+                  : 'Guardar Cambios'}
+              </span>
             </button>
           </div>
         </form>

@@ -2,7 +2,6 @@ import React from 'react';
 import { Heart, MessageSquare, Star } from 'lucide-react';
 import { Game } from '../types';
 import { useGameData } from '../context/GameDataContext';
-import { BestPlayerWidget } from './BestPlayerWidget';
 
 interface GameCardProps {
   game: Game;
@@ -49,9 +48,6 @@ export const GameCard: React.FC<GameCardProps> = ({
         <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white font-['Plus_Jakarta_Sans'] group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors line-clamp-1">
           {game.name}
         </h3>
-
-        {/* 🏆 MEJOR JUGADOR WIDGET */}
-        <BestPlayerWidget game={game} />
 
         {/* ⭐ Valoración | ❤️ Likes | 💬 Comentarios */}
         <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 pt-1">
