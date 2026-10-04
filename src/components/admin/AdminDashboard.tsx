@@ -914,9 +914,9 @@ export const AdminDashboard: React.FC = () => {
 
       {/* Dashboard Iframe Modal */}
       {activeDashboardGame && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md animate-in fade-in">
-          <div className="relative w-full max-w-5xl h-[85vh] rounded-3xl bg-slate-900 border border-slate-700 shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between px-6 py-4 bg-slate-950 border-b border-slate-800">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/90 backdrop-blur-md animate-in fade-in">
+          <div className="relative w-[98vw] h-[96vh] max-w-[98vw] max-h-[96vh] rounded-3xl bg-slate-900 border border-slate-700 shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between px-6 py-4 bg-slate-950 border-b border-slate-800 shrink-0">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 rounded-xl bg-cyan-500/20 text-cyan-400">
                   <BarChart3 className="w-5 h-5" />
@@ -939,15 +939,15 @@ export const AdminDashboard: React.FC = () => {
               </button>
             </div>
 
-            <div className="flex-1 bg-slate-950 relative overflow-hidden flex items-center justify-center">
+            <div className="flex-1 w-full h-full min-h-0 bg-slate-950 relative overflow-auto">
               {activeDashboardGame.dashboardUrl ? (
                 <iframe
                   src={activeDashboardGame.dashboardUrl}
                   title={`Dashboard ${activeDashboardGame.name}`}
-                  className="w-full h-full border-0 bg-white"
+                  className="w-full h-full border-0 bg-white min-h-[600px]"
                 />
               ) : (
-                <div className="p-8 text-center space-y-3">
+                <div className="p-8 text-center space-y-3 h-full flex flex-col items-center justify-center">
                   <div className="text-3xl">📊</div>
                   <h4 className="text-base font-bold text-white font-['Orbitron']">Dashboard no configurado</h4>
                   <p className="text-xs text-slate-400 max-w-sm mx-auto">

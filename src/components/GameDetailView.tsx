@@ -146,7 +146,7 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
               className="px-8 py-3.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-base font-['Orbitron'] tracking-wider shadow-md active:scale-95 transition-all flex items-center justify-center gap-2.5 shrink-0"
             >
               <Play className="w-5 h-5 fill-slate-950" />
-              <span>▶ JUGAR GRATIS</span>
+              <span>▶ JUGAR</span>
             </button>
           </div>
 
