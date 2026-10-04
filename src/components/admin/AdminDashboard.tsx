@@ -42,6 +42,10 @@ import {
   Filter,
   RefreshCw,
   LayoutDashboard,
+  Maximize2,
+  Minimize2,
+  ZoomIn,
+  ZoomOut,
 } from 'lucide-react';
 import { useGameData } from '../../context/GameDataContext';
 import { useAuth } from '../../context/AuthContext';
@@ -87,6 +91,8 @@ export const AdminDashboard: React.FC = () => {
   const [isGameEditorOpen, setIsGameEditorOpen] = useState(false);
   const [editingGame, setEditingGame] = useState<Game | null>(null);
   const [activeDashboardGame, setActiveDashboardGame] = useState<Game | null>(null);
+  const [isDashboardFullscreen, setIsDashboardFullscreen] = useState(false);
+  const [dashboardZoom, setDashboardZoom] = useState<number>(100);
   const [newCatName, setNewCatName] = useState('');
   const [newMascotMessage, setNewMascotMessage] = useState('');
 
@@ -1426,44 +1432,126 @@ export const AdminDashboard: React.FC = () => {
         />
       )}
 
-      {/* Game Dashboard Modal (Iframe / Fullscreen Viewer with Native Scroll) */}
+      {/* Game Dashboard Modal (Iframe / Fullscreen Viewer with Zoom & Native Scroll) */}
       {activeDashboardGame && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-slate-950/85 backdrop-blur-md animate-in fade-in overscroll-contain">
-          <div className="relative w-[95vw] max-w-[1400px] h-[92vh] max-h-[92vh] rounded-3xl bg-slate-900 border border-slate-700 shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95">
-            {/* Modal Header Fijo */}
-            <header className="flex items-center justify-between p-3 sm:p-4 md:p-5 border-b border-slate-800 bg-slate-950 shrink-0">
+        <div className={`fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md animate-in fade-in overscroll-contain ${
+          isDashboardFullscreen ? 'p-0' : 'p-2 sm:p-4 md:p-6'
+        }`}>
+          <div className={`relative bg-slate-900 border border-slate-700 shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 transition-all duration-200 ${
+            isDashboardFullscreen
+              ? 'w-screen h-screen max-w-none max-h-none rounded-none border-0'
+              : 'w-[96vw] max-w-[1500px] h-[94vh] max-h-[94vh] rounded-3xl'
+          }`}>
+            {/* Modal Header Fijo con Controles de Vista */}
+            <header className="flex items-center justify-between px-3 sm:px-5 py-3 border-b border-slate-800 bg-slate-950 shrink-0 gap-2">
               <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
                 <div className="p-2 sm:p-2.5 rounded-2xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 shrink-0">
                   <LayoutDashboard className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-sm sm:text-base font-black text-white font-['Orbitron'] flex items-center gap-2 truncate">
+                  <h3 className="text-xs sm:text-sm md:text-base font-black text-white font-['Orbitron'] flex items-center gap-2 truncate">
                     <span>DASHBOARD — {activeDashboardGame.name}</span>
                   </h3>
-                  <p className="text-[10px] sm:text-[11px] text-slate-400 font-mono truncate max-w-xl">
+                  <p className="text-[10px] sm:text-[11px] text-slate-400 font-mono truncate max-w-sm sm:max-w-md md:max-w-xl">
                     ID: {activeDashboardGame.gameId} {activeDashboardGame.dashboardUrl && `· ${activeDashboardGame.dashboardUrl}`}
                   </p>
                 </div>
               </div>
-              <button
-                onClick={() => setActiveDashboardGame(null)}
-                className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors shrink-0 ml-2"
-                title="Cerrar (✕)"
-              >
-                <X className="w-5 h-5" />
-              </button>
+
+              {/* Botones de control: Zoom, Pantalla Completa, Abrir en pestaña, Cerrar */}
+              <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                {activeDashboardGame.dashboardUrl && (
+                  <div className="hidden sm:flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-xl px-2 py-1 text-xs">
+                    <span className="text-[10px] text-slate-400 font-bold uppercase mr-1">Zoom:</span>
+                    <button
+                      onClick={() => setDashboardZoom((z) => Math.max(50, z - 10))}
+                      className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+                      title="Reducir zoom (-10%)"
+                    >
+                      <ZoomOut className="w-3.5 h-3.5" />
+                    </button>
+                    <span className="font-mono text-[11px] font-bold text-cyan-400 min-w-[36px] text-center">
+                      {dashboardZoom}%
+                    </span>
+                    <button
+                      onClick={() => setDashboardZoom((z) => Math.min(150, z + 10))}
+                      className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+                      title="Aumentar zoom (+10%)"
+                    >
+                      <ZoomIn className="w-3.5 h-3.5" />
+                    </button>
+                    {dashboardZoom !== 100 && (
+                      <button
+                        onClick={() => setDashboardZoom(100)}
+                        className="text-[10px] text-slate-400 hover:text-cyan-400 ml-1 px-1 rounded hover:bg-slate-800 transition-colors"
+                        title="Restablecer a 100%"
+                      >
+                        100%
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Pantalla Completa Toggle */}
+                <button
+                  onClick={() => setIsDashboardFullscreen((prev) => !prev)}
+                  className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
+                  title={isDashboardFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa (100% espacio)'}
+                >
+                  {isDashboardFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                </button>
+
+                {/* Abrir en pestaña externa */}
+                {activeDashboardGame.dashboardUrl && (
+                  <a
+                    href={activeDashboardGame.dashboardUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-400 border border-cyan-500/30 transition-colors"
+                    title="Abrir en pestaña completa independiente"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                )}
+
+                {/* Botón Cerrar */}
+                <button
+                  onClick={() => {
+                    setActiveDashboardGame(null);
+                    setIsDashboardFullscreen(false);
+                    setDashboardZoom(100);
+                  }}
+                  className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors ml-1"
+                  title="Cerrar (✕)"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </header>
 
-            {/* Modal Body: Área del iframe con flex-1 y min-h-0 para permitir scroll interno completo */}
-            <main className="flex-1 min-h-0 w-full bg-slate-950 relative flex flex-col">
+            {/* Modal Body: Área del iframe con soporte de zoom, scroll completo bidireccional */}
+            <main className="flex-1 min-h-0 w-full bg-slate-950 relative overflow-auto">
               {activeDashboardGame.dashboardUrl ? (
-                <iframe
-                  src={activeDashboardGame.dashboardUrl}
-                  title={`Dashboard de ${activeDashboardGame.name}`}
-                  className="w-full flex-1 min-h-0 border-0 block"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                  sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-downloads"
-                />
+                <div
+                  className="w-full h-full min-w-full min-h-full origin-top-left transition-transform duration-100"
+                  style={
+                    dashboardZoom !== 100
+                      ? {
+                          width: `${100 / (dashboardZoom / 100)}%`,
+                          height: `${100 / (dashboardZoom / 100)}%`,
+                          transform: `scale(${dashboardZoom / 100})`,
+                        }
+                      : { width: '100%', height: '100%' }
+                  }
+                >
+                  <iframe
+                    src={activeDashboardGame.dashboardUrl}
+                    title={`Dashboard de ${activeDashboardGame.name}`}
+                    className="w-full h-full border-0 block"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                    sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-downloads"
+                  />
+                </div>
               ) : (
                 <div className="h-full flex flex-col items-center justify-center text-center p-6 sm:p-8 space-y-4">
                   <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-cyan-400">
@@ -1503,22 +1591,47 @@ export const AdminDashboard: React.FC = () => {
 
             {/* Modal Footer Fijo */}
             <footer className="flex items-center justify-between p-3 sm:p-4 border-t border-slate-800 bg-slate-950 shrink-0 text-xs">
-              {activeDashboardGame.dashboardUrl ? (
-                <a
-                  href={activeDashboardGame.dashboardUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-cyan-400 hover:text-cyan-300 font-bold inline-flex items-center gap-1.5 hover:underline"
-                >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                  <span>↗ Abrir en nueva pestaña</span>
-                </a>
-              ) : (
-                <span className="text-slate-500 text-[11px]">URL no configurada</span>
-              )}
+              <div className="flex items-center gap-3">
+                {activeDashboardGame.dashboardUrl ? (
+                  <a
+                    href={activeDashboardGame.dashboardUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-cyan-400 hover:text-cyan-300 font-bold inline-flex items-center gap-1.5 hover:underline"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>↗ Abrir en nueva pestaña completa</span>
+                  </a>
+                ) : (
+                  <span className="text-slate-500 text-[11px]">URL no configurada</span>
+                )}
+
+                {/* Mobile zoom control */}
+                {activeDashboardGame.dashboardUrl && (
+                  <div className="flex sm:hidden items-center gap-1 bg-slate-900 border border-slate-800 rounded-lg px-1.5 py-0.5 text-[10px]">
+                    <button
+                      onClick={() => setDashboardZoom((z) => Math.max(50, z - 10))}
+                      className="text-slate-400 hover:text-white"
+                    >
+                      -
+                    </button>
+                    <span className="font-mono text-cyan-400 font-bold">{dashboardZoom}%</span>
+                    <button
+                      onClick={() => setDashboardZoom((z) => Math.min(150, z + 10))}
+                      className="text-slate-400 hover:text-white"
+                    >
+                      +
+                    </button>
+                  </div>
+                )}
+              </div>
 
               <button
-                onClick={() => setActiveDashboardGame(null)}
+                onClick={() => {
+                  setActiveDashboardGame(null);
+                  setIsDashboardFullscreen(false);
+                  setDashboardZoom(100);
+                }}
                 className="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs transition-colors"
               >
                 Cerrar
