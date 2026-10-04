@@ -30,6 +30,11 @@ export const GameEditorModal: React.FC<GameEditorModalProps> = ({ gameToEdit, on
   const [rankingEnabled, setRankingEnabled] = useState(gameToEdit?.rankingConfig?.enabled ?? true);
   const [rankingType, setRankingType] = useState(gameToEdit?.rankingConfig?.type || 'score');
   const [rankingUnit, setRankingUnit] = useState(gameToEdit?.rankingConfig?.unit || 'pts');
+  const [rankingCollection, setRankingCollection] = useState(gameToEdit?.rankingConfig?.collection || '');
+  const [rankingPlayerField, setRankingPlayerField] = useState(gameToEdit?.rankingConfig?.playerField || 'playerName');
+  const [rankingScoreField, setRankingScoreField] = useState(gameToEdit?.rankingConfig?.scoreField || 'score');
+  const [rankingOrder, setRankingOrder] = useState<'desc' | 'asc'>(gameToEdit?.rankingConfig?.order || 'desc');
+  const [dashboardUrl, setDashboardUrl] = useState(gameToEdit?.dashboardUrl || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const allStatuses: GameStatus[] = [
@@ -68,11 +73,14 @@ export const GameEditorModal: React.FC<GameEditorModalProps> = ({ gameToEdit, on
       rankingConfig: {
         enabled: rankingEnabled,
         type: rankingType as any,
-        scoreField: 'score',
-        order: 'desc',
+        scoreField: rankingScoreField.trim() || 'score',
+        order: rankingOrder,
         limit: 50,
         unit: rankingUnit,
-      },
+        collection: rankingCollection.trim() || undefined,
+        playerField: rankingPlayerField.trim() || undefined,
+      } as any,
+      dashboardUrl: dashboardUrl.trim() || undefined,
     });
 
     setIsSubmitting(false);
@@ -250,6 +258,73 @@ export const GameEditorModal: React.FC<GameEditorModalProps> = ({ gameToEdit, on
               placeholder="https://anapse.github.io/mi-juego/"
               className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-cyan-400"
             />
+          </div>
+
+          {/* 🏆 CONFIGURACIÓN DEL RANKING */}
+          <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+            <h4 className="font-extrabold text-white font-['Orbitron'] flex items-center gap-2">
+              <span>🏆 CONFIGURACIÓN DEL RANKING</span>
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-400 mb-1">Colección / tabla del ranking:</label>
+                <input
+                  type="text"
+                  value={rankingCollection}
+                  onChange={(e) => setRankingCollection(e.target.value)}
+                  placeholder="ej: scores, fox_thief_ranking"
+                  className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-400 mb-1">Campo del nombre del jugador:</label>
+                <input
+                  type="text"
+                  value={rankingPlayerField}
+                  onChange={(e) => setRankingPlayerField(e.target.value)}
+                  placeholder="ej: playerName, name"
+                  className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-400 mb-1">Campo de la puntuación:</label>
+                <input
+                  type="text"
+                  value={rankingScoreField}
+                  onChange={(e) => setRankingScoreField(e.target.value)}
+                  placeholder="ej: score"
+                  className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-400 mb-1">Orden:</label>
+                <select
+                  value={rankingOrder}
+                  onChange={(e) => setRankingOrder(e.target.value as 'desc' | 'asc')}
+                  className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white font-bold text-xs focus:outline-none focus:border-cyan-400"
+                >
+                  <option value="desc">Mayor → menor (desc)</option>
+                  <option value="asc">Menor → mayor (asc)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* 📊 DASHBOARD DEL JUEGO */}
+          <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+            <h4 className="font-extrabold text-white font-['Orbitron'] flex items-center gap-2">
+              <span>📊 DASHBOARD DEL JUEGO</span>
+            </h4>
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-400 mb-1">URL del Dashboard:</label>
+              <input
+                type="url"
+                value={dashboardUrl}
+                onChange={(e) => setDashboardUrl(e.target.value)}
+                placeholder="https://... (URL del dashboard de analíticas)"
+                className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
+              />
+            </div>
           </div>
 
           {/* Checkboxes & Config */}

@@ -65,13 +65,16 @@ export interface Game {
   ratingAvg: number;
   ratingsCount: number;
   rankingConfig?: {
-    enabled: boolean;
-    type: 'score' | 'time' | 'level' | 'coins' | 'distance';
-    scoreField: string;
-    order: 'desc' | 'asc';
-    limit: number;
+    enabled?: boolean;
+    type?: 'score' | 'time' | 'level' | 'coins' | 'distance';
+    scoreField?: string;
+    order?: 'desc' | 'asc';
+    limit?: number;
     unit?: string;
+    collection?: string;
+    playerField?: string;
   };
+  dashboardUrl?: string;
   sampleLeaderboard?: {
     rank: number;
     playerName: string;

@@ -39,12 +39,18 @@ export const GameModalPlayer: React.FC<GameModalPlayerProps> = ({
   useEffect(() => {
     if (!gameStarted) return;
 
+    // Detect if we are in mobile view (screen width < 640px)
+    const isMobileView = typeof window !== 'undefined' && window.innerWidth < 640;
+    if (!isMobileView) return;
+
     const stateName = `gameplay-${game.gameId}`;
     window.history.pushState({ activeGameplay: stateName }, '');
 
     const handlePopState = (event: PopStateEvent) => {
-      // If the back button is pressed, close the game player cleanly!
-      onClose();
+      // ONLY close if the popped state is indeed null or does not have our activeGameplay state!
+      if (!event.state || event.state.activeGameplay !== stateName) {
+        onClose();
+      }
     };
 
     window.addEventListener('popstate', handlePopState);
