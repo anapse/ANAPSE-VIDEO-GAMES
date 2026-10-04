@@ -1428,7 +1428,7 @@ export const AdminDashboard: React.FC = () => {
 
       {/* Game Dashboard Modal (Iframe / Fullscreen Viewer with Native Scroll) */}
       {activeDashboardGame && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-slate-950/85 backdrop-blur-md animate-in fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-slate-950/85 backdrop-blur-md animate-in fade-in overscroll-contain">
           <div className="relative w-[95vw] max-w-[1400px] h-[92vh] max-h-[92vh] rounded-3xl bg-slate-900 border border-slate-700 shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95">
             {/* Modal Header Fijo */}
             <header className="flex items-center justify-between p-3 sm:p-4 md:p-5 border-b border-slate-800 bg-slate-950 shrink-0">
@@ -1455,12 +1455,12 @@ export const AdminDashboard: React.FC = () => {
             </header>
 
             {/* Modal Body: Área del iframe con flex-1 y min-h-0 para permitir scroll interno completo */}
-        <main className="flex-1 min-h-0 w-full h-full bg-slate-950 relative overflow-hidden">
+            <main className="flex-1 min-h-0 w-full bg-slate-950 relative flex flex-col">
               {activeDashboardGame.dashboardUrl ? (
                 <iframe
                   src={activeDashboardGame.dashboardUrl}
                   title={`Dashboard de ${activeDashboardGame.name}`}
-                  className="w-full h-full border-0 block"
+                  className="w-full flex-1 min-h-0 border-0 block"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                   sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-downloads"
                 />
