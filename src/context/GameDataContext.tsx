@@ -498,6 +498,7 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         limit: 50,
         unit: 'pts',
       },
+      dashboardUrl: gameData.dashboardUrl || '',
       sampleLeaderboard: gameData.sampleLeaderboard || [],
       createdAt: gameData.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -516,6 +517,7 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       await setDoc(doc(db, 'games', newGame.gameId), sanitizedGame, { merge: true });
     } catch (err) {
       handleFirestoreError(err, OperationType.WRITE, `games/${newGame.gameId}`);
+      throw err;
     }
   };
 

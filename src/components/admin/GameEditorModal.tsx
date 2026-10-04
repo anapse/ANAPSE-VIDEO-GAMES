@@ -88,8 +88,8 @@ export const GameEditorModal: React.FC<GameEditorModalProps> = ({ gameToEdit, on
     };
 
     console.log(`[GameEditor] Guardando juego: ${payload.gameId}`);
-    console.log(`[GameEditor] rankingConfig:`, JSON.stringify(payload.rankingConfig));
-    console.log(`[GameEditor] dashboardUrl:`, payload.dashboardUrl);
+    console.log(`[GameEditor] rankingConfig:\n${JSON.stringify(payload.rankingConfig, null, 2)}`);
+    console.log(`[GameEditor] dashboardUrl: ${payload.dashboardUrl}`);
 
     setIsSubmitting(true);
     try {
@@ -100,9 +100,12 @@ export const GameEditorModal: React.FC<GameEditorModalProps> = ({ gameToEdit, on
       const docRef = doc(db, 'games', payload.gameId);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        console.log('[GameEditor] Verified stored game document in Firestore:', docSnap.data());
+        const storedData = docSnap.data();
+        console.log('[GameEditor] Documento verificado: OK');
+        console.log('[GameEditor] rankingConfig guardado:', storedData.rankingConfig);
+        console.log('[GameEditor] dashboardUrl guardado:', storedData.dashboardUrl);
       } else {
-        console.warn('[GameEditor] Warning: Document not immediately found on read back');
+        throw new Error('Document not found after write verification');
       }
 
       setIsSubmitting(false);
@@ -111,7 +114,8 @@ export const GameEditorModal: React.FC<GameEditorModalProps> = ({ gameToEdit, on
       alert(msg);
       onClose();
     } catch (err) {
-      console.error('[GameEditor] Firestore update error:', err);
+      console.error('[GameEditor] Firestore update: ERROR');
+      console.error('[GameEditor] Error:', err);
       setIsSubmitting(false);
       alert('❌ No se pudieron guardar los cambios');
     }

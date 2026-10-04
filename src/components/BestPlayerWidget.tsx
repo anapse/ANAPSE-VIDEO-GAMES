@@ -3,6 +3,7 @@ import { collection, query, orderBy, limit, getDocs, where, getFirestore } from 
 import { db, app } from '../lib/firebase';
 import { Game } from '../types';
 import { Trophy } from 'lucide-react';
+import firebaseConfig from '../../firebase-applet-config.json';
 
 interface BestPlayerWidgetProps {
   game: Game;
@@ -24,7 +25,8 @@ export const BestPlayerWidget: React.FC<BestPlayerWidgetProps> = ({ game }) => {
 
         console.log('[BestPlayer]');
         console.log(`Game: ${game.gameId}`);
-        console.log(`Database: ${databaseId || '(default)'}`);
+        console.log(`Firebase projectId: ${firebaseConfig.projectId}`);
+        console.log(`Database ID: ${databaseId || '(default)'}`);
         console.log(`Collection: ${targetCollection}`);
         console.log(`PlayerField: ${playerField}`);
         console.log(`ScoreField: ${scoreField}`);
@@ -56,10 +58,9 @@ export const BestPlayerWidget: React.FC<BestPlayerWidgetProps> = ({ game }) => {
       } catch (err: any) {
         console.error('[BestPlayer] Error:', err);
         const errMsg = err?.message || String(err);
+        console.log(`[BestPlayer] Database error: ${errMsg}`);
         if (errMsg.includes('permission') || errMsg.includes('Missing or insufficient permissions')) {
           console.log('[BestPlayer] Permission denied');
-        } else {
-          console.log('[BestPlayer] Database error');
         }
         if (isMounted) setTopPlayer(null);
       }
