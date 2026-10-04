@@ -1,5 +1,5 @@
 import React from 'react';
-import { Heart, Shield } from 'lucide-react';
+import { Heart, Shield, Users } from 'lucide-react';
 import { ASSETS } from '../lib/assets';
 import { useGameData } from '../context/GameDataContext';
 import { isUserOnline } from './UserBadge';
@@ -10,15 +10,34 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({ onTabChange }) => {
   const { users } = useGameData();
-  const moderators = users.filter((u) => u.role === 'MODERADOR');
+
+  // 1. Total registered users
+  const totalUsers = users.length;
+
+  // 2. All moderators registered (Total)
+  const allModerators = users.filter((u) => u.role === 'MODERADOR');
+  const totalModeratorsCount = allModerators.length;
+
+  // 3. Only online moderators (sorted by most recently active)
+  const onlineModerators = allModerators
+    .filter((u) => isUserOnline(u.lastSeen))
+    .sort((a, b) => {
+      const timeA = a.lastSeen ? new Date(a.lastSeen).getTime() : 0;
+      const timeB = b.lastSeen ? new Date(b.lastSeen).getTime() : 0;
+      return timeB - timeA;
+    });
+
+  // Limit of shown online moderators: 3
+  const displayedOnlineMods = onlineModerators.slice(0, 3);
+  const remainingOnlineCount = onlineModerators.length - 3;
 
   return (
     <footer className="bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs mt-16 pb-20 lg:pb-12 pt-12 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8">
           
           {/* Brand & Mission */}
-          <div className="space-y-3 md:col-span-2">
+          <div className="space-y-3 sm:col-span-2 md:col-span-2">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-500 to-amber-500 p-0.5 shadow-xs flex items-center justify-center overflow-hidden">
                 <img
@@ -62,38 +81,70 @@ export const Footer: React.FC<FooterProps> = ({ onTabChange }) => {
                   Apoyar ANAPSE
                 </button>
               </li>
+              <li className="pt-1">
+                <button onClick={() => onTabChange('admin')} className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors text-[11px] text-slate-400">
+                  Panel de Administración
+                </button>
+              </li>
             </ul>
           </div>
 
-          {/* Moderators & Admin */}
-          <div className="space-y-2">
-            <p className="font-bold text-slate-900 dark:text-white uppercase text-[11px] tracking-wider font-['Orbitron'] flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
-              <Shield className="w-3.5 h-3.5" />
-              <span>Moderación</span>
-            </p>
-            {moderators.length > 0 ? (
-              <ul className="space-y-1 text-xs">
-                {moderators.map((mod) => {
-                  const online = isUserOnline(mod.lastSeen);
-                  return (
-                    <li key={mod.uid} className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${online ? 'bg-emerald-400 shadow-xs animate-pulse' : 'bg-slate-500'}`} />
+          {/* Community & Moderation Section */}
+          <div className="space-y-4">
+            
+            {/* 👥 COMUNIDAD */}
+            <div className="space-y-1">
+              <p className="font-bold text-slate-900 dark:text-white uppercase text-[11px] tracking-wider font-['Orbitron'] flex items-center gap-1.5 text-cyan-600 dark:text-cyan-400">
+                <Users className="w-3.5 h-3.5" />
+                <span>COMUNIDAD</span>
+              </p>
+              <p className="text-xs text-slate-700 dark:text-slate-300 font-medium">
+                {totalUsers} {totalUsers === 1 ? 'jugador registrado' : 'jugadores registrados'}
+              </p>
+            </div>
+
+            {/* 🛡️ MODERACIÓN */}
+            <div className="space-y-2">
+              <div className="space-y-0.5">
+                <p className="font-bold text-slate-900 dark:text-white uppercase text-[11px] tracking-wider font-['Orbitron'] flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+                  <Shield className="w-3.5 h-3.5" />
+                  <span>MODERACIÓN</span>
+                </p>
+                <p className="text-xs text-slate-700 dark:text-slate-300 font-medium">
+                  {totalModeratorsCount} {totalModeratorsCount === 1 ? 'moderador' : 'moderadores'}
+                </p>
+              </div>
+
+              {/* Only show online moderators */}
+              {displayedOnlineMods.length > 0 && (
+                <div className="space-y-1.5 pt-1">
+                  {displayedOnlineMods.map((mod) => (
+                    <div
+                      key={mod.uid}
+                      className="flex items-center gap-1.5 text-xs text-slate-800 dark:text-slate-200 font-medium"
+                    >
+                      <span
+                        className="w-2 h-2 rounded-full bg-emerald-400 shadow-xs shadow-emerald-500/50 animate-pulse shrink-0"
+                        title="En línea"
+                      />
                       <span className="truncate">{mod.displayName}</span>
-                      <span className="text-[9px] font-bold px-1 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                      <span className="text-slate-400 dark:text-slate-500">·</span>
+                      <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
                         Mod
                       </span>
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : (
-              <p className="text-[11px] text-slate-500 italic">Equipo de moderación activo</p>
-            )}
-            <div className="pt-2">
-              <button onClick={() => onTabChange('admin')} className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors text-[11px]">
-                Acceso Administración
-              </button>
+                    </div>
+                  ))}
+
+                  {/* If more than 3 online moderators */}
+                  {remainingOnlineCount > 0 && (
+                    <p className="text-[11px] text-emerald-600/90 dark:text-emerald-400/90 font-medium pt-0.5">
+                      + {remainingOnlineCount} {remainingOnlineCount === 1 ? 'moderador en línea' : 'moderadores en línea'}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
+
           </div>
         </div>
 
