@@ -35,22 +35,45 @@ export const GameModalPlayer: React.FC<GameModalPlayerProps> = ({
     recordGamePlay(game.gameId);
   }, [game.gameId]);
 
+  // Synchronize history state when gameplay starts so native back button closes gameplay
+  useEffect(() => {
+    if (!gameStarted) return;
+
+    const stateName = `gameplay-${game.gameId}`;
+    window.history.pushState({ activeGameplay: stateName }, '');
+
+    const handlePopState = (event: PopStateEvent) => {
+      // If the back button is pressed, close the game player cleanly!
+      onClose();
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      // If the component unmounts and we are still in our pushed history state, pop it
+      if (window.history.state?.activeGameplay === stateName) {
+        window.history.back();
+      }
+    };
+  }, [gameStarted, game.gameId, onClose]);
+
   // ACTIVE GAMEPLAY MODE: Invisible frame, 9:16 ratio optimized for mobile/desktop, zero borders/padding/margins
   if (gameStarted) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 backdrop-blur-sm p-0 m-0 overflow-hidden">
-        {/* Floating discrete back button overlay */}
+        {/* Floating discrete back button overlay - Hidden on mobile, flex on desktop */}
         <button
           onClick={onClose}
-          className="absolute top-3 left-3 z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/70 hover:bg-slate-900/90 text-white backdrop-blur-md text-xs font-bold border border-white/20 shadow-lg active:scale-95 transition-all"
+          className="hidden sm:flex absolute top-3 left-3 z-30 items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/70 hover:bg-slate-900/90 text-white backdrop-blur-md text-xs font-bold border border-white/20 shadow-lg active:scale-95 transition-all"
           title="Volver a juegos"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>← Volver</span>
         </button>
 
-        {/* Floating action buttons (share & like) on top right */}
-        <div className="absolute top-3 right-3 z-30 flex items-center gap-2">
+        {/* Floating action buttons (share & like) on top right - Hidden on mobile, flex on desktop */}
+        <div className="hidden sm:flex absolute top-3 right-3 z-30 items-center gap-2">
           <button
             onClick={() => toggleLikeGame(game.gameId)}
             className={`p-2 rounded-full backdrop-blur-md border text-xs flex items-center gap-1 transition-all ${
