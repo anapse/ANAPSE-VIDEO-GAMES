@@ -33,6 +33,8 @@ export const Header: React.FC<HeaderProps> = ({
   const {
     profile,
     signOut,
+    isAdmin,
+    isModerator,
     isStaff,
     setShowAuthModal,
   } = useAuth();
@@ -179,10 +181,14 @@ export const Header: React.FC<HeaderProps> = ({
                         setCurrentTab('admin');
                         setShowRoleMenu(false);
                       }}
-                      className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-500/10 flex items-center gap-2 mt-1 border-b border-slate-100 dark:border-slate-800"
+                      className={`w-full text-left px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-2 mt-1 border-b border-slate-100 dark:border-slate-800 ${
+                        isAdmin
+                          ? 'text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-500/10'
+                          : 'text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10'
+                      }`}
                     >
                       <Shield className="w-3.5 h-3.5" />
-                      <span>Abrir Dashboard Admin</span>
+                      <span>{isAdmin ? 'Panel de Administración' : 'Panel de Moderación'}</span>
                     </button>
                   )}
 

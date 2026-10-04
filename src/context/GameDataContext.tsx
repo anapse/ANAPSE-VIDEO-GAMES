@@ -22,6 +22,10 @@ import {
   MascotConfig,
   SupportSettings,
   Score,
+  UserProfile,
+  UserRole,
+  Report,
+  ModerationLog,
 } from '../types';
 
 export const DEFAULT_SUPPORT_SETTINGS: SupportSettings = {
@@ -113,7 +117,15 @@ interface GameDataContextType {
   createPoll: (pollData: { question: string; description?: string; options: string[] }) => Promise<void>;
   addComment: (targetType: Comment['targetType'], targetId: string, content: string, parentId?: string | null) => Promise<void>;
   toggleLikeComment: (commentId: string) => Promise<void>;
-  deleteComment: (commentId: string) => Promise<void>;
+  hideComment: (commentId: string, hide: boolean, reason?: string) => Promise<void>;
+  deleteComment: (commentId: string, reason?: string) => Promise<void>;
+  reportComment: (reportData: Omit<Report, 'id' | 'createdAt' | 'status'>) => Promise<void>;
+  resolveReport: (reportId: string, status: 'RESOLVED' | 'DISMISSED', notes?: string) => Promise<void>;
+  changeUserRole: (userId: string, newRole: UserRole) => Promise<void>;
+  updateUserDisplayName: (userId: string, newName: string) => Promise<void>;
+  users: UserProfile[];
+  reports: Report[];
+  moderationLogs: ModerationLog[];
   addDonation: (donationData: { gameId: string; gameName: string; amount: number; message?: string; isPublic: boolean; paymentMethod: string }) => Promise<void>;
   addCategory: (category: Category) => Promise<void>;
   deleteCategory: (categoryId: string) => Promise<void>;
@@ -139,6 +151,9 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [donations, setDonations] = useState<Donation[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [usersCount, setUsersCount] = useState<number>(0);
+  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [reports, setReports] = useState<Report[]>([]);
+  const [moderationLogs, setModerationLogs] = useState<ModerationLog[]>([]);
   const [scores, setScores] = useState<Score[]>([]);
   const [userCommentLikes, setUserCommentLikes] = useState<Record<string, boolean>>({});
 
@@ -335,10 +350,34 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const unsubUsers = onSnapshot(
         collection(db, 'users'),
         (snapshot) => {
+          const remoteUsers = snapshot.docs.map((d) => ({ uid: d.id, ...d.data() } as UserProfile));
+          setUsers(remoteUsers);
           setUsersCount(snapshot.size);
         },
         (error) => {
           handleFirestoreError(error, OperationType.LIST, 'users');
+        }
+      );
+
+      const unsubReports = onSnapshot(
+        collection(db, 'reports'),
+        (snapshot) => {
+          const remoteReports = snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Report));
+          setReports(remoteReports.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+        },
+        () => {
+          // Ignored for non-moderators
+        }
+      );
+
+      const unsubModerationLogs = onSnapshot(
+        collection(db, 'moderationLogs'),
+        (snapshot) => {
+          const remoteLogs = snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as ModerationLog));
+          setModerationLogs(remoteLogs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+        },
+        () => {
+          // Ignored for non-moderators
         }
       );
 
@@ -799,12 +838,190 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
-  const deleteComment = async (commentId: string) => {
+  const deleteComment = async (commentId: string, reason?: string) => {
     setComments((prev) => prev.filter((c) => c.id !== commentId && c.parentId !== commentId));
     try {
       await deleteDoc(doc(db, 'comments', commentId));
+
+      // Record in moderation audit logs
+      if (profile) {
+        const logId = 'log-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4);
+        const logEntry: ModerationLog = {
+          id: logId,
+          moderatorId: profile.uid,
+          moderatorName: profile.displayName || 'Moderador',
+          action: 'DELETED',
+          commentId,
+          reason: reason || 'Eliminado por moderación',
+          createdAt: new Date().toISOString(),
+        };
+        await setDoc(doc(db, 'moderationLogs', logId), logEntry);
+      }
     } catch (err) {
       handleFirestoreError(err, OperationType.DELETE, `comments/${commentId}`);
+    }
+  };
+
+  const hideComment = async (commentId: string, hide: boolean, reason?: string) => {
+    const updatedBy = profile?.displayName || 'Moderador ANAPSE';
+    const timestamp = new Date().toISOString();
+
+    setComments((prev) =>
+      prev.map((c) =>
+        c.id === commentId
+          ? {
+              ...c,
+              hidden: hide,
+              hiddenBy: hide ? updatedBy : undefined,
+              hiddenAt: hide ? timestamp : undefined,
+              moderatedBy: updatedBy,
+              moderatedAt: timestamp,
+              moderationAction: hide ? 'HIDDEN' : 'RESTORED',
+            }
+          : c
+      )
+    );
+
+    try {
+      const commentRef = doc(db, 'comments', commentId);
+      await updateDoc(commentRef, {
+        hidden: hide,
+        hiddenBy: hide ? updatedBy : null,
+        hiddenAt: hide ? timestamp : null,
+        moderatedBy: updatedBy,
+        moderatedAt: timestamp,
+        moderationAction: hide ? 'HIDDEN' : 'RESTORED',
+      });
+
+      // Record in moderation audit logs
+      if (profile) {
+        const logId = 'log-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4);
+        const logEntry: ModerationLog = {
+          id: logId,
+          moderatorId: profile.uid,
+          moderatorName: profile.displayName || 'Moderador',
+          action: hide ? 'HIDDEN' : 'RESTORED',
+          commentId,
+          reason: reason || (hide ? 'Comentario ocultado' : 'Comentario restaurado'),
+          createdAt: timestamp,
+        };
+        await setDoc(doc(db, 'moderationLogs', logId), logEntry);
+      }
+    } catch (err) {
+      handleFirestoreError(err, OperationType.UPDATE, `comments/${commentId}`);
+    }
+  };
+
+  const reportComment = async (reportData: Omit<Report, 'id' | 'createdAt' | 'status'>) => {
+    const newId = 'rep-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4);
+    const newReport: Report = {
+      id: newId,
+      ...reportData,
+      status: 'PENDING',
+      createdAt: new Date().toISOString(),
+    };
+
+    setReports((prev) => [newReport, ...prev]);
+
+    try {
+      await setDoc(doc(db, 'reports', newId), newReport);
+
+      // Audit log entry for report creation
+      const logId = 'log-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4);
+      const logEntry: ModerationLog = {
+        id: logId,
+        moderatorId: reportData.reportedBy,
+        moderatorName: reportData.reporterName,
+        action: 'REPORTED',
+        commentId: reportData.commentId,
+        targetUserId: reportData.commentAuthorId,
+        targetUserName: reportData.commentAuthorName,
+        reason: `${reportData.reason}${reportData.details ? ': ' + reportData.details : ''}`,
+        createdAt: new Date().toISOString(),
+      };
+      await setDoc(doc(db, 'moderationLogs', logId), logEntry);
+    } catch (err) {
+      handleFirestoreError(err, OperationType.WRITE, `reports/${newId}`);
+    }
+  };
+
+  const resolveReport = async (reportId: string, status: 'RESOLVED' | 'DISMISSED', notes?: string) => {
+    const resolvedBy = profile?.displayName || 'Moderador';
+    const timestamp = new Date().toISOString();
+
+    setReports((prev) =>
+      prev.map((r) => (r.id === reportId ? { ...r, status, resolvedBy, resolvedAt: timestamp } : r))
+    );
+
+    try {
+      await updateDoc(doc(db, 'reports', reportId), {
+        status,
+        resolvedBy,
+        resolvedAt: timestamp,
+      });
+
+      // Audit log entry
+      if (profile) {
+        const logId = 'log-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4);
+        const logEntry: ModerationLog = {
+          id: logId,
+          moderatorId: profile.uid,
+          moderatorName: resolvedBy,
+          action: status === 'RESOLVED' ? 'RESOLVED_REPORT' : 'DISMISSED_REPORT',
+          reason: notes || `Reporte ${status === 'RESOLVED' ? 'resuelto' : 'descartado'}`,
+          createdAt: timestamp,
+        };
+        await setDoc(doc(db, 'moderationLogs', logId), logEntry);
+      }
+    } catch (err) {
+      handleFirestoreError(err, OperationType.UPDATE, `reports/${reportId}`);
+    }
+  };
+
+  const changeUserRole = async (userId: string, newRole: UserRole) => {
+    const updatedBy = profile?.displayName || 'Administrador';
+    const timestamp = new Date().toISOString();
+
+    setUsers((prev) =>
+      prev.map((u) => (u.uid === userId ? { ...u, role: newRole, updatedAt: timestamp } : u))
+    );
+
+    try {
+      await updateDoc(doc(db, 'users', userId), {
+        role: newRole,
+        updatedAt: timestamp,
+      });
+
+      // Audit log entry
+      if (profile) {
+        const logId = 'log-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4);
+        const logEntry: ModerationLog = {
+          id: logId,
+          moderatorId: profile.uid,
+          moderatorName: updatedBy,
+          action: 'ROLE_CHANGED',
+          targetUserId: userId,
+          reason: `Rol asignado a: ${newRole}`,
+          createdAt: timestamp,
+        };
+        await setDoc(doc(db, 'moderationLogs', logId), logEntry);
+      }
+    } catch (err) {
+      handleFirestoreError(err, OperationType.UPDATE, `users/${userId}`);
+    }
+  };
+
+  const updateUserDisplayName = async (userId: string, newName: string) => {
+    setUsers((prev) =>
+      prev.map((u) => (u.uid === userId ? { ...u, displayName: newName, updatedAt: new Date().toISOString() } : u))
+    );
+    try {
+      await updateDoc(doc(db, 'users', userId), {
+        displayName: newName,
+        updatedAt: new Date().toISOString(),
+      });
+    } catch (err) {
+      handleFirestoreError(err, OperationType.UPDATE, `users/${userId}`);
     }
   };
 
@@ -932,7 +1149,15 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         createPoll,
         addComment,
         toggleLikeComment,
+        hideComment,
         deleteComment,
+        reportComment,
+        resolveReport,
+        changeUserRole,
+        updateUserDisplayName,
+        users,
+        reports,
+        moderationLogs,
         addDonation,
         addCategory,
         deleteCategory,

@@ -54,6 +54,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               role: isAdminEmail ? 'ADMINISTRADOR' : 'USUARIO',
               favoriteCategory: 'Arcade',
               badges: ['Gamer Pionero', isAdminEmail ? 'Fundador ANAPSE' : 'Jugador Oficial'],
+              lastSeen: new Date().toISOString(),
               createdAt: new Date().toISOString(),
             };
             await setDoc(userDocRef, newProfile);
@@ -69,6 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             photoURL: user.photoURL || `https://api.dicebear.com/7.x/bottts/svg?seed=${user.uid}`,
             role: isAdminEmail ? 'ADMINISTRADOR' : 'USUARIO',
             badges: ['Gamer ANAPSE'],
+            lastSeen: new Date().toISOString(),
             createdAt: new Date().toISOString(),
           });
         }
@@ -80,6 +82,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     return () => unsubscribe();
   }, []);
+
+  // Periodic heartbeat to update lastSeen every 60 seconds
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const updateHeartbeat = async () => {
+      try {
+        const userRef = doc(db, 'users', currentUser.uid);
+        await setDoc(userRef, { lastSeen: new Date().toISOString() }, { merge: true });
+      } catch {
+        // Silent catch for background heartbeat
+      }
+    };
+
+    updateHeartbeat();
+    const interval = setInterval(updateHeartbeat, 60 * 1000);
+    return () => clearInterval(interval);
+  }, [currentUser]);
 
   const signInWithGoogle = async () => {
     try {

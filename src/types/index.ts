@@ -104,7 +104,9 @@ export interface UserProfile {
   bio?: string;
   favoriteCategory?: string;
   badges?: string[];
+  lastSeen?: string;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface Proposal {
@@ -145,10 +147,46 @@ export interface Comment {
   parentId?: string | null;
   userId: string;
   userName: string;
+  userRole?: UserRole;
   userPhoto?: string;
   content: string;
   likesCount: number;
   hidden?: boolean;
+  hiddenBy?: string;
+  hiddenAt?: string;
+  moderatedBy?: string;
+  moderatedAt?: string;
+  moderationAction?: string;
+  createdAt: string;
+}
+
+export interface Report {
+  id: string;
+  commentId: string;
+  commentContent: string;
+  commentAuthorName: string;
+  commentAuthorId: string;
+  targetType: string;
+  targetId: string;
+  reportedBy: string;
+  reporterName: string;
+  reason: 'Spam' | 'Insultos' | 'Acoso' | 'Contenido inapropiado' | 'Otro';
+  details?: string;
+  status: 'PENDING' | 'RESOLVED' | 'DISMISSED';
+  resolvedBy?: string;
+  resolvedAt?: string;
+  createdAt: string;
+}
+
+export interface ModerationLog {
+  id: string;
+  moderatorId: string;
+  moderatorName: string;
+  action: 'HIDDEN' | 'RESTORED' | 'DELETED' | 'REPORTED' | 'RESOLVED_REPORT' | 'DISMISSED_REPORT' | 'ROLE_CHANGED';
+  commentId?: string;
+  targetUserId?: string;
+  targetUserName?: string;
+  reason?: string;
   createdAt: string;
 }
 

@@ -25,7 +25,7 @@ import { X, Home, Gamepad2, Sparkles, Flame, Hammer, Lightbulb, MessageSquare, H
 
 const MainAppContent: React.FC = () => {
   const { games, selectedGame, setSelectedGame, activeGameModal, setActiveGameModal } = useGameData();
-  const { isAdmin } = useAuth();
+  const { isStaff } = useAuth();
 
   const [currentTab, setCurrentTab] = useState<string>('home');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -36,12 +36,12 @@ const MainAppContent: React.FC = () => {
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
-  // Redirect non-admins to home if they attempt to access admin tab
+  // Redirect non-staff users to home if they attempt to access admin/moderation tab
   useEffect(() => {
-    if (currentTab === 'admin' && !isAdmin) {
+    if (currentTab === 'admin' && !isStaff) {
       setCurrentTab('home');
     }
-  }, [currentTab, isAdmin]);
+  }, [currentTab, isStaff]);
 
   // Hash-based routing check for #game-fox-thief etc.
   useEffect(() => {

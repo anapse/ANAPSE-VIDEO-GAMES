@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { MessageSquare, Heart, Send } from 'lucide-react';
+import { MessageSquare, Send } from 'lucide-react';
 import { useGameData } from '../context/GameDataContext';
 import { useAuth } from '../context/AuthContext';
+import { CommentItem } from './CommentItem';
+import { UserBadge } from './UserBadge';
 
 export const CommunityFeed: React.FC = () => {
-  const { comments, addComment, toggleLikeComment } = useGameData();
+  const { comments, addComment } = useGameData();
   const { profile } = useAuth();
   const [postText, setPostText] = useState('');
 
@@ -42,8 +44,12 @@ export const CommunityFeed: React.FC = () => {
             className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 border border-cyan-500/30"
           />
           <div>
-            <p className="text-xs font-bold text-slate-900 dark:text-white">{profile?.displayName || 'Jugador ANAPSE'}</p>
-            <span className="text-[10px] text-cyan-600 dark:text-cyan-400 font-bold uppercase">{profile?.role || 'USUARIO'}</span>
+            <UserBadge
+              name={profile?.displayName || 'Jugador ANAPSE'}
+              role={profile?.role || 'USUARIO'}
+              size="sm"
+              className="text-slate-900 dark:text-white"
+            />
           </div>
         </div>
 
@@ -73,31 +79,7 @@ export const CommunityFeed: React.FC = () => {
       <div className="space-y-3">
         {feedComments.length > 0 ? (
           feedComments.map((item) => (
-            <div key={item.id} className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <img
-                    src={item.userPhoto || `https://api.dicebear.com/7.x/bottts/svg?seed=${item.userId}`}
-                    alt={item.userName}
-                    className="w-7 h-7 rounded-xl bg-slate-100 dark:bg-slate-800"
-                  />
-                  <span className="text-xs font-bold text-slate-900 dark:text-white">{item.userName}</span>
-                </div>
-                <span className="text-[10px] text-slate-400">{new Date(item.createdAt).toLocaleDateString()}</span>
-              </div>
-
-              <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">{item.content}</p>
-
-              <div className="flex items-center gap-3 pt-2 border-t border-slate-100 dark:border-slate-800/80 text-xs text-slate-400">
-                <button
-                  onClick={() => toggleLikeComment(item.id)}
-                  className="flex items-center gap-1 hover:text-rose-500 transition-colors"
-                >
-                  <Heart className="w-3.5 h-3.5" />
-                  <span>{item.likesCount || 0}</span>
-                </button>
-              </div>
-            </div>
+            <CommentItem key={item.id} comment={item} />
           ))
         ) : (
           <div className="p-8 text-center rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-xs text-slate-400">

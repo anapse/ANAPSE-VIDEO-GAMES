@@ -32,7 +32,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   collapsed,
   onToggleCollapse,
 }) => {
-  const { isStaff } = useAuth();
+  const { isStaff, isAdmin, isModerator } = useAuth();
   const { proposals, games, setSelectedGame } = useGameData();
 
   const mainNavItems = [
@@ -172,28 +172,34 @@ export const Sidebar: React.FC<SidebarProps> = ({
         })}
       </div>
 
-      {/* Admin / Staff Access (Discrete at bottom) */}
+      {/* Admin / Moderator Access (Discrete at bottom) */}
       {isStaff && (
         <div className="w-full pt-3 border-t border-slate-200/80 dark:border-slate-800/80">
           {!collapsed && (
-            <p className="px-2 text-[10px] font-extrabold uppercase tracking-widest text-orange-600 dark:text-orange-400 mb-1 font-['Orbitron']">
-              Administración
+            <p className={`px-2 text-[10px] font-extrabold uppercase tracking-widest mb-1 font-['Orbitron'] ${
+              isAdmin ? 'text-orange-600 dark:text-orange-400' : 'text-emerald-600 dark:text-emerald-400'
+            }`}>
+              {isAdmin ? 'Administración' : 'Moderación'}
             </p>
           )}
           <button
             onClick={() => handleNav('admin')}
-            title={collapsed ? 'Dashboard Admin' : undefined}
+            title={collapsed ? (isAdmin ? 'Dashboard Admin' : 'Panel Moderador') : undefined}
             className={`w-full flex items-center rounded-xl text-xs font-bold transition-all ${
               collapsed ? 'justify-center p-2' : 'justify-between px-3 py-2 text-left'
             } ${
               currentTab === 'admin'
-                ? 'bg-orange-500/20 text-orange-700 dark:text-orange-300 border border-orange-500/40'
-                : 'text-orange-600/80 dark:text-orange-400/80 hover:text-orange-600 dark:hover:text-orange-300 hover:bg-orange-500/10'
+                ? isAdmin
+                  ? 'bg-orange-500/20 text-orange-700 dark:text-orange-300 border border-orange-500/40'
+                  : 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40'
+                : isAdmin
+                ? 'text-orange-600/80 dark:text-orange-400/80 hover:text-orange-600 dark:hover:text-orange-300 hover:bg-orange-500/10'
+                : 'text-emerald-600/80 dark:text-emerald-400/80 hover:text-emerald-600 dark:hover:text-emerald-300 hover:bg-emerald-500/10'
             }`}
           >
             <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-2.5'}`}>
-              <Shield className="w-4 h-4 text-orange-500" />
-              {!collapsed && <span>Dashboard Admin</span>}
+              <Shield className={`w-4 h-4 ${isAdmin ? 'text-orange-500' : 'text-emerald-500'}`} />
+              {!collapsed && <span>{isAdmin ? 'Dashboard Admin' : 'Panel Moderador'}</span>}
             </div>
             {!collapsed && <ChevronRight className="w-3.5 h-3.5 opacity-60" />}
           </button>
