@@ -1426,46 +1426,46 @@ export const AdminDashboard: React.FC = () => {
         />
       )}
 
-      {/* Game Dashboard Modal (Iframe / External Viewer) */}
+      {/* Game Dashboard Modal (Iframe / Fullscreen Viewer with Native Scroll) */}
       {activeDashboardGame && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md animate-in fade-in">
-          <div className="relative w-full max-w-5xl h-[85vh] rounded-3xl bg-slate-900 border border-slate-700 shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-800 bg-slate-950 shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-2xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
-                  <LayoutDashboard className="w-5 h-5" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-slate-950/85 backdrop-blur-md animate-in fade-in">
+          <div className="relative w-[95vw] max-w-[1400px] h-[92vh] max-h-[92vh] rounded-3xl bg-slate-900 border border-slate-700 shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95">
+            {/* Modal Header Fijo */}
+            <header className="flex items-center justify-between p-3 sm:p-4 md:p-5 border-b border-slate-800 bg-slate-950 shrink-0">
+              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                <div className="p-2 sm:p-2.5 rounded-2xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 shrink-0">
+                  <LayoutDashboard className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
-                <div>
-                  <h3 className="text-sm sm:text-base font-black text-white font-['Orbitron'] flex items-center gap-2">
+                <div className="min-w-0">
+                  <h3 className="text-sm sm:text-base font-black text-white font-['Orbitron'] flex items-center gap-2 truncate">
                     <span>DASHBOARD — {activeDashboardGame.name}</span>
                   </h3>
-                  <p className="text-[11px] text-slate-400 font-mono truncate max-w-md">
+                  <p className="text-[10px] sm:text-[11px] text-slate-400 font-mono truncate max-w-xl">
                     ID: {activeDashboardGame.gameId} {activeDashboardGame.dashboardUrl && `· ${activeDashboardGame.dashboardUrl}`}
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setActiveDashboardGame(null)}
-                className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
-                title="Cerrar"
+                className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors shrink-0 ml-2"
+                title="Cerrar (✕)"
               >
                 <X className="w-5 h-5" />
               </button>
-            </div>
+            </header>
 
-            {/* Modal Body: Iframe or Config Prompt */}
-            <div className="flex-1 w-full bg-slate-950 relative overflow-hidden">
+            {/* Modal Body: Área del iframe con flex-1 y min-h-0 para permitir scroll interno completo */}
+            <main className="flex-1 min-h-0 w-full bg-slate-950 relative">
               {activeDashboardGame.dashboardUrl ? (
                 <iframe
                   src={activeDashboardGame.dashboardUrl}
                   title={`Dashboard de ${activeDashboardGame.name}`}
-                  className="w-full h-full border-0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  className="w-full h-full border-0 block"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                   sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-downloads"
                 />
               ) : (
-                <div className="h-full flex flex-col items-center justify-center text-center p-8 space-y-4">
+                <div className="h-full flex flex-col items-center justify-center text-center p-6 sm:p-8 space-y-4">
                   <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-cyan-400">
                     <LayoutDashboard className="w-8 h-8 opacity-80" />
                   </div>
@@ -1485,7 +1485,7 @@ export const AdminDashboard: React.FC = () => {
                         setEditingGame(target);
                         setIsGameEditorOpen(true);
                       }}
-                      className="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-md"
+                      className="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-md active:scale-95"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
                       <span>Editar Juego</span>
@@ -1499,10 +1499,10 @@ export const AdminDashboard: React.FC = () => {
                   </div>
                 </div>
               )}
-            </div>
+            </main>
 
-            {/* Modal Footer */}
-            <div className="flex items-center justify-between p-3.5 sm:p-4 border-t border-slate-800 bg-slate-950 shrink-0 text-xs">
+            {/* Modal Footer Fijo */}
+            <footer className="flex items-center justify-between p-3 sm:p-4 border-t border-slate-800 bg-slate-950 shrink-0 text-xs">
               {activeDashboardGame.dashboardUrl ? (
                 <a
                   href={activeDashboardGame.dashboardUrl}
@@ -1519,11 +1519,11 @@ export const AdminDashboard: React.FC = () => {
 
               <button
                 onClick={() => setActiveDashboardGame(null)}
-                className="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs"
+                className="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs transition-colors"
               >
                 Cerrar
               </button>
-            </div>
+            </footer>
           </div>
         </div>
       )}
