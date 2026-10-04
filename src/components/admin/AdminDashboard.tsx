@@ -41,6 +41,7 @@ import {
   UserX,
   Filter,
   RefreshCw,
+  LayoutDashboard,
 } from 'lucide-react';
 import { useGameData } from '../../context/GameDataContext';
 import { useAuth } from '../../context/AuthContext';
@@ -118,31 +119,35 @@ export const AdminDashboard: React.FC = () => {
   };
 
   // Nav items configuration based on role
+  // Desktop: exactly 3 rows for admin (Row 1: 6, Row 2: 6, Row 3: 5)
   const adminNavItems = [
-    { id: 'resumen', label: '📊 Resumen' },
-    { id: 'juegos', label: '🎮 Juegos', count: games.length },
-    { id: 'propuestas', label: '💡 Propuestas', count: proposals.length },
-    { id: 'encuestas', label: '🗳️ Encuestas', count: polls.length },
-    { id: 'comentarios', label: '💬 Comentarios', count: comments.length },
-    { id: 'reportes', label: '🚩 Denuncias', count: pendingReportsCount, alert: pendingReportsCount > 0 },
-    { id: 'logs', label: '📜 Registro Moderación', count: moderationLogs.length },
-    { id: 'usuarios', label: '👥 Usuarios & Roles', count: users.length },
-    { id: 'apoyos', label: '❤️ Apoyos', count: donations.length },
-    { id: 'analitica', label: '📈 Analítica' },
-    { id: 'rankings', label: '🏆 Rankings' },
-    { id: 'categorias', label: '📁 Categorías', count: categories.length },
-    { id: 'repos', label: '🔗 Repositorios' },
-    { id: 'firebase', label: '🔥 Firebase' },
-    { id: 'recursos', label: '🖼️ Recursos' },
-    { id: 'anuncios', label: '📢 Anuncios', count: announcements.length },
-    { id: 'config', label: '⚙️ Configuración' },
+    // Fila 1 (6 botones)
+    { id: 'resumen', label: 'Resumen', icon: '📊' },
+    { id: 'juegos', label: 'Juegos', icon: '🎮', count: games.length },
+    { id: 'propuestas', label: 'Propuestas', icon: '💡', count: proposals.length },
+    { id: 'encuestas', label: 'Encuestas', icon: '🗳️', count: polls.length },
+    { id: 'comentarios', label: 'Comentarios', icon: '💬', count: comments.length },
+    { id: 'reportes', label: 'Denuncias', icon: '🚩', count: pendingReportsCount, alert: pendingReportsCount > 0 },
+    // Fila 2 (6 botones)
+    { id: 'logs', label: 'Moderación', icon: '📜', count: moderationLogs.length },
+    { id: 'usuarios', label: 'Usuarios', icon: '👥', count: users.length },
+    { id: 'apoyos', label: 'Apoyos', icon: '❤️', count: donations.length },
+    { id: 'analitica', label: 'Analítica', icon: '📈' },
+    { id: 'rankings', label: 'Rankings', icon: '🏆' },
+    { id: 'categorias', label: 'Categorías', icon: '📁', count: categories.length },
+    // Fila 3 (5 botones)
+    { id: 'repos', label: 'Repositorios', icon: '🔗' },
+    { id: 'firebase', label: 'Firebase', icon: '🔥' },
+    { id: 'recursos', label: 'Recursos', icon: '🖼️' },
+    { id: 'anuncios', label: 'Anuncios', icon: '📢', count: announcements.length },
+    { id: 'config', label: 'Configuración', icon: '⚙️' },
   ];
 
   const moderatorNavItems = [
-    { id: 'comentarios', label: '💬 Comentarios', count: comments.length },
-    { id: 'reportes', label: '🚩 Denuncias', count: pendingReportsCount, alert: pendingReportsCount > 0 },
-    { id: 'logs', label: '📜 Historial de Moderación', count: moderationLogs.length },
-    { id: 'usuarios', label: '👥 Comunidad & Jugadores', count: users.length },
+    { id: 'comentarios', label: 'Comentarios', icon: '💬', count: comments.length },
+    { id: 'reportes', label: 'Denuncias', icon: '🚩', count: pendingReportsCount, alert: pendingReportsCount > 0 },
+    { id: 'logs', label: 'Moderación', icon: '📜', count: moderationLogs.length },
+    { id: 'usuarios', label: 'Comunidad', icon: '👥', count: users.length },
   ];
 
   const navItems = isAdmin ? adminNavItems : moderatorNavItems;
@@ -325,24 +330,31 @@ export const AdminDashboard: React.FC = () => {
         )}
       </div>
 
-      {/* Main Tabs Navigation */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none border-b border-slate-800">
+      {/* Main Tabs Navigation (3 rows in desktop via CSS Grid, compact buttons) */}
+      <div className={`grid gap-2 border-b border-slate-800 pb-4 ${
+        isAdmin
+          ? 'grid-cols-3 sm:grid-cols-4 md:grid-cols-6'
+          : 'grid-cols-2 sm:grid-cols-4'
+      }`}>
         {navItems.map((item) => {
           const isActive = activeTab === item.id;
           return (
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 relative ${
+              className={`p-2 sm:p-2.5 rounded-2xl flex flex-col items-center justify-center text-center transition-all relative border ${
                 isActive
-                  ? 'bg-cyan-500 text-slate-950 font-black shadow-md shadow-cyan-500/20'
-                  : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-850 border border-slate-800'
+                  ? 'bg-cyan-500 text-slate-950 border-cyan-400 font-black shadow-lg shadow-cyan-500/25 scale-[1.02]'
+                  : 'bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border-slate-800 hover:border-slate-700'
               }`}
             >
-              <span>{item.label}</span>
+              <span className="text-base sm:text-lg leading-none mb-1">{item.icon}</span>
+              <span className="text-[11px] sm:text-xs font-bold tracking-tight line-clamp-1 truncate w-full">
+                {item.label}
+              </span>
               {item.count !== undefined && (
                 <span
-                  className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                  className={`mt-1 text-[10px] font-black px-1.5 py-0.2 rounded-full ${
                     isActive
                       ? 'bg-slate-950/40 text-slate-950 font-black'
                       : item.alert
@@ -463,8 +475,8 @@ export const AdminDashboard: React.FC = () => {
                     <th className="p-4">Juego</th>
                     <th className="p-4">Categoría</th>
                     <th className="p-4">Estado</th>
-                    <th className="p-4">Ranking / Base de Datos</th>
-                    <th className="p-4">Partidas</th>
+                    <th className="p-4 text-center">Dashboard</th>
+                    <th className="p-4 text-center">Partidas</th>
                     <th className="p-4 text-right">Acciones</th>
                   </tr>
                 </thead>
@@ -502,21 +514,17 @@ export const AdminDashboard: React.FC = () => {
                           <option value="ARCHIVADO">ARCHIVADO</option>
                         </select>
                       </td>
-                      <td className="p-4 font-mono text-[11px]">
-                        {g.rankingConfig?.databaseId ? (
-                          <div>
-                            <span className="text-emerald-400 font-bold block truncate max-w-[160px]" title={g.rankingConfig.databaseId}>
-                              🗄️ {g.rankingConfig.databaseId}
-                            </span>
-                            <span className="text-[9px] text-slate-400 block truncate">
-                              📁 {g.rankingConfig.collection || 'scores'} ({g.rankingConfig.scoreField || 'score'})
-                            </span>
-                          </div>
-                        ) : (
-                          <span className="text-slate-500 italic">Default</span>
-                        )}
+                      <td className="p-4 text-center">
+                        <button
+                          onClick={() => setActiveDashboardGame(g)}
+                          className="px-3 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 hover:text-cyan-300 border border-cyan-500/30 text-xs font-bold inline-flex items-center gap-1.5 transition-all shadow-xs active:scale-95"
+                          title={`Abrir Dashboard de ${g.name}`}
+                        >
+                          <LayoutDashboard className="w-3.5 h-3.5" />
+                          <span>Dashboard</span>
+                        </button>
                       </td>
-                      <td className="p-4 font-mono text-cyan-300 font-bold">{g.playsCount || 0}</td>
+                      <td className="p-4 text-center font-mono text-cyan-300 font-bold">{g.playsCount || 0}</td>
                       <td className="p-4 text-right space-x-1.5">
                         <button
                           onClick={() => {
@@ -1416,6 +1424,108 @@ export const AdminDashboard: React.FC = () => {
             setEditingGame(null);
           }}
         />
+      )}
+
+      {/* Game Dashboard Modal (Iframe / External Viewer) */}
+      {activeDashboardGame && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md animate-in fade-in">
+          <div className="relative w-full max-w-5xl h-[85vh] rounded-3xl bg-slate-900 border border-slate-700 shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-800 bg-slate-950 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-2xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                  <LayoutDashboard className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm sm:text-base font-black text-white font-['Orbitron'] flex items-center gap-2">
+                    <span>DASHBOARD — {activeDashboardGame.name}</span>
+                  </h3>
+                  <p className="text-[11px] text-slate-400 font-mono truncate max-w-md">
+                    ID: {activeDashboardGame.gameId} {activeDashboardGame.dashboardUrl && `· ${activeDashboardGame.dashboardUrl}`}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setActiveDashboardGame(null)}
+                className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
+                title="Cerrar"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body: Iframe or Config Prompt */}
+            <div className="flex-1 w-full bg-slate-950 relative overflow-hidden">
+              {activeDashboardGame.dashboardUrl ? (
+                <iframe
+                  src={activeDashboardGame.dashboardUrl}
+                  title={`Dashboard de ${activeDashboardGame.name}`}
+                  className="w-full h-full border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-downloads"
+                />
+              ) : (
+                <div className="h-full flex flex-col items-center justify-center text-center p-8 space-y-4">
+                  <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-cyan-400">
+                    <LayoutDashboard className="w-8 h-8 opacity-80" />
+                  </div>
+                  <div className="space-y-1.5 max-w-md">
+                    <h4 className="text-base font-bold text-white font-['Orbitron']">
+                      📊 Dashboard no configurado
+                    </h4>
+                    <p className="text-xs text-slate-400 leading-relaxed">
+                      Este juego todavía no tiene una URL de dashboard asignada. Puedes agregarla editando las propiedades del juego en el catálogo.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3 pt-2">
+                    <button
+                      onClick={() => {
+                        const target = activeDashboardGame;
+                        setActiveDashboardGame(null);
+                        setEditingGame(target);
+                        setIsGameEditorOpen(true);
+                      }}
+                      className="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-md"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                      <span>Editar Juego</span>
+                    </button>
+                    <button
+                      onClick={() => setActiveDashboardGame(null)}
+                      className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs"
+                    >
+                      Cerrar
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-between p-3.5 sm:p-4 border-t border-slate-800 bg-slate-950 shrink-0 text-xs">
+              {activeDashboardGame.dashboardUrl ? (
+                <a
+                  href={activeDashboardGame.dashboardUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-cyan-400 hover:text-cyan-300 font-bold inline-flex items-center gap-1.5 hover:underline"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>↗ Abrir en nueva pestaña</span>
+                </a>
+              ) : (
+                <span className="text-slate-500 text-[11px]">URL no configurada</span>
+              )}
+
+              <button
+                onClick={() => setActiveDashboardGame(null)}
+                className="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
