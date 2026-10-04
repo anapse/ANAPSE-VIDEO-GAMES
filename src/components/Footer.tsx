@@ -1,12 +1,17 @@
 import React from 'react';
-import { Heart, ExternalLink } from 'lucide-react';
+import { Heart, Shield } from 'lucide-react';
 import { ASSETS } from '../lib/assets';
+import { useGameData } from '../context/GameDataContext';
+import { isUserOnline } from './UserBadge';
 
 interface FooterProps {
   onTabChange: (tab: string) => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({ onTabChange }) => {
+  const { users } = useGameData();
+  const moderators = users.filter((u) => u.role === 'MODERADOR');
+
   return (
     <footer className="bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs mt-16 pb-20 lg:pb-12 pt-12 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -60,18 +65,35 @@ export const Footer: React.FC<FooterProps> = ({ onTabChange }) => {
             </ul>
           </div>
 
-          {/* Admin & Info */}
+          {/* Moderators & Admin */}
           <div className="space-y-2">
-            <p className="font-bold text-slate-900 dark:text-white uppercase text-[11px] tracking-wider font-['Orbitron']">
-              Información
+            <p className="font-bold text-slate-900 dark:text-white uppercase text-[11px] tracking-wider font-['Orbitron'] flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+              <Shield className="w-3.5 h-3.5" />
+              <span>Moderación</span>
             </p>
-            <ul className="space-y-1.5 text-xs">
-              <li>
-                <button onClick={() => onTabChange('admin')} className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">
-                  Dashboard de Administración
-                </button>
-              </li>
-            </ul>
+            {moderators.length > 0 ? (
+              <ul className="space-y-1 text-xs">
+                {moderators.map((mod) => {
+                  const online = isUserOnline(mod.lastSeen);
+                  return (
+                    <li key={mod.uid} className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${online ? 'bg-emerald-400 shadow-xs animate-pulse' : 'bg-slate-500'}`} />
+                      <span className="truncate">{mod.displayName}</span>
+                      <span className="text-[9px] font-bold px-1 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                        Mod
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="text-[11px] text-slate-500 italic">Equipo de moderación activo</p>
+            )}
+            <div className="pt-2">
+              <button onClick={() => onTabChange('admin')} className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors text-[11px]">
+                Acceso Administración
+              </button>
+            </div>
           </div>
         </div>
 

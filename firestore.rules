@@ -52,7 +52,7 @@ service cloud.firestore {
       allow read: if true;
       allow create: if isOwner(userId) && (
         request.resource.data.role == 'USUARIO' ||
-        (request.resource.data.role == 'ADMINISTRADOR' && request.auth.token.email == 'elherreroanapse@gmail.com')
+        (request.resource.data.role == 'ADMINISTRADOR' && (request.auth.token.email == 'elherreroanapse@gmail.com' || request.auth.token.email == 'anapse_video@hotmail.com'))
       );
       allow update: if isAdmin() || (
         isOwner(userId) && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role'])

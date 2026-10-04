@@ -785,6 +785,7 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       parentId: parentId || null,
       userId: profile?.uid || currentUser?.uid || 'guest-' + Date.now(),
       userName: profile?.displayName || 'Gamer Anapse',
+      userRole: profile?.role || 'USUARIO',
       userPhoto: profile?.photoURL || `https://api.dicebear.com/7.x/bottts/svg?seed=${newId}`,
       content,
       likesCount: 0,

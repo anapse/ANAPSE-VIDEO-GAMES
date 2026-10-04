@@ -39,13 +39,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
       if (user) {
+        const isAdminEmail =
+          user.email === 'elherreroanapse@gmail.com' ||
+          user.email === 'anapse_video@hotmail.com';
         const userDocRef = doc(db, 'users', user.uid);
         try {
           const userSnap = await getDoc(userDocRef);
           if (userSnap.exists()) {
-            setProfile(userSnap.data() as UserProfile);
+            const data = userSnap.data() as UserProfile;
+            if (isAdminEmail && data.role !== 'ADMINISTRADOR') {
+              const updatedProfile = { ...data, role: 'ADMINISTRADOR' as UserRole };
+              await setDoc(userDocRef, { role: 'ADMINISTRADOR' }, { merge: true });
+              setProfile(updatedProfile);
+            } else {
+              setProfile(data);
+            }
           } else {
-            const isAdminEmail = user.email === 'elherreroanapse@gmail.com';
             const newProfile: UserProfile = {
               uid: user.uid,
               displayName: user.displayName || user.email?.split('@')[0] || 'Gamer Anapse',
@@ -62,7 +71,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         } catch (err) {
           handleFirestoreError(err, OperationType.GET, `users/${user.uid}`);
-          const isAdminEmail = user.email === 'elherreroanapse@gmail.com';
           setProfile({
             uid: user.uid,
             displayName: user.displayName || 'Gamer Anapse',
@@ -157,13 +165,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const isAdmin =
-    profile?.role === 'ADMINISTRADOR' || profile?.email === 'elherreroanapse@gmail.com';
-  const isStaff =
-    isAdmin ||
-    profile?.role === 'MAYORDOMO' ||
-    profile?.role === 'EDITOR' ||
-    profile?.role === 'MODERADOR';
-  const isModerator = isStaff;
+    profile?.role === 'ADMINISTRADOR' ||
+    profile?.email === 'elherreroanapse@gmail.com' ||
+    profile?.email === 'anapse_video@hotmail.com' ||
+    currentUser?.email === 'elherreroanapse@gmail.com' ||
+    currentUser?.email === 'anapse_video@hotmail.com';
+  const isModerator = isAdmin || profile?.role === 'MODERADOR';
+  const isStaff = isAdmin || isModerator;
 
   return (
     <AuthContext.Provider
