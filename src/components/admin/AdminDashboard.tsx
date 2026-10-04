@@ -1460,7 +1460,7 @@ export const AdminDashboard: React.FC = () => {
                 <iframe
                   src={activeDashboardGame.dashboardUrl}
                   title={`Dashboard de ${activeDashboardGame.name}`}
-                  className="absolute inset-0 w-full h-full border-0 block"
+                  className="w-full h-full border-0 block"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                   sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-downloads"
                 />
