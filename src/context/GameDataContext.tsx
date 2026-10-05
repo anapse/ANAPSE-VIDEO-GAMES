@@ -262,8 +262,14 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     });
   };
 
-  // Firestore Realtime listeners
+  // Firestore Realtime listeners.
+  // When a game is active, pause portal subscriptions so Firestore updates
+  // do not compete with the game's rendering and main thread.
   useEffect(() => {
+    if (activeGameModal) {
+      return;
+    }
+
     try {
       setLoadingGames(true);
       const unsubGames = onSnapshot(
@@ -426,10 +432,14 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     } catch (e) {
       console.warn('Realtime listeners fallback to local state:', e);
     }
-  }, []);
+  }, [activeGameModal]);
 
   // Listen to user-specific likes, votes, and comment likes in real-time from Firestore
   useEffect(() => {
+    if (activeGameModal) {
+      return;
+    }
+
     if (!currentUser) {
       setUserLikes({});
       setUserPollVotes({});
@@ -484,7 +494,7 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       unsubUserCommentLikes();
       unsubUserPollVotes();
     };
-  }, [currentUser]);
+  }, [currentUser, activeGameModal]);
 
   const addOrUpdateGame = async (gameData: Partial<Game> & { gameId: string; name: string }) => {
     const existingIndex = games.findIndex((g) => g.gameId === gameData.gameId);
