@@ -28,13 +28,41 @@ export const GameModalPlayer: React.FC<GameModalPlayerProps> = ({
   // Quick Start Screen state
   const [gameStarted, setGameStarted] = useState(false);
   const [activeTab, setActiveTab] = useState<'start' | 'how' | 'ranking'>('start');
+  const [showExitPrompt, setShowExitPrompt] = useState(false);
   const historyEntryAddedRef = useRef(false);
+  const handlingExitRef = useRef(false);
 
   const isLiked = !!userLikes[game.gameId];
 
   useEffect(() => {
     recordGamePlay(game.gameId);
   }, [game.gameId]);
+
+  const requestExit = () => {
+    if (!gameStarted) {
+      onClose();
+      return;
+    }
+    setShowExitPrompt(true);
+  };
+
+  const cancelExit = () => {
+    setShowExitPrompt(false);
+
+    // The browser already consumed our synthetic history entry when Back was pressed.
+    // Restore it so another Back press is intercepted by the confirmation again.
+    if (!historyEntryAddedRef.current && typeof window !== 'undefined') {
+      const stateName = `gameplay-${game.gameId}`;
+      window.history.pushState({ activeGameplay: stateName }, '', window.location.href);
+      historyEntryAddedRef.current = true;
+    }
+  };
+
+  const confirmExit = () => {
+    handlingExitRef.current = true;
+    setShowExitPrompt(false);
+    onClose();
+  };
 
   // Mobile history handling: one synthetic entry per active game. Never call history.back() during
   // ordinary React cleanup; that can navigate the entire portal away from the game on mobile.
@@ -49,8 +77,12 @@ export const GameModalPlayer: React.FC<GameModalPlayerProps> = ({
     historyEntryAddedRef.current = true;
 
     const handlePopState = () => {
-      // The browser Back action is the explicit request to leave gameplay.
-      onClose();
+      // Browser Back is intercepted and converted into an in-game confirmation.
+      // The game remains mounted so the current score/state is not lost.
+      historyEntryAddedRef.current = false;
+      if (!handlingExitRef.current) {
+        setShowExitPrompt(true);
+      }
     };
 
     window.addEventListener('popstate', handlePopState);
@@ -60,15 +92,56 @@ export const GameModalPlayer: React.FC<GameModalPlayerProps> = ({
       // necessarily a user Back action; doing so can jump out of the portal.
       historyEntryAddedRef.current = false;
     };
-  }, [gameStarted, game.gameId, onClose]);
+  }, [gameStarted, game.gameId]);
 
   // ACTIVE GAMEPLAY MODE: Invisible frame, 9:16 ratio optimized for mobile/desktop, zero borders/padding/margins
   if (gameStarted) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 backdrop-blur-sm p-0 m-0 overflow-hidden overscroll-none touch-none">
-        {/* Floating discrete back button overlay - Hidden on mobile, flex on desktop */}
+        {/* Exit confirmation banner */}
+        {showExitPrompt && (
+          <div className="absolute inset-x-3 top-4 z-[60] flex justify-center pointer-events-none">
+            <div
+              role="alertdialog"
+              aria-modal="true"
+              aria-labelledby="exit-game-title"
+              className="pointer-events-auto w-full max-w-sm rounded-2xl bg-slate-900/95 border border-amber-400/40 shadow-2xl backdrop-blur-xl p-4 text-white animate-in slide-in-from-top-3 duration-200"
+            >
+              <div className="flex items-start gap-3">
+                <div className="shrink-0 w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-400/30 flex items-center justify-center text-lg">
+                  ⚠️
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h2 id="exit-game-title" className="font-bold text-sm">¿Quieres salir del juego?</h2>
+                  <p className="mt-1 text-xs leading-relaxed text-slate-300">
+                    Tu partida actual podría perderse si sales.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={cancelExit}
+                  className="py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold transition-colors active:scale-95"
+                >
+                  CONTINUAR JUGANDO
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmExit}
+                  className="py-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold transition-colors active:scale-95"
+                >
+                  SALIR
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Floating discrete back button - Hidden on mobile, flex on desktop */}
         <button
-          onClick={onClose}
+          onClick={requestExit}
           className="hidden sm:flex absolute top-3 left-3 z-30 items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/70 hover:bg-slate-900/90 text-white backdrop-blur-md text-xs font-bold border border-white/20 shadow-lg active:scale-95 transition-all"
           title="Volver a juegos"
         >
@@ -99,7 +172,7 @@ export const GameModalPlayer: React.FC<GameModalPlayerProps> = ({
           </button>
         </div>
 
-        {/* Game iframe / container (Invisible frame, 9:16 aspect ratio, zero margins/padding) */}
+        {/* Game iframe / container (Invisible frame, 9:16 ratio, zero margins/padding) */}
         <div className="w-full h-[100svh] max-w-[calc(100svh*9/16)] aspect-[9/16] flex items-center justify-center border-0 p-0 m-0 bg-transparent overflow-hidden relative">
           {game.webUrl && game.embedAllowed && !iframeError ? (
             <iframe
