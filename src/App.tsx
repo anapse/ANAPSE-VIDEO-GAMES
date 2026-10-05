@@ -92,7 +92,8 @@ const MainAppContent: React.FC = () => {
   return (
     <div className="min-h-screen bg-transparent text-slate-900 dark:text-slate-100 flex flex-col font-sans selection:bg-amber-500 selection:text-slate-950 relative overflow-x-hidden transition-colors">
       
-      {/* Official Fantasy Valley Background (Fondo visible detrás de la plataforma) */}
+      {/* Official Fantasy Valley Background - pausado durante el juego para liberar GPU */}
+      {!activeGameModal && (
       <div className="fixed inset-0 pointer-events-none z-0">
         <img
           src={ASSETS.background}
@@ -105,8 +106,9 @@ const MainAppContent: React.FC = () => {
         {/* Capa ultra sutil e iluminada para ver el paisaje como un mapa de fondo */}
         <div className="absolute inset-0 bg-white/20 dark:bg-slate-950/50 backdrop-blur-[1px]" />
       </div>
+      )}
       
-      {/* Topbar */}
+      {/* Topbar */
       <Header
         currentTab={currentTab}
         setCurrentTab={(tab) => {
@@ -195,8 +197,8 @@ const MainAppContent: React.FC = () => {
         </main>
       </div>
 
-      {/* Mascot Companion (Discrete & Non-Intrusive) */}
-      <MascotPet />
+      {/* Mascot Companion - pausada durante el juego para liberar CPU/GPU */}
+      {!activeGameModal && <MascotPet />}
 
       {/* Mobile Navigation Drawer */}
       {mobileDrawerOpen && (
