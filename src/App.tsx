@@ -108,7 +108,7 @@ const MainAppContent: React.FC = () => {
       </div>
       )}
       
-      {/* Topbar */
+      {/* Topbar */}
       <Header
         currentTab={currentTab}
         setCurrentTab={(tab) => {
