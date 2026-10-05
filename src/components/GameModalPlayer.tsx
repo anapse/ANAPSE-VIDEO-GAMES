@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   X,
   ExternalLink,
@@ -28,6 +28,7 @@ export const GameModalPlayer: React.FC<GameModalPlayerProps> = ({
   // Quick Start Screen state
   const [gameStarted, setGameStarted] = useState(false);
   const [activeTab, setActiveTab] = useState<'start' | 'how' | 'ranking'>('start');
+  const historyEntryAddedRef = useRef(false);
 
   const isLiked = !!userLikes[game.gameId];
 
@@ -35,39 +36,36 @@ export const GameModalPlayer: React.FC<GameModalPlayerProps> = ({
     recordGamePlay(game.gameId);
   }, [game.gameId]);
 
-  // Synchronize history state when gameplay starts so native back button closes gameplay
+  // Mobile history handling: one synthetic entry per active game. Never call history.back() during
+  // ordinary React cleanup; that can navigate the entire portal away from the game on mobile.
   useEffect(() => {
     if (!gameStarted) return;
 
-    // Detect if we are in mobile view (screen width < 640px)
-    const isMobileView = typeof window !== 'undefined' && window.innerWidth < 640;
-    if (!isMobileView) return;
+    const isMobileView = typeof window !== 'undefined' && window.matchMedia('(max-width: 639px)').matches;
+    if (!isMobileView || historyEntryAddedRef.current) return;
 
     const stateName = `gameplay-${game.gameId}`;
-    window.history.pushState({ activeGameplay: stateName }, '');
+    window.history.pushState({ activeGameplay: stateName }, '', window.location.href);
+    historyEntryAddedRef.current = true;
 
-    const handlePopState = (event: PopStateEvent) => {
-      // ONLY close if the popped state is indeed null or does not have our activeGameplay state!
-      if (!event.state || event.state.activeGameplay !== stateName) {
-        onClose();
-      }
+    const handlePopState = () => {
+      // The browser Back action is the explicit request to leave gameplay.
+      onClose();
     };
 
     window.addEventListener('popstate', handlePopState);
-
     return () => {
       window.removeEventListener('popstate', handlePopState);
-      // If the component unmounts and we are still in our pushed history state, pop it
-      if (window.history.state?.activeGameplay === stateName) {
-        window.history.back();
-      }
+      // Intentionally do NOT call history.back() here. A React unmount is not
+      // necessarily a user Back action; doing so can jump out of the portal.
+      historyEntryAddedRef.current = false;
     };
   }, [gameStarted, game.gameId, onClose]);
 
   // ACTIVE GAMEPLAY MODE: Invisible frame, 9:16 ratio optimized for mobile/desktop, zero borders/padding/margins
   if (gameStarted) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 backdrop-blur-sm p-0 m-0 overflow-hidden">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 backdrop-blur-sm p-0 m-0 overflow-hidden overscroll-none touch-none">
         {/* Floating discrete back button overlay - Hidden on mobile, flex on desktop */}
         <button
           onClick={onClose}
@@ -102,12 +100,12 @@ export const GameModalPlayer: React.FC<GameModalPlayerProps> = ({
         </div>
 
         {/* Game iframe / container (Invisible frame, 9:16 aspect ratio, zero margins/padding) */}
-        <div className="w-full h-[100dvh] max-w-[calc(100dvh*9/16)] aspect-[9/16] flex items-center justify-center border-0 p-0 m-0 bg-transparent overflow-hidden relative">
+        <div className="w-full h-[100svh] max-w-[calc(100svh*9/16)] aspect-[9/16] flex items-center justify-center border-0 p-0 m-0 bg-transparent overflow-hidden relative">
           {game.webUrl && game.embedAllowed && !iframeError ? (
             <iframe
               src={game.webUrl}
               title={game.name}
-              className="w-full h-full border-0 p-0 m-0 bg-transparent overflow-hidden"
+              className="w-full h-full border-0 p-0 m-0 bg-transparent overflow-hidden touch-none"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; gamepad; microphone; camera"
               allowFullScreen
               onError={() => setIframeError(true)}
