@@ -97,7 +97,7 @@ export const GameModalPlayer: React.FC<GameModalPlayerProps> = ({
   // ACTIVE GAMEPLAY MODE: Invisible frame, 9:16 ratio optimized for mobile/desktop, zero borders/padding/margins
   if (gameStarted) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 backdrop-blur-sm p-0 m-0 overflow-hidden overscroll-none touch-none">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black p-0 m-0 overflow-hidden overscroll-none touch-none" style={{ contain: 'strict' }}>
         {/* Exit confirmation banner */}
         {showExitPrompt && (
           <div className="absolute inset-x-3 top-4 z-[60] flex justify-center pointer-events-none">
@@ -105,7 +105,7 @@ export const GameModalPlayer: React.FC<GameModalPlayerProps> = ({
               role="alertdialog"
               aria-modal="true"
               aria-labelledby="exit-game-title"
-              className="pointer-events-auto w-full max-w-sm rounded-2xl bg-slate-900/95 border border-amber-400/40 shadow-2xl backdrop-blur-xl p-4 text-white animate-in slide-in-from-top-3 duration-200"
+              className="pointer-events-auto w-full max-w-sm rounded-2xl bg-slate-900/95 border border-amber-400/40 shadow-2xl  p-4 text-white animate-in slide-in-from-top-3 duration-200"
             >
               <div className="flex items-start gap-3">
                 <div className="shrink-0 w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-400/30 flex items-center justify-center text-lg">
@@ -142,7 +142,7 @@ export const GameModalPlayer: React.FC<GameModalPlayerProps> = ({
         {/* Floating discrete back button - Hidden on mobile, flex on desktop */}
         <button
           onClick={requestExit}
-          className="hidden sm:flex absolute top-3 left-3 z-30 items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/70 hover:bg-slate-900/90 text-white backdrop-blur-md text-xs font-bold border border-white/20 shadow-lg active:scale-95 transition-all"
+          className="hidden sm:flex absolute top-3 left-3 z-30 items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/70 hover:bg-slate-900/90 text-white  text-xs font-bold border border-white/20 shadow-lg active:scale-95 transition-all"
           title="Volver a juegos"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
@@ -153,7 +153,7 @@ export const GameModalPlayer: React.FC<GameModalPlayerProps> = ({
         <div className="hidden sm:flex absolute top-3 right-3 z-30 items-center gap-2">
           <button
             onClick={() => toggleLikeGame(game.gameId)}
-            className={`p-2 rounded-full backdrop-blur-md border text-xs flex items-center gap-1 transition-all ${
+            className={`p-2 rounded-full  border text-xs flex items-center gap-1 transition-all ${
               isLiked
                 ? 'bg-rose-500/80 text-white border-rose-400'
                 : 'bg-slate-900/60 text-white border-white/20'
@@ -165,7 +165,7 @@ export const GameModalPlayer: React.FC<GameModalPlayerProps> = ({
 
           <button
             onClick={() => onShare(game)}
-            className="p-2 rounded-full bg-slate-900/60 hover:bg-slate-900/80 text-white backdrop-blur-md border border-white/20"
+            className="p-2 rounded-full bg-slate-900/60 hover:bg-slate-900/80 text-white  border border-white/20"
             title="Compartir"
           >
             <Share2 className="w-3.5 h-3.5" />
@@ -184,7 +184,7 @@ export const GameModalPlayer: React.FC<GameModalPlayerProps> = ({
               onError={() => setIframeError(true)}
             />
           ) : (
-            <div className="p-6 text-center max-w-sm mx-auto space-y-4 rounded-3xl bg-slate-900/90 text-white border border-slate-800 shadow-xl backdrop-blur-md">
+            <div className="p-6 text-center max-w-sm mx-auto space-y-4 rounded-3xl bg-slate-900/90 text-white border border-slate-800 shadow-xl ">
               <img
                 src={game.mainImage}
                 alt={game.name}
@@ -220,8 +220,8 @@ export const GameModalPlayer: React.FC<GameModalPlayerProps> = ({
 
   // PRE-GAME INFO MODAL MODE
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-slate-950/80 backdrop-blur-md animate-in fade-in">
-      <div className="relative w-full max-w-md mx-auto p-6 rounded-3xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/80 dark:border-slate-800 shadow-2xl text-center space-y-5 animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-slate-950/80  animate-in fade-in">
+      <div className="relative w-full max-w-md mx-auto p-6 rounded-3xl bg-white/95 dark:bg-slate-900/95  border border-slate-200/80 dark:border-slate-800 shadow-2xl text-center space-y-5 animate-in zoom-in-95 duration-200">
         {/* Close Button */}
         <button
           onClick={onClose}
