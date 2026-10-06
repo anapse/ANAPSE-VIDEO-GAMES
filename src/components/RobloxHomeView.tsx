@@ -36,7 +36,14 @@ export const RobloxHomeView: React.FC<RobloxHomeViewProps> = ({
   const { games, proposals, comments, loadingGames, gamesError } = useGameData();
 
   const featuredGames = games.filter((g) => g.featured || g.status === 'PUBLICADO').slice(0, 4);
-  const newGames = games.filter((g) => g.isNew || g.status === 'BETA' || g.status === 'PUBLICADO').slice(0, 4);
+  const recentPublishedGames = [...games]
+    .filter((g) => g.status === 'PUBLICADO')
+    .sort((a, b) => {
+      const dateA = new Date(a.publishedAt || a.updatedAt || a.createdAt).getTime();
+      const dateB = new Date(b.publishedAt || b.updatedAt || b.createdAt).getTime();
+      return dateB - dateA;
+    })
+    .slice(0, 4);
   const mostPlayedGames = [...games].sort((a, b) => b.playsCount - a.playsCount).slice(0, 4);
   const creatingGames = games.filter((g) => g.status === 'EN CREACIÓN' || g.status === 'EN REPARACIÓN').slice(0, 4);
   const recentComments = comments.slice(0, 3);
@@ -160,18 +167,18 @@ export const RobloxHomeView: React.FC<RobloxHomeViewProps> = ({
         )}
       </section>
 
-      {/* 3. 🆕 JUEGOS NUEVOS */}
-      {newGames.length > 0 && (
+      {/* 3. 🆕 ÚLTIMOS PUBLICADOS */}
+      {recentPublishedGames.length > 0 && (
         <section className="space-y-4">
           <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-slate-800 pb-2.5">
             <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white font-['Orbitron'] flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-amber-500" />
-              <span>Juegos Nuevos</span>
+              <span>Últimos Publicados</span>
             </h2>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
-            {newGames.map((game) => (
+            {recentPublishedGames.map((game) => (
               <GameCard
                 key={game.gameId}
                 game={game}
