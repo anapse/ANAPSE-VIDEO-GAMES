@@ -111,6 +111,7 @@ interface GameDataContextType {
   toggleFollowGame: (gameId: string) => Promise<void>;
   recordGamePlay: (gameId: string) => Promise<void>;
   recordGameView: (gameId: string) => Promise<void>;
+  recordPlatformVisit: () => Promise<void>;
   addProposal: (proposalData: { title: string; description: string; category: string; idea: string; imageUrl?: string }) => Promise<void>;
   voteProposal: (proposalId: string) => Promise<void>;
   updateProposalStatus: (proposalId: string, status: Proposal['status']) => Promise<void>;
@@ -157,6 +158,7 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [moderationLogs, setModerationLogs] = useState<ModerationLog[]>([]);
   const [scores, setScores] = useState<Score[]>([]);
   const [userCommentLikes, setUserCommentLikes] = useState<Record<string, boolean>>({});
+  const [platformVisits, setPlatformVisits] = useState<number>(0);
 
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [activeGameModal, setActiveGameModal] = useState<Game | null>(null);
@@ -273,6 +275,17 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     try {
       setLoadingGames(true);
+      const unsubPlatformAnalytics = onSnapshot(
+        doc(db, 'analytics', 'platform'),
+        (snapshot) => {
+          const data = snapshot.data();
+          setPlatformVisits(Number(data?.totalVisits || 0));
+        },
+        () => {
+          // Analytics are optional; keep the catalog working if unavailable.
+        }
+      );
+
       const unsubGames = onSnapshot(
         collection(db, 'games'),
         (snapshot) => {
@@ -418,6 +431,7 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       );
 
       return () => {
+        unsubPlatformAnalytics();
         unsubGames();
         unsubCategories();
         unsubProposals();
@@ -642,6 +656,19 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const toggleFollowGame = async (gameId: string) => {
     const isFollowed = !!userFollows[gameId];
     setUserFollows({ ...userFollows, [gameId]: !isFollowed });
+  };
+
+  const recordPlatformVisit = async () => {
+    setPlatformVisits((prev) => prev + 1);
+    try {
+      await setDoc(
+        doc(db, 'analytics', 'platform'),
+        { totalVisits: increment(1), updatedAt: new Date().toISOString() },
+        { merge: true }
+      );
+    } catch (err) {
+      // Keep the local dashboard responsive if Firestore is temporarily unavailable.
+    }
   };
 
   const recordGameView = async (gameId: string) => {
@@ -1119,7 +1146,7 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const globalAnalytics: GlobalAnalytics = {
-    totalVisits: games.reduce((acc, g) => acc + (g.viewsCount || 0), 0),
+    totalVisits: platformVisits,
     totalPlays: games.reduce((acc, g) => acc + (g.playsCount || 0), 0),
     totalUsers: usersCount,
     totalLikes: games.reduce((acc, g) => acc + (g.likesCount || 0), 0),
@@ -1190,6 +1217,7 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         submitScore,
         scores,
         globalAnalytics,
+        recordPlatformVisit,
         loadingGames,
         gamesError,
       }}
