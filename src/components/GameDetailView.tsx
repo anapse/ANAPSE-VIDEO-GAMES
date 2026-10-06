@@ -136,7 +136,7 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
                 </p>
                 <div className="flex items-center gap-2 text-xs text-amber-500 font-bold pt-1">
                   <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                  <span>{game.ratingAvg > 0 ? game.ratingAvg : '4.9'} / 5</span>
+                  <span>{game.ratingsCount > 0 ? game.ratingAvg.toFixed(1) : 'Sin calificación'}{game.ratingsCount > 0 ? ' / 5' : ''}</span>
                   <span className="text-slate-400 font-normal">({game.ratingsCount} valoraciones)</span>
                 </div>
               </div>
