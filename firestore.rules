@@ -36,6 +36,15 @@ service cloud.firestore {
       return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
     }
 
+    // Platform analytics: public website visit counter.
+    match /analytics/{docId} {
+      allow read: if true;
+      allow create: if docId == 'platform' && request.resource.data.totalVisits == 1;
+      allow update: if docId == 'platform' &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['totalVisits', 'updatedAt']) &&
+        request.resource.data.totalVisits == resource.data.totalVisits + 1;
+    }
+
     // Games collection
     match /games/{gameId} {
       allow read: if true; // Public catalog
