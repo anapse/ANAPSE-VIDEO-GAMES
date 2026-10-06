@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Play,
   Heart,
@@ -42,10 +42,20 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
     rateGame,
     userFollows,
     toggleFollowGame,
+    recordGameView,
   } = useGameData();
 
   const [newComment, setNewComment] = useState('');
   const [starHover, setStarHover] = useState<number | null>(null);
+
+  const recordedViewRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (recordedViewRef.current === game.gameId) return;
+    recordedViewRef.current = game.gameId;
+    void recordGameView(game.gameId);
+  }, [game.gameId, recordGameView]);
+
 
   const isLiked = !!userLikes[game.gameId];
   const isFollowed = !!userFollows[game.gameId];
