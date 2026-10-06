@@ -566,6 +566,7 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       sampleLeaderboard: gameData.sampleLeaderboard || [],
       createdAt: gameData.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      publishedAt: gameData.publishedAt,
     };
 
     if (existingIndex >= 0) {
@@ -596,11 +597,24 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const updateGameStatus = async (gameId: string, status: GameStatus) => {
+    const timestamp = new Date().toISOString();
+    const currentGame = games.find((g) => g.gameId === gameId);
+    const publicationChanged = status === 'PUBLICADO' && currentGame?.status !== 'PUBLICADO';
+    const publishedAt = publicationChanged ? timestamp : currentGame?.publishedAt;
+
     setGames((prev) =>
-      prev.map((g) => (g.gameId === gameId ? { ...g, status, updatedAt: new Date().toISOString() } : g))
+      prev.map((g) =>
+        g.gameId === gameId
+          ? { ...g, status, updatedAt: timestamp, ...(publishedAt ? { publishedAt } : {}) }
+          : g
+      )
     );
     try {
-      await updateDoc(doc(db, 'games', gameId), { status, updatedAt: new Date().toISOString() });
+      await updateDoc(doc(db, 'games', gameId), {
+        status,
+        updatedAt: timestamp,
+        ...(publishedAt ? { publishedAt } : {}),
+      });
     } catch (err) {
       handleFirestoreError(err, OperationType.UPDATE, `games/${gameId}`);
     }
