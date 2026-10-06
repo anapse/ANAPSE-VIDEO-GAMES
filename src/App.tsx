@@ -24,7 +24,7 @@ import { ASSETS } from './lib/assets';
 import { X, Home, Gamepad2, Sparkles, Flame, Hammer, Lightbulb, MessageSquare, Heart } from 'lucide-react';
 
 const MainAppContent: React.FC = () => {
-  const { games, selectedGame, setSelectedGame, activeGameModal, setActiveGameModal } = useGameData();
+  const { games, selectedGame, setSelectedGame, activeGameModal, setActiveGameModal, recordPlatformVisit } = useGameData();
   const { isStaff } = useAuth();
 
   const [currentTab, setCurrentTab] = useState<string>('home');
@@ -35,6 +35,14 @@ const MainAppContent: React.FC = () => {
   const [donationModalGame, setDonationModalGame] = useState<Game | null>(null);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+
+  // Count one website visit per browser session. Reloads in the same tab do not inflate the counter.
+  useEffect(() => {
+    const visitKey = 'anapse_platform_visit_recorded';
+    if (sessionStorage.getItem(visitKey) === '1') return;
+    sessionStorage.setItem(visitKey, '1');
+    void recordPlatformVisit();
+  }, [recordPlatformVisit]);
 
   // Redirect non-staff users to home if they attempt to access admin/moderation tab
   useEffect(() => {
