@@ -110,6 +110,7 @@ interface GameDataContextType {
   rateGame: (gameId: string, rating: number) => Promise<void>;
   toggleFollowGame: (gameId: string) => Promise<void>;
   recordGamePlay: (gameId: string) => Promise<void>;
+  recordGameView: (gameId: string) => Promise<void>;
   addProposal: (proposalData: { title: string; description: string; category: string; idea: string; imageUrl?: string }) => Promise<void>;
   voteProposal: (proposalId: string) => Promise<void>;
   updateProposalStatus: (proposalId: string, status: Proposal['status']) => Promise<void>;
@@ -643,6 +644,19 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setUserFollows({ ...userFollows, [gameId]: !isFollowed });
   };
 
+  const recordGameView = async (gameId: string) => {
+    setGames((prev) =>
+      prev.map((g) => (g.gameId === gameId ? { ...g, viewsCount: (g.viewsCount || 0) + 1 } : g))
+    );
+    try {
+      await updateDoc(doc(db, 'games', gameId), {
+        viewsCount: increment(1),
+      });
+    } catch (err) {
+      // Keep the local counter responsive if Firestore is temporarily unavailable.
+    }
+  };
+
   const recordGamePlay = async (gameId: string) => {
     setGames((prev) =>
       prev.map((g) => (g.gameId === gameId ? { ...g, playsCount: g.playsCount + 1 } : g))
@@ -1153,6 +1167,7 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         rateGame,
         toggleFollowGame,
         recordGamePlay,
+        recordGameView,
         addProposal,
         voteProposal,
         updateProposalStatus,
