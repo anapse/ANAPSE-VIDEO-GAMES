@@ -85,6 +85,7 @@ export interface Game {
   }[];
   createdAt: string;
   updatedAt?: string;
+  publishedAt?: string;
 }
 
 export interface Category {
