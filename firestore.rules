@@ -49,9 +49,16 @@ service cloud.firestore {
     match /games/{gameId} {
       allow read: if true; // Public catalog
       allow create, delete: if isAdmin();
+      // Game view/play counters must work for anonymous visitors too.
+      // Keep all other game edits restricted to admins/authenticated users.
       allow update: if isAdmin() || (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewsCount']) &&
+        request.resource.data.viewsCount == resource.data.viewsCount + 1
+      ) || (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['playsCount']) &&
+        request.resource.data.playsCount == resource.data.playsCount + 1
+      ) || (
         isSignedIn() &&
-        // Allow public counters (views, plays, likes, rating) to be incremented securely
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewsCount', 'playsCount', 'likesCount', 'ratingAvg', 'ratingsCount', 'updatedAt'])
       );
     }
