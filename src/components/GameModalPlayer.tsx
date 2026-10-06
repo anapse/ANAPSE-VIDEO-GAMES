@@ -22,7 +22,7 @@ export const GameModalPlayer: React.FC<GameModalPlayerProps> = ({
   onClose,
   onShare,
 }) => {
-  const { recordGamePlay, userLikes, toggleLikeGame } = useGameData();
+  const { recordGamePlay, recordGameView, userLikes, toggleLikeGame } = useGameData();
   const [iframeError, setIframeError] = useState(false);
 
   // Quick Start Screen state
@@ -35,7 +35,8 @@ export const GameModalPlayer: React.FC<GameModalPlayerProps> = ({
   const isLiked = !!userLikes[game.gameId];
 
   useEffect(() => {
-    recordGamePlay(game.gameId);
+    void recordGamePlay(game.gameId);
+    void recordGameView(game.gameId);
   }, [game.gameId]);
 
   const requestExit = () => {
