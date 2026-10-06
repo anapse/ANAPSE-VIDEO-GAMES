@@ -289,7 +289,18 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const unsubGames = onSnapshot(
         collection(db, 'games'),
         (snapshot) => {
-          const remoteGames = snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Game));
+          const remoteGames = snapshot.docs.map((d) => {
+            const data = d.data() as Partial<Game>;
+            // Los valores 5/5 y 1 valoración eran valores de demostración.
+            // Como las valoraciones reales aún no se habían guardado, no deben mostrarse como ratings reales.
+            const hasPlaceholderRating = data.ratingAvg === 5 && data.ratingsCount === 1;
+            return {
+              id: d.id,
+              ...data,
+              ratingAvg: hasPlaceholderRating ? 0 : (data.ratingAvg ?? 0),
+              ratingsCount: hasPlaceholderRating ? 0 : (data.ratingsCount ?? 0),
+            } as Game;
+          });
           setGames(remoteGames);
           setLoadingGames(false);
           setGamesError(null);
@@ -552,8 +563,8 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       likesCount: gameData.likesCount ?? 0,
       playsCount: gameData.playsCount ?? 0,
       viewsCount: gameData.viewsCount ?? 0,
-      ratingAvg: gameData.ratingAvg ?? 5.0,
-      ratingsCount: gameData.ratingsCount ?? 1,
+      ratingAvg: gameData.ratingAvg ?? 0,
+      ratingsCount: gameData.ratingsCount ?? 0,
       rankingConfig: gameData.rankingConfig || {
         enabled: true,
         type: 'score',
@@ -654,17 +665,30 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const rateGame = async (gameId: string, rating: number) => {
     const prevUserRating = userRatings[gameId];
-    setUserRatings({ ...userRatings, [gameId]: rating });
+    setUserRatings((prev) => ({ ...prev, [gameId]: rating }));
+
+    let updatedRating: { ratingAvg: number; ratingsCount: number } | null = null;
 
     setGames((prev) =>
       prev.map((g) => {
         if (g.gameId !== gameId) return g;
-        const count = prevUserRating ? g.ratingsCount : g.ratingsCount + 1;
-        const total = g.ratingAvg * g.ratingsCount + rating - (prevUserRating || 0);
-        const newAvg = Number((total / count).toFixed(1));
+        const currentCount = g.ratingsCount || 0;
+        const currentAvg = g.ratingAvg || 0;
+        const count = prevUserRating ? currentCount : currentCount + 1;
+        const total = currentAvg * currentCount + rating - (prevUserRating || 0);
+        const newAvg = Number((total / Math.max(1, count)).toFixed(1));
+        updatedRating = { ratingAvg: newAvg, ratingsCount: count };
         return { ...g, ratingAvg: newAvg, ratingsCount: count };
       })
     );
+
+    if (updatedRating) {
+      try {
+        await updateDoc(doc(db, 'games', gameId), updatedRating);
+      } catch (err) {
+        handleFirestoreError(err, OperationType.UPDATE, `games/${gameId}`);
+      }
+    }
   };
 
   const toggleFollowGame = async (gameId: string) => {
