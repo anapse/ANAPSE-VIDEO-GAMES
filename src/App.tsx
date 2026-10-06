@@ -19,6 +19,7 @@ import { ShareModal } from './components/ShareModal';
 import { MascotPet } from './components/MascotPet';
 import { MobileNav } from './components/MobileNav';
 import { Footer } from './components/Footer';
+import { AdBanner } from './components/AdBanner';
 import { Game } from './types';
 import { ASSETS } from './lib/assets';
 import { X, Home, Gamepad2, Sparkles, Flame, Hammer, Lightbulb, MessageSquare, Heart } from 'lucide-react';
@@ -132,6 +133,9 @@ const MainAppContent: React.FC = () => {
         }}
         onOpenMobileMenu={() => setMobileDrawerOpen(true)}
       />
+
+      {/* Publicidad superior: visible solo en el portal, nunca dentro del juego */}
+      {!activeGameModal && <AdBanner slot="top" />}
 
       {/* Main Layout: Left Sidebar + Central Discovery Content */}
       <div className="flex-1 flex max-w-7xl w-full mx-auto relative z-10">
@@ -283,6 +287,9 @@ const MainAppContent: React.FC = () => {
         isOpen={isNewProposalOpen}
         onClose={() => setIsNewProposalOpen(false)}
       />
+
+      {/* Publicidad inferior: franja discreta antes del footer */}
+      {!activeGameModal && <AdBanner slot="footer" />}
 
       {/* Footer */}
       <Footer
