@@ -379,7 +379,14 @@ export const AdminDashboard: React.FC = () => {
       {/* 📊 RESUMEN (Admin only) */}
       {isAdmin && activeTab === 'resumen' && (
         <div className="space-y-6">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+            <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-1">
+              <span className="text-xs font-bold text-slate-400 uppercase">Visitas</span>
+              <p className="text-2xl sm:text-3xl font-black text-violet-400 font-['Orbitron']">
+                {globalAnalytics.totalVisits.toLocaleString()}
+              </p>
+            </div>
+
             <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-1">
               <span className="text-xs font-bold text-slate-400 uppercase">Partidas Jugadas</span>
               <p className="text-2xl sm:text-3xl font-black text-cyan-400 font-['Orbitron']">
