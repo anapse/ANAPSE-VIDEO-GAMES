@@ -53,7 +53,7 @@ export const GameCard: React.FC<GameCardProps> = ({
         <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 pt-1">
           <div className="flex items-center gap-1 font-bold text-amber-500">
             <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-            <span>{game.ratingAvg > 0 ? game.ratingAvg : '4.9'}</span>
+            <span>{game.ratingsCount > 0 ? game.ratingAvg.toFixed(1) : 'Sin calificación'}</span>
           </div>
 
           <button
