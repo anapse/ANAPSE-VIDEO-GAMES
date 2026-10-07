@@ -59,6 +59,15 @@ service cloud.firestore {
          request.resource.data.uniqueVisitors == resource.data.uniqueVisitors + 1);
     }
 
+    match /analytics/visitors/{visitorId} {
+      allow read: if true;
+      allow create: if request.resource.data.firstSeenAt is string &&
+        request.resource.data.lastSeenAt is string;
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['firstSeenAt', 'lastSeenAt']) &&
+        request.resource.data.firstSeenAt == resource.data.firstSeenAt &&
+        request.resource.data.lastSeenAt is string;
+    }
+
     match /analytics/sources/{sourceId} {
       allow read: if true;
       allow create: if request.resource.data.visits == 1 &&
