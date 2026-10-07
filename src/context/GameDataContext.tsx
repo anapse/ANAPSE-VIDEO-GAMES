@@ -498,7 +498,6 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     let cancelled = false;
     const loadPlatformAnalytics = async () => {
       try {
-        const today = new Date().toISOString().slice(0, 10);
         const dates = Array.from({ length: 14 }, (_, index) => {
           const date = new Date();
           date.setUTCDate(date.getUTCDate() - (13 - index));
@@ -536,8 +535,6 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
         setPlatformDailyVisits(daily);
         setPlatformSources(sources);
-        setPlatformVisits((current) => current);
-        void today;
       } catch (error) {
         console.warn('No se pudo cargar la analítica de plataforma:', error);
       }
@@ -890,6 +887,10 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const uniqueDateKey = 'anapse_unique_visit_date_v2';
     const isUniqueToday = localStorage.getItem(uniqueDateKey) !== today;
 
+    const visitorDocRef = doc(db, 'analytics', 'visitors', visitorId);
+    const visitorSnapshot = await getDoc(visitorDocRef);
+    const isNewVisitor = !visitorSnapshot.exists();
+
     const params = new URLSearchParams(window.location.search);
     let referrerHost = '';
     try {
@@ -910,7 +911,7 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           doc(db, 'analytics', 'platform'),
           {
             totalVisits: increment(1),
-            totalUniqueVisitors: increment(isUniqueToday ? 1 : 0),
+            totalUniqueVisitors: increment(isNewVisitor ? 1 : 0),
             updatedAt: timestamp,
           },
           { merge: true }
@@ -922,6 +923,14 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             visits: increment(1),
             uniqueVisitors: increment(isUniqueToday ? 1 : 0),
             updatedAt: timestamp,
+          },
+          { merge: true }
+        ),
+        setDoc(
+          visitorDocRef,
+          {
+            firstSeenAt: visitorSnapshot.exists() ? visitorSnapshot.data().firstSeenAt || timestamp : timestamp,
+            lastSeenAt: timestamp,
           },
           { merge: true }
         ),
@@ -942,7 +951,7 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       sessionStorage.setItem(sessionKey, '1');
       if (isUniqueToday) localStorage.setItem(uniqueDateKey, today);
       setPlatformVisits((prev) => prev + 1);
-      if (isUniqueToday) setPlatformUniqueVisitors((prev) => prev + 1);
+      if (isNewVisitor) setPlatformUniqueVisitors((prev) => prev + 1);
     } catch (error) {
       console.warn('No se pudo registrar la visita de plataforma:', error);
     }
