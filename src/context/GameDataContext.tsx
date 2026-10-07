@@ -894,7 +894,7 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const params = new URLSearchParams(window.location.search);
     let referrerHost = '';
     try {
-      referrerHost = document.referrer ? new URL(document.referrer).hostname.replace(/^www\\./, '') : '';
+      referrerHost = document.referrer ? new URL(document.referrer).hostname.replace(/^www\./, '') : '';
     } catch {
       referrerHost = '';
     }
