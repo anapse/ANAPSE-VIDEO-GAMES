@@ -1192,15 +1192,16 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         : {}),
     };
 
-    setTools((prev) => {
-      const item = { id: toolId, ...payload };
-      return prev.some((tool) => tool.id === toolId)
-        ? prev.map((tool) => (tool.id === toolId ? item : tool))
-        : [...prev, item];
-    });
-
+    // Persist first. The realtime listener will refresh the local list after
+    // Firestore confirms the write, so a rejected write cannot look successful.
     try {
       await setDoc(doc(db, 'tools', toolId), payload);
+      setTools((prev) => {
+        const item = { id: toolId, ...payload };
+        return prev.some((tool) => tool.id === toolId)
+          ? prev.map((tool) => (tool.id === toolId ? item : tool))
+          : [...prev, item];
+      });
     } catch (err) {
       handleFirestoreError(err, OperationType.WRITE, 'tools/' + toolId);
       throw err;
