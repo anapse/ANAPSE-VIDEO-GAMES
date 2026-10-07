@@ -4,6 +4,7 @@ import {
   doc,
   onSnapshot,
   getDocs,
+  getDoc,
   setDoc,
   updateDoc,
   deleteDoc,
@@ -29,6 +30,7 @@ import {
   ModerationLog,
   ToolItem,
   ToolMetrics,
+  AnalyticsSource,
 } from '../types';
 
 export const DEFAULT_SUPPORT_SETTINGS: SupportSettings = {
@@ -168,6 +170,9 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [scores, setScores] = useState<Score[]>([]);
   const [userCommentLikes, setUserCommentLikes] = useState<Record<string, boolean>>({});
   const [platformVisits, setPlatformVisits] = useState<number>(0);
+  const [platformUniqueVisitors, setPlatformUniqueVisitors] = useState<number>(0);
+  const [platformDailyVisits, setPlatformDailyVisits] = useState<GlobalAnalytics['dailyVisits']>([]);
+  const [platformSources, setPlatformSources] = useState<AnalyticsSource[]>([]);
 
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [activeGameModal, setActiveGameModal] = useState<Game | null>(null);
@@ -480,6 +485,69 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       console.warn('Realtime listeners fallback to local state:', e);
     }
   }, [activeGameModal]);
+
+  // Load the real platform traffic history for the admin dashboard.
+  useEffect(() => {
+    const isAdminUser =
+      profile?.role === 'ADMINISTRADOR' ||
+      currentUser?.email === 'elherreroanapse@gmail.com' ||
+      currentUser?.email === 'anapse_video@hotmail.com';
+
+    if (!isAdminUser) return;
+
+    let cancelled = false;
+    const loadPlatformAnalytics = async () => {
+      try {
+        const today = new Date().toISOString().slice(0, 10);
+        const dates = Array.from({ length: 14 }, (_, index) => {
+          const date = new Date();
+          date.setUTCDate(date.getUTCDate() - (13 - index));
+          return date.toISOString().slice(0, 10);
+        });
+
+        const [dailySnapshots, sourcesSnapshot] = await Promise.all([
+          Promise.all(dates.map((date) => getDoc(doc(db, 'analytics', 'daily', date)))),
+          getDocs(collection(db, 'analytics', 'sources')),
+        ]);
+
+        if (cancelled) return;
+
+        const daily = dailySnapshots.map((snapshot, index) => {
+          const data = snapshot.exists() ? snapshot.data() : {};
+          return {
+            date: dates[index],
+            visits: Number(data.visits || 0),
+            uniqueVisitors: Number(data.uniqueVisitors || 0),
+            plays: 0,
+          };
+        });
+
+        const sources = sourcesSnapshot.docs
+          .map((snapshot) => snapshot.data() as Partial<AnalyticsSource>)
+          .map((data) => ({
+            source: String(data.source || 'direct'),
+            medium: String(data.medium || 'direct'),
+            campaign: data.campaign ? String(data.campaign) : undefined,
+            visits: Number(data.visits || 0),
+            uniqueVisitors: Number(data.uniqueVisitors || 0),
+          }))
+          .sort((a, b) => b.visits - a.visits)
+          .slice(0, 8);
+
+        setPlatformDailyVisits(daily);
+        setPlatformSources(sources);
+        setPlatformVisits((current) => current);
+        void today;
+      } catch (error) {
+        console.warn('No se pudo cargar la analítica de plataforma:', error);
+      }
+    };
+
+    void loadPlatformAnalytics();
+    return () => {
+      cancelled = true;
+    };
+  }, [profile?.role, currentUser?.email]);
 
   // Load metrics for tools from their configured Firestore database.
   // Only administrators request external tool metrics.
@@ -803,18 +871,82 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setUserFollows({ ...userFollows, [gameId]: !isFollowed });
   };
 
-  const recordPlatformVisit = async () => {
-    setPlatformVisits((prev) => prev + 1);
-    try {
-      await setDoc(
-        doc(db, 'analytics', 'platform'),
-        { totalVisits: increment(1), updatedAt: new Date().toISOString() },
-        { merge: true }
-      );
-    } catch (err) {
-      // Keep the local dashboard responsive if Firestore is temporarily unavailable.
+  const recordPlatformVisit = useCallback(async () => {
+    if (typeof window === 'undefined') return;
+
+    const sessionKey = 'anapse_platform_visit_recorded_v2';
+    if (sessionStorage.getItem(sessionKey) === '1') return;
+
+    const visitorKey = 'anapse_visitor_id_v2';
+    let visitorId = localStorage.getItem(visitorKey);
+    if (!visitorId) {
+      visitorId = typeof crypto !== 'undefined' && 'randomUUID' in crypto
+        ? crypto.randomUUID()
+        : 'visitor-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+      localStorage.setItem(visitorKey, visitorId);
     }
-  };
+
+    const today = new Date().toISOString().slice(0, 10);
+    const uniqueDateKey = 'anapse_unique_visit_date_v2';
+    const isUniqueToday = localStorage.getItem(uniqueDateKey) !== today;
+
+    const params = new URLSearchParams(window.location.search);
+    let referrerHost = '';
+    try {
+      referrerHost = document.referrer ? new URL(document.referrer).hostname.replace(/^www\\./, '') : '';
+    } catch {
+      referrerHost = '';
+    }
+
+    const source = (params.get('utm_source') || referrerHost || 'direct').trim().toLowerCase().slice(0, 80);
+    const medium = (params.get('utm_medium') || (referrerHost ? 'referral' : 'direct')).trim().toLowerCase().slice(0, 40);
+    const campaign = (params.get('utm_campaign') || '').trim().toLowerCase().slice(0, 100);
+    const sourceId = (source + '__' + medium).replace(/[^a-z0-9_-]/g, '_').slice(0, 140);
+    const timestamp = new Date().toISOString();
+
+    try {
+      await Promise.all([
+        setDoc(
+          doc(db, 'analytics', 'platform'),
+          {
+            totalVisits: increment(1),
+            totalUniqueVisitors: increment(isUniqueToday ? 1 : 0),
+            updatedAt: timestamp,
+          },
+          { merge: true }
+        ),
+        setDoc(
+          doc(db, 'analytics', 'daily', today),
+          {
+            date: today,
+            visits: increment(1),
+            uniqueVisitors: increment(isUniqueToday ? 1 : 0),
+            updatedAt: timestamp,
+          },
+          { merge: true }
+        ),
+        setDoc(
+          doc(db, 'analytics', 'sources', sourceId),
+          {
+            source,
+            medium,
+            campaign: campaign || null,
+            visits: increment(1),
+            uniqueVisitors: increment(isUniqueToday ? 1 : 0),
+            updatedAt: timestamp,
+          },
+          { merge: true }
+        ),
+      ]);
+
+      sessionStorage.setItem(sessionKey, '1');
+      if (isUniqueToday) localStorage.setItem(uniqueDateKey, today);
+      setPlatformVisits((prev) => prev + 1);
+      if (isUniqueToday) setPlatformUniqueVisitors((prev) => prev + 1);
+    } catch (error) {
+      console.warn('No se pudo registrar la visita de plataforma:', error);
+    }
+  }, []);
 
   const recordGameView = async (gameId: string) => {
     setGames((prev) =>
@@ -1339,21 +1471,25 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const globalAnalytics: GlobalAnalytics = {
     totalVisits: platformVisits,
+    totalUniqueVisitors: platformUniqueVisitors,
+    todayVisits: platformDailyVisits[platformDailyVisits.length - 1]?.visits || 0,
+    todayUniqueVisitors: platformDailyVisits[platformDailyVisits.length - 1]?.uniqueVisitors || 0,
     totalPlays: games.reduce((acc, g) => acc + (g.playsCount || 0), 0),
     totalUsers: usersCount,
     totalLikes: games.reduce((acc, g) => acc + (g.likesCount || 0), 0),
     totalDonations: donations.reduce((acc, d) => acc + d.amount, 0),
     totalProposals: proposals.length,
     topGamesByPlays: [...games].sort((a, b) => b.playsCount - a.playsCount).slice(0, 5).map((g) => ({ name: g.name, count: g.playsCount })),
-    dailyVisits: [
+    dailyVisits: platformDailyVisits.length > 0 ? platformDailyVisits : [
       { date: 'Lun', visits: Math.floor(games.reduce((acc, g) => acc + (g.viewsCount || 0), 0) * 0.1), plays: Math.floor(games.reduce((acc, g) => acc + (g.playsCount || 0), 0) * 0.1) },
       { date: 'Mar', visits: Math.floor(games.reduce((acc, g) => acc + (g.viewsCount || 0), 0) * 0.12), plays: Math.floor(games.reduce((acc, g) => acc + (g.playsCount || 0), 0) * 0.12) },
       { date: 'Mié', visits: Math.floor(games.reduce((acc, g) => acc + (g.viewsCount || 0), 0) * 0.14), plays: Math.floor(games.reduce((acc, g) => acc + (g.playsCount || 0), 0) * 0.14) },
       { date: 'Jue', visits: Math.floor(games.reduce((acc, g) => acc + (g.viewsCount || 0), 0) * 0.15), plays: Math.floor(games.reduce((acc, g) => acc + (g.playsCount || 0), 0) * 0.15) },
       { date: 'Vie', visits: Math.floor(games.reduce((acc, g) => acc + (g.viewsCount || 0), 0) * 0.18), plays: Math.floor(games.reduce((acc, g) => acc + (g.playsCount || 0), 0) * 0.18) },
       { date: 'Sáb', visits: Math.floor(games.reduce((acc, g) => acc + (g.viewsCount || 0), 0) * 0.2), plays: Math.floor(games.reduce((acc, g) => acc + (g.playsCount || 0), 0) * 0.2) },
-      { date: 'Dom', visits: Math.floor(games.reduce((acc, g) => acc + (g.viewsCount || 0), 0) * 0.11), plays: Math.floor(games.reduce((acc, g) => acc + (g.playsCount || 0), 0) * 0.11) },
+      { date: 'Dom', visits: 0, uniqueVisitors: 0, plays: 0 },
     ],
+    topSources: platformSources,
   };
 
   return (
