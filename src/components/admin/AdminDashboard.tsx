@@ -46,6 +46,11 @@ import {
   Minimize2,
   ZoomIn,
   ZoomOut,
+  ChevronDown,
+  UsersRound,
+  MousePointerClick,
+  Globe2,
+  Link2,
 } from 'lucide-react';
 import { useGameData } from '../../context/GameDataContext';
 import { useAuth } from '../../context/AuthContext';
@@ -100,6 +105,8 @@ export const AdminDashboard: React.FC = () => {
   const [newCatName, setNewCatName] = useState('');
   const [newMascotMessage, setNewMascotMessage] = useState('');
   const [editingTool, setEditingTool] = useState<ToolItem | null>(null);
+  const [isToolFormOpen, setIsToolFormOpen] = useState(false);
+  const [openNavGroup, setOpenNavGroup] = useState('general');
   const [toolForm, setToolForm] = useState({
     name: '',
     description: '',
@@ -173,6 +180,13 @@ export const AdminDashboard: React.FC = () => {
 
   const navItems = isAdmin ? adminNavItems : moderatorNavItems;
 
+  const adminNavGroups = [
+    { id: 'general', label: 'General', icon: '📊', items: [adminNavItems.find((item) => item.id === 'resumen')!, adminNavItems.find((item) => item.id === 'analitica')!] },
+    { id: 'contenido', label: 'Contenido', icon: '🎮', items: [adminNavItems.find((item) => item.id === 'juegos')!, adminNavItems.find((item) => item.id === 'categorias')!, adminNavItems.find((item) => item.id === 'herramientas')!, adminNavItems.find((item) => item.id === 'anuncios')!] },
+    { id: 'comunidad', label: 'Comunidad', icon: '👥', items: [adminNavItems.find((item) => item.id === 'usuarios')!, adminNavItems.find((item) => item.id === 'propuestas')!, adminNavItems.find((item) => item.id === 'encuestas')!, adminNavItems.find((item) => item.id === 'comentarios')!, adminNavItems.find((item) => item.id === 'reportes')!, adminNavItems.find((item) => item.id === 'apoyos')!] },
+    { id: 'sistema', label: 'Sistema', icon: '⚙️', items: [adminNavItems.find((item) => item.id === 'rankings')!, adminNavItems.find((item) => item.id === 'repos')!, adminNavItems.find((item) => item.id === 'firebase')!, adminNavItems.find((item) => item.id === 'recursos')!, adminNavItems.find((item) => item.id === 'logs')!, adminNavItems.find((item) => item.id === 'config')!] },
+  ];
+
   // Filtered comments
   const filteredComments = useMemo(() => {
     return comments.filter((c) => {
@@ -238,6 +252,7 @@ export const AdminDashboard: React.FC = () => {
 
   const resetToolForm = () => {
     setEditingTool(null);
+    setIsToolFormOpen(true);
     setToolForm({
       name: '',
       description: '',
@@ -247,6 +262,12 @@ export const AdminDashboard: React.FC = () => {
       metricsDatabaseId: '',
       metricsCollection: '',
     });
+  };
+
+  const closeToolForm = () => {
+    setEditingTool(null);
+    setIsToolFormOpen(false);
+    setToolForm({ name: '', description: '', url: '', imageUrl: '', visible: true, metricsDatabaseId: '', metricsCollection: '' });
   };
 
   const handleSaveTool = async (e: React.FormEvent) => {
@@ -272,7 +293,7 @@ export const AdminDashboard: React.FC = () => {
             : undefined,
       });
       showNotification(editingTool ? 'Herramienta actualizada correctamente' : 'Herramienta creada correctamente');
-      resetToolForm();
+      closeToolForm();
     } catch {
       showNotification('No se pudo guardar la herramienta', 'error');
     }
@@ -280,6 +301,7 @@ export const AdminDashboard: React.FC = () => {
 
   const handleEditTool = (tool: ToolItem) => {
     setEditingTool(tool);
+    setIsToolFormOpen(true);
     setToolForm({
       name: tool.name,
       description: tool.description,
@@ -341,6 +363,9 @@ export const AdminDashboard: React.FC = () => {
       showNotification('Error al procesar el reporte', 'error');
     }
   };
+
+  const analyticsMaxVisits = Math.max(...globalAnalytics.dailyVisits.map((day) => day.visits), 1);
+  const analyticsDays = globalAnalytics.dailyVisits.filter((day) => day.visits > 0 || day.uniqueVisitors > 0);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 animate-in fade-in">
@@ -406,85 +431,26 @@ export const AdminDashboard: React.FC = () => {
         )}
       </div>
 
-      {/* Main Tabs Navigation (3 rows in desktop via CSS Grid, compact buttons) */}
-      <div className={`grid gap-2 border-b border-slate-800 pb-4 ${
-        isAdmin
-          ? 'grid-cols-3 sm:grid-cols-4 md:grid-cols-6'
-          : 'grid-cols-2 sm:grid-cols-4'
-      }`}>
-        {navItems.map((item) => {
-          const isActive = activeTab === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`p-2 sm:p-2.5 rounded-2xl flex flex-col items-center justify-center text-center transition-all relative border ${
-                isActive
-                  ? 'bg-cyan-500 text-slate-950 border-cyan-400 font-black shadow-lg shadow-cyan-500/25 scale-[1.02]'
-                  : 'bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border-slate-800 hover:border-slate-700'
-              }`}
-            >
-              <span className="text-base sm:text-lg leading-none mb-1">{item.icon}</span>
-              <span className="text-[11px] sm:text-xs font-bold tracking-tight line-clamp-1 truncate w-full">
-                {item.label}
-              </span>
-              {item.count !== undefined && (
-                <span
-                  className={`mt-1 text-[10px] font-black px-1.5 py-0.2 rounded-full ${
-                    isActive
-                      ? 'bg-slate-950/40 text-slate-950 font-black'
-                      : item.alert
-                      ? 'bg-amber-500 text-slate-950 font-black animate-pulse'
-                      : 'bg-slate-800 text-slate-400'
-                  }`}
-                >
-                  {item.count}
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
+      {/* Navegación agrupada */}
+      {isAdmin ? (
+        <div className="rounded-3xl bg-slate-950/80 border border-slate-800 p-2 shadow-xl">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+            {adminNavGroups.map((group) => {
+              const isOpen = openNavGroup === group.id;
+              const hasActive = group.items.some((item) => activeTab === item.id);
+              return <button key={group.id} type="button" onClick={() => setOpenNavGroup(isOpen ? '' : group.id)} className={`flex items-center justify-between gap-3 rounded-2xl px-4 py-3 border transition-all ${isOpen || hasActive ? 'bg-cyan-500/10 border-cyan-500/40 text-white' : 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white'}`}><span className="flex items-center gap-2.5 min-w-0"><span className="text-lg">{group.icon}</span><span className="text-xs font-black uppercase tracking-wider truncate">{group.label}</span></span><ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180 text-cyan-400' : 'text-slate-500'}`} /></button>;
+            })}
+          </div>
+          {openNavGroup && <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 border-t border-slate-800 pt-2">{adminNavGroups.find((group) => group.id === openNavGroup)?.items.map((item) => { const isActive = activeTab === item.id; return <button key={item.id} type="button" onClick={() => setActiveTab(item.id)} className={`min-h-[64px] rounded-2xl px-2 py-2 flex flex-col items-center justify-center gap-1 border transition-all ${isActive ? 'bg-cyan-500 text-slate-950 border-cyan-400 shadow-lg shadow-cyan-500/20' : 'bg-slate-900 text-slate-300 border-slate-800 hover:border-slate-700 hover:bg-slate-800 hover:text-white'}`}><span className="text-base leading-none">{item.icon}</span><span className="text-[10px] font-black uppercase tracking-tight truncate max-w-full">{item.label}</span>{item.count !== undefined && <span className={`text-[9px] font-black px-1.5 rounded-full ${isActive ? 'bg-slate-950/20' : item.alert ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-400'}`}>{item.count}</span>}</button>; })}</div>}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 rounded-3xl bg-slate-950/80 border border-slate-800 p-2">{navItems.map((item) => { const isActive = activeTab === item.id; return <button key={item.id} onClick={() => setActiveTab(item.id)} className={`min-h-[64px] p-2 rounded-2xl flex flex-col items-center justify-center text-center border transition-all ${isActive ? 'bg-emerald-500 text-slate-950 border-emerald-400 shadow-lg' : 'bg-slate-900 text-slate-300 border-slate-800 hover:bg-slate-800 hover:text-white'}`}><span className="text-base leading-none mb-1">{item.icon}</span><span className="text-[10px] font-black uppercase tracking-tight truncate w-full">{item.label}</span>{item.count !== undefined && <span className="mt-1 text-[9px] font-black px-1.5 rounded-full bg-slate-800 text-slate-400">{item.count}</span>}</button>; })}</div>
+      )}
 
       {/* 📊 RESUMEN (Admin only) */}
       {isAdmin && activeTab === 'resumen' && (
         <div className="space-y-6">
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-            <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-1">
-              <span className="text-xs font-bold text-slate-400 uppercase">Visitas</span>
-              <p className="text-2xl sm:text-3xl font-black text-violet-400 font-['Orbitron']">
-                {globalAnalytics.totalVisits.toLocaleString()}
-              </p>
-            </div>
-
-            <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-1">
-              <span className="text-xs font-bold text-slate-400 uppercase">Partidas Jugadas</span>
-              <p className="text-2xl sm:text-3xl font-black text-cyan-400 font-['Orbitron']">
-                {globalAnalytics.totalPlays.toLocaleString()}
-              </p>
-            </div>
-
-            <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-1">
-              <span className="text-xs font-bold text-slate-400 uppercase">Juegos Activos</span>
-              <p className="text-2xl sm:text-3xl font-black text-amber-400 font-['Orbitron']">
-                {games.length}
-              </p>
-            </div>
-
-            <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-1">
-              <span className="text-xs font-bold text-slate-400 uppercase">Denuncias Pendientes</span>
-              <p className="text-2xl sm:text-3xl font-black text-rose-400 font-['Orbitron']">
-                {pendingReportsCount}
-              </p>
-            </div>
-
-            <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-1">
-              <span className="text-xs font-bold text-slate-400 uppercase">Apoyos / Donaciones</span>
-              <p className="text-2xl sm:text-3xl font-black text-emerald-400 font-['Orbitron']">
-                S/ {globalAnalytics.totalDonations}
-              </p>
-            </div>
-          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3"><div className="p-5 rounded-3xl bg-gradient-to-br from-cyan-500/15 to-slate-900 border border-cyan-500/20"><UsersRound className="w-5 h-5 text-cyan-400 mb-3" /><span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Visitantes</span><p className="text-2xl sm:text-3xl font-black text-white font-['Orbitron'] mt-1">{globalAnalytics.totalUniqueVisitors.toLocaleString()}</p></div><div className="p-5 rounded-3xl bg-gradient-to-br from-violet-500/15 to-slate-900 border border-violet-500/20"><MousePointerClick className="w-5 h-5 text-violet-400 mb-3" /><span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Visitas</span><p className="text-2xl sm:text-3xl font-black text-white font-['Orbitron'] mt-1">{globalAnalytics.totalVisits.toLocaleString()}</p></div><div className="p-5 rounded-3xl bg-gradient-to-br from-emerald-500/15 to-slate-900 border border-emerald-500/20"><Globe2 className="w-5 h-5 text-emerald-400 mb-3" /><span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Hoy</span><p className="text-2xl sm:text-3xl font-black text-white font-['Orbitron'] mt-1">{globalAnalytics.todayUniqueVisitors.toLocaleString()}</p></div><div className="p-5 rounded-3xl bg-gradient-to-br from-amber-500/15 to-slate-900 border border-amber-500/20"><Gamepad2 className="w-5 h-5 text-amber-400 mb-3" /><span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Juegos activos</span><p className="text-2xl sm:text-3xl font-black text-white font-['Orbitron'] mt-1">{games.length}</p></div><div className="p-5 rounded-3xl bg-gradient-to-br from-rose-500/15 to-slate-900 border border-rose-500/20"><Flag className="w-5 h-5 text-rose-400 mb-3" /><span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Pendientes</span><p className="text-2xl sm:text-3xl font-black text-white font-['Orbitron'] mt-1">{pendingReportsCount}</p></div></div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
@@ -1195,26 +1161,21 @@ export const AdminDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* 📈 ANALÍTICA (Admin only) */}
+      {/* 📈 ANALÍTICA */}
       {isAdmin && activeTab === 'analitica' && (
-        <div className="space-y-6">
-          <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
-            <h3 className="text-base font-black text-white font-['Orbitron']">Tráfico Semanal del Portal</h3>
-            <div className="grid grid-cols-7 gap-2 pt-4">
-              {globalAnalytics.dailyVisits.map((d, i) => (
-                <div key={i} className="flex flex-col items-center gap-2">
-                  <div className="w-full h-32 bg-slate-950 rounded-2xl relative flex items-end p-1 border border-slate-800">
-                    <div
-                      className="w-full bg-gradient-to-t from-cyan-500 to-indigo-500 rounded-xl transition-all duration-500"
-                      style={{ height: `${(d.visits / 6000) * 100}%` }}
-                    />
-                  </div>
-                  <span className="text-xs font-bold text-slate-400">{d.date}</span>
-                  <span className="text-[10px] font-mono text-cyan-300">{d.visits}</span>
-                </div>
-              ))}
-            </div>
+        <div className="space-y-5">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3"><div><p className="text-[10px] font-black uppercase tracking-[0.22em] text-cyan-400">Analítica real del portal</p><h2 className="text-2xl font-black text-white font-['Orbitron']">¿De dónde está llegando la gente?</h2><p className="text-xs text-slate-400 mt-1">Visitantes, visitas y procedencia. Sin datos inventados.</p></div><div className="px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-[10px] text-slate-400">Últimos 14 días</div></div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="p-5 rounded-3xl bg-gradient-to-br from-cyan-500/15 to-slate-900 border border-cyan-500/20"><UsersRound className="w-5 h-5 text-cyan-400 mb-3" /><p className="text-[10px] font-black uppercase tracking-wider text-slate-400">Visitantes acumulados</p><p className="text-3xl font-black text-white font-['Orbitron'] mt-1">{globalAnalytics.totalUniqueVisitors.toLocaleString()}</p><p className="text-[10px] text-slate-500 mt-1">navegadores únicos detectados</p></div>
+            <div className="p-5 rounded-3xl bg-gradient-to-br from-violet-500/15 to-slate-900 border border-violet-500/20"><MousePointerClick className="w-5 h-5 text-violet-400 mb-3" /><p className="text-[10px] font-black uppercase tracking-wider text-slate-400">Visitas totales</p><p className="text-3xl font-black text-white font-['Orbitron'] mt-1">{globalAnalytics.totalVisits.toLocaleString()}</p><p className="text-[10px] text-slate-500 mt-1">una por sesión de navegador</p></div>
+            <div className="p-5 rounded-3xl bg-gradient-to-br from-emerald-500/15 to-slate-900 border border-emerald-500/20"><Globe2 className="w-5 h-5 text-emerald-400 mb-3" /><p className="text-[10px] font-black uppercase tracking-wider text-slate-400">Hoy</p><p className="text-3xl font-black text-white font-['Orbitron'] mt-1">{globalAnalytics.todayUniqueVisitors.toLocaleString()}</p><p className="text-[10px] text-slate-500 mt-1">visitantes únicos hoy</p></div>
+            <div className="p-5 rounded-3xl bg-gradient-to-br from-amber-500/15 to-slate-900 border border-amber-500/20"><Link2 className="w-5 h-5 text-amber-400 mb-3" /><p className="text-[10px] font-black uppercase tracking-wider text-slate-400">Visitas hoy</p><p className="text-3xl font-black text-white font-['Orbitron'] mt-1">{globalAnalytics.todayVisits.toLocaleString()}</p><p className="text-[10px] text-slate-500 mt-1">entradas registradas</p></div>
           </div>
+          <div className="grid grid-cols-1 xl:grid-cols-[1.65fr_1fr] gap-5">
+            <section className="p-5 sm:p-6 rounded-3xl bg-slate-900 border border-slate-800"><div className="flex items-center justify-between gap-3 mb-5"><div><h3 className="text-sm font-black text-white font-['Orbitron']">Visitas por día</h3><p className="text-[10px] text-slate-500 mt-1">Datos acumulados desde que se activa este sistema.</p></div><span className="text-[10px] font-black text-cyan-400">{analyticsDays.length} días con actividad</span></div><div className="h-64 flex items-end gap-2 sm:gap-3 border-b border-slate-800 pb-1">{globalAnalytics.dailyVisits.map((day) => { const height = Math.max((day.visits / analyticsMaxVisits) * 100, day.visits > 0 ? 5 : 1); return <div key={day.date} className="flex-1 h-full flex flex-col justify-end items-center gap-2 min-w-0"><span className="text-[9px] font-mono text-cyan-300">{day.visits || ''}</span><div className="w-full max-w-10 h-[78%] flex items-end"><div className="w-full rounded-t-xl bg-gradient-to-t from-cyan-600 to-cyan-300 shadow-lg shadow-cyan-500/10 transition-all" style={{ height: `${height}%` }} title={`${day.visits} visitas · ${day.uniqueVisitors} visitantes`} /></div><span className="text-[9px] font-bold text-slate-500 truncate max-w-full">{day.date.slice(5)}</span></div>; })}</div></section>
+            <section className="p-5 sm:p-6 rounded-3xl bg-slate-900 border border-slate-800"><div className="flex items-center justify-between mb-5"><div><h3 className="text-sm font-black text-white font-['Orbitron']">De dónde llegan</h3><p className="text-[10px] text-slate-500 mt-1">Fuentes y enlaces que generan entradas.</p></div><Link2 className="w-5 h-5 text-amber-400" /></div><div className="space-y-2.5">{globalAnalytics.topSources.length === 0 ? <div className="p-5 rounded-2xl bg-slate-950 border border-dashed border-slate-800 text-center"><p className="text-xs font-bold text-slate-400">Aún no hay fuentes registradas.</p><p className="text-[10px] text-slate-600 mt-1">Los próximos clics aparecerán aquí.</p></div> : globalAnalytics.topSources.map((source) => <div key={source.source + source.medium} className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-slate-950 border border-slate-800"><div className="min-w-0"><p className="text-xs font-black text-white truncate">{source.source}</p><p className="text-[10px] text-slate-500 truncate">{source.medium}{source.campaign ? ` · ${source.campaign}` : ''}</p></div><div className="text-right shrink-0"><p className="text-sm font-black text-cyan-300">{source.visits}</p><p className="text-[9px] text-slate-500">visitas · {source.uniqueVisitors} únicos</p></div></div>)}</div></section>
+          </div>
+          <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/15 text-[10px] text-slate-400"><span className="font-black text-amber-400">Nota:</span> “visitante” significa un navegador/dispositivo identificado de forma anónima mediante almacenamiento local; no es una identificación personal ni una persona garantizada.</div>
         </div>
       )}
 
@@ -1279,39 +1240,16 @@ export const AdminDashboard: React.FC = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h3 className="text-lg font-black text-white font-['Orbitron']">Herramientas del Portal ({tools.length})</h3>
-              <p className="text-xs text-slate-400">Las herramientas se publican y administran exclusivamente desde este panel.</p>
+              <p className="text-xs text-slate-400">Administra las herramientas sin saturar el panel. El formulario aparece solo cuando vas a crear o editar.</p>
             </div>
             <button onClick={resetToolForm} className="px-4 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs flex items-center gap-2">
               <Plus className="w-4 h-4" /> Nueva herramienta
             </button>
           </div>
 
-          <form onSubmit={handleSaveTool} className="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
-            <h4 className="text-sm font-black text-white font-['Orbitron']">{editingTool ? 'EDITAR HERRAMIENTA' : 'NUEVA HERRAMIENTA'}</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              <div><label className="block font-bold text-slate-300 mb-1">Nombre *</label><input value={toolForm.name} onChange={(e) => setToolForm((p) => ({ ...p, name: e.target.value }))} required className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white" /></div>
-              <div><label className="block font-bold text-slate-300 mb-1">URL *</label><input type="url" value={toolForm.url} onChange={(e) => setToolForm((p) => ({ ...p, url: e.target.value }))} required className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white" placeholder="https://..." /></div>
-              <div className="sm:col-span-2"><label className="block font-bold text-slate-300 mb-1">Descripción *</label><textarea rows={2} value={toolForm.description} onChange={(e) => setToolForm((p) => ({ ...p, description: e.target.value }))} required className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white resize-none" /></div>
-              <div className="sm:col-span-2"><label className="block font-bold text-slate-300 mb-1">Imagen (URL opcional)</label><input type="url" value={toolForm.imageUrl} onChange={(e) => setToolForm((p) => ({ ...p, imageUrl: e.target.value }))} className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white" placeholder="https://..." /></div>
-              <div className="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-slate-300 mb-1">Base de datos de métricas</label>
-                  <input value={toolForm.metricsDatabaseId} onChange={(e) => setToolForm((p) => ({ ...p, metricsDatabaseId: e.target.value }))} className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono" placeholder="ID de la base Firestore" />
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-300 mb-1">Colección de métricas</label>
-                  <input value={toolForm.metricsCollection} onChange={(e) => setToolForm((p) => ({ ...p, metricsCollection: e.target.value }))} className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono" placeholder="Ej: visits" />
-                </div>
-              </div>
-              <div className="flex items-center gap-4 pt-5">
-                <label className="flex items-center gap-2 text-slate-300 font-bold"><input type="checkbox" checked={toolForm.visible} onChange={(e) => setToolForm((p) => ({ ...p, visible: e.target.checked }))} /> Visible</label>
-              </div>
-            </div>
-            <div className="flex justify-end gap-2">
-              {editingTool && <button type="button" onClick={resetToolForm} className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs">Cancelar</button>}
-              <button type="submit" className="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs">{editingTool ? 'Guardar cambios' : 'Publicar herramienta'}</button>
-            </div>
-          </form>
+          {isToolFormOpen && (
+            <div className="p-5 rounded-3xl bg-slate-900 border border-cyan-500/20 shadow-xl shadow-cyan-950/20 space-y-4"><div className="flex items-center justify-between gap-3"><div><h4 className="text-sm font-black text-white font-['Orbitron']">{editingTool ? 'EDITAR HERRAMIENTA' : 'NUEVA HERRAMIENTA'}</h4><p className="text-[10px] text-slate-500 mt-1">Configura lo necesario y publica cuando esté lista.</p></div><button type="button" onClick={closeToolForm} className="p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white"><X className="w-4 h-4" /></button></div><form onSubmit={handleSaveTool} className="space-y-4"><div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs"><div><label className="block font-bold text-slate-300 mb-1">Nombre *</label><input value={toolForm.name} onChange={(e) => setToolForm((p) => ({ ...p, name: e.target.value }))} required className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white" /></div><div><label className="block font-bold text-slate-300 mb-1">URL de la herramienta *</label><input type="url" value={toolForm.url} onChange={(e) => setToolForm((p) => ({ ...p, url: e.target.value }))} required className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white" placeholder="https://..." /></div><div className="sm:col-span-2"><label className="block font-bold text-slate-300 mb-1">Descripción *</label><textarea rows={2} value={toolForm.description} onChange={(e) => setToolForm((p) => ({ ...p, description: e.target.value }))} required className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white resize-none" /></div><div className="sm:col-span-2"><label className="block font-bold text-slate-300 mb-1">Imagen (URL opcional)</label><input type="url" value={toolForm.imageUrl} onChange={(e) => setToolForm((p) => ({ ...p, imageUrl: e.target.value }))} className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white" placeholder="https://..." /></div><details className="sm:col-span-2 rounded-2xl bg-slate-950 border border-slate-800 p-3 group"><summary className="cursor-pointer list-none flex items-center justify-between text-[11px] font-black text-slate-300"><span>Configuración avanzada de métricas</span><ChevronDown className="w-4 h-4 text-slate-500 group-open:rotate-180 transition-transform" /></summary><div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3"><div><label className="block font-bold text-slate-400 mb-1">Base de datos de métricas</label><input value={toolForm.metricsDatabaseId} onChange={(e) => setToolForm((p) => ({ ...p, metricsDatabaseId: e.target.value }))} className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white font-mono" placeholder="ID de Firebase/Firestore" /></div><div><label className="block font-bold text-slate-400 mb-1">Colección de métricas</label><input value={toolForm.metricsCollection} onChange={(e) => setToolForm((p) => ({ ...p, metricsCollection: e.target.value }))} className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white font-mono" placeholder="Ej: visits" /></div></div></details><div className="flex items-center gap-4 pt-2"><label className="flex items-center gap-2 text-slate-300 font-bold"><input type="checkbox" checked={toolForm.visible} onChange={(e) => setToolForm((p) => ({ ...p, visible: e.target.checked }))} /> Visible</label></div></div><div className="flex justify-end gap-2 pt-2 border-t border-slate-800"><button type="button" onClick={closeToolForm} className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs">Cancelar</button><button type="submit" className="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs">{editingTool ? 'Guardar cambios' : 'Publicar herramienta'}</button></div></form></div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {tools.length === 0 ? <div className="md:col-span-2 p-10 text-center rounded-3xl bg-slate-900 border border-slate-800 text-sm text-slate-500 font-bold">No hay herramientas registradas. Crea la primera desde este panel.</div> :
