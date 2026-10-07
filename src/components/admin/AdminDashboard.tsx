@@ -929,7 +929,7 @@ export const AdminDashboard: React.FC = () => {
             <div>
               <h3 className="text-lg font-black text-white font-['Orbitron'] flex items-center gap-2">
                 <Users className="w-5 h-5 text-cyan-400" />
-                <span>{isAdmin ? 'Gestión de Usuarios y Roles' : 'Directorio de Jugadores de la Comunidad'} ({users.length})</span>
+                <span>{isAdmin ? 'Gestión de Usuarios y Roles' : 'Directorio de Usos de la Comunidad'} ({users.length})</span>
               </h3>
               <p className="text-xs text-slate-400">
                 {isAdmin
@@ -1262,9 +1262,6 @@ export const AdminDashboard: React.FC = () => {
                   <p className="text-xs text-slate-400 mt-3 line-clamp-2">{tool.description}</p>
                   {tool.metrics && (
                     <>
-                      <div className="mt-2 p-2 rounded-xl bg-slate-950 border border-slate-800 text-[10px] font-mono text-slate-400">
-                        <span className="text-cyan-400">Fuente:</span> {tool.metrics.databaseId} · {tool.metrics.collection}
-                      </div>
                       {toolMetrics[tool.id]?.loading ? (
                         <div className="mt-2 p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-400">
                           Cargando métricas...
@@ -1297,8 +1294,7 @@ export const AdminDashboard: React.FC = () => {
                       )}
                     </>
                   )}
-                  <div className="flex items-center justify-between mt-4">
-                    <span className="text-[10px] text-slate-500 truncate max-w-[55%]">{tool.url}</span>
+                  <div className="flex items-center justify-end mt-4">
                     <div className="flex gap-1.5">
                       <button onClick={() => handleEditTool(tool)} className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-400" title="Editar"><Edit2 className="w-3.5 h-3.5" /></button>
                       <button onClick={() => { if (confirm('¿Eliminar ' + tool.name + '?')) { void deleteTool(tool.id); showNotification('Herramienta eliminada'); } }} className="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400" title="Eliminar"><Trash2 className="w-3.5 h-3.5" /></button>
