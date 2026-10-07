@@ -261,15 +261,27 @@ export interface Announcement {
   createdAt: string;
 }
 
+export interface AnalyticsSource {
+  source: string;
+  medium: string;
+  campaign?: string;
+  visits: number;
+  uniqueVisitors: number;
+}
+
 export interface GlobalAnalytics {
   totalVisits: number;
+  totalUniqueVisitors: number;
+  todayVisits: number;
+  todayUniqueVisitors: number;
   totalPlays: number;
   totalUsers: number;
   totalLikes: number;
   totalDonations: number;
   totalProposals: number;
   topGamesByPlays: { name: string; count: number }[];
-  dailyVisits: { date: string; visits: number; plays: number }[];
+  dailyVisits: { date: string; visits: number; uniqueVisitors: number; plays: number }[];
+  topSources: AnalyticsSource[];
 }
 
 export interface MascotConfig {
