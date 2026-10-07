@@ -96,6 +96,21 @@ export interface Category {
   order: number;
 }
 
+export interface ToolItem {
+  id: string;
+  name: string;
+  description: string;
+  url: string;
+  icon?: string;
+  imageUrl?: string;
+  category?: string;
+  featured: boolean;
+  visible: boolean;
+  order: number;
+  createdAt: string;
+  updatedAt?: string;
+}
+
 export interface UserProfile {
   uid: string;
   displayName: string;
