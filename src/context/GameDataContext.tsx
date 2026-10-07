@@ -26,6 +26,7 @@ import {
   UserRole,
   Report,
   ModerationLog,
+  ToolItem,
 } from '../types';
 
 export const DEFAULT_SUPPORT_SETTINGS: SupportSettings = {
@@ -90,6 +91,7 @@ interface GameDataContextType {
   comments: Comment[];
   donations: Donation[];
   announcements: Announcement[];
+  tools: ToolItem[];
   selectedGame: Game | null;
   activeGameModal: Game | null;
   userLikes: Record<string, boolean>;
@@ -131,6 +133,8 @@ interface GameDataContextType {
   addDonation: (donationData: { gameId: string; gameName: string; amount: number; message?: string; isPublic: boolean; paymentMethod: string }) => Promise<void>;
   addCategory: (category: Category) => Promise<void>;
   deleteCategory: (categoryId: string) => Promise<void>;
+  addOrUpdateTool: (toolData: Omit<ToolItem, 'id' | 'createdAt'> & { id?: string }) => Promise<void>;
+  deleteTool: (toolId: string) => Promise<void>;
   submitScore: (gameId: string, score: number, playerName?: string) => Promise<void>;
   scores: Score[];
   globalAnalytics: GlobalAnalytics;
@@ -152,6 +156,7 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [comments, setComments] = useState<Comment[]>([]);
   const [donations, setDonations] = useState<Donation[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [tools, setTools] = useState<ToolItem[]>([]);
   const [usersCount, setUsersCount] = useState<number>(0);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
@@ -367,6 +372,19 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }
       );
 
+      const unsubTools = onSnapshot(
+        collection(db, 'tools'),
+        (snapshot) => {
+          const remote = snapshot.docs
+            .map((d) => ({ id: d.id, ...d.data() } as ToolItem))
+            .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+          setTools(remote);
+        },
+        (error) => {
+          handleFirestoreError(error, OperationType.LIST, 'tools');
+        }
+      );
+
       const unsubAnnouncements = onSnapshot(
         collection(db, 'announcements'),
         (snapshot) => {
@@ -450,6 +468,7 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         unsubComments();
         unsubDonations();
         unsubAnnouncements();
+        unsubTools();
         unsubUsers();
         unsubScores();
         unsubSupportSettings();
@@ -1154,6 +1173,48 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
+  const addOrUpdateTool = async (toolData: Omit<ToolItem, 'id' | 'createdAt'> & { id?: string }) => {
+    const toolId = toolData.id?.trim() || 'tool-' + Date.now();
+    const now = new Date().toISOString();
+    const existing = tools.find((tool) => tool.id === toolId);
+    const payload: ToolItem = {
+      id: toolId,
+      name: toolData.name.trim(),
+      description: toolData.description.trim(),
+      url: toolData.url.trim(),
+      icon: toolData.icon?.trim() || '🛠️',
+      imageUrl: toolData.imageUrl?.trim() || '',
+      category: toolData.category?.trim() || 'General',
+      featured: toolData.featured ?? false,
+      visible: toolData.visible ?? true,
+      order: Number.isFinite(toolData.order) ? toolData.order : tools.length,
+      createdAt: existing?.createdAt || now,
+      updatedAt: now,
+    };
+    setTools((prev) => {
+      const next = prev.some((tool) => tool.id === toolId)
+        ? prev.map((tool) => (tool.id === toolId ? payload : tool))
+        : [...prev, payload];
+      return next.sort((a, b) => a.order - b.order);
+    });
+    try {
+      await setDoc(doc(db, 'tools', toolId), payload);
+    } catch (err) {
+      handleFirestoreError(err, OperationType.WRITE, 'tools/' + toolId);
+      throw err;
+    }
+  };
+
+  const deleteTool = async (toolId: string) => {
+    setTools((prev) => prev.filter((tool) => tool.id !== toolId));
+    try {
+      await deleteDoc(doc(db, 'tools', toolId));
+    } catch (err) {
+      handleFirestoreError(err, OperationType.DELETE, 'tools/' + toolId);
+      throw err;
+    }
+  };
+
   const deleteCategory = async (categoryId: string) => {
     setCategories((prev) => prev.filter((c) => c.id !== categoryId));
     try {
@@ -1212,6 +1273,7 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         comments,
         donations,
         announcements,
+        tools,
         selectedGame,
         activeGameModal,
         userLikes,
@@ -1252,6 +1314,8 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         addDonation,
         addCategory,
         deleteCategory,
+        addOrUpdateTool,
+        deleteTool,
         submitScore,
         scores,
         globalAnalytics,
