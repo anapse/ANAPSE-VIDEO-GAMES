@@ -11,6 +11,7 @@ import {
   Shield,
   ChevronRight,
   Menu,
+  Wrench,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useGameData } from '../context/GameDataContext';
@@ -44,6 +45,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'proposals', label: 'Proponer Juego', icon: Lightbulb, count: proposals.length },
     { id: 'community', label: 'Comunidad', icon: MessageSquare },
     { id: 'support', label: 'Apoyar ANAPSE', icon: Heart },
+  ];
+
+  const toolNavItems = [
+    { id: 'tools', label: 'Herramientas', icon: Wrench },
   ];
 
   const categories = [
@@ -136,6 +141,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   {item.count}
                 </span>
               )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Tools - separate row */}
+      <div className="w-full pt-3 mt-2 border-t border-slate-200/80 dark:border-slate-800/80">
+        {toolNavItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = currentTab === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={() => handleNav(item.id)}
+              title={collapsed ? item.label : undefined}
+              className={`w-full flex items-center rounded-2xl text-xs sm:text-sm font-semibold transition-all group relative ${collapsed ? 'justify-center p-2.5' : 'justify-between px-3 py-2 text-left'} ${isActive ? 'bg-amber-500 text-slate-950 font-bold shadow-xs' : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/80'}`}
+            >
+              <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-2.5'}`}>
+                <Icon className={`w-4 h-4 ${isActive ? 'text-slate-950' : 'text-slate-500 dark:text-slate-400'}`} />
+                {!collapsed && <span className="truncate">Herramientas</span>}
+              </div>
             </button>
           );
         })}
