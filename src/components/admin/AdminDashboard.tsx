@@ -82,6 +82,7 @@ export const AdminDashboard: React.FC = () => {
     supportSettings,
     updateSupportSettings,
     tools,
+    toolMetrics,
     addOrUpdateTool,
     deleteTool,
   } = useGameData();
@@ -1322,9 +1323,41 @@ export const AdminDashboard: React.FC = () => {
                   </div>
                   <p className="text-xs text-slate-400 mt-3 line-clamp-2">{tool.description}</p>
                   {tool.metrics && (
-                    <div className="mt-2 p-2 rounded-xl bg-slate-950 border border-slate-800 text-[10px] font-mono text-slate-400">
-                      <span className="text-cyan-400">Métricas:</span> {tool.metrics.databaseId} · {tool.metrics.collection}
-                    </div>
+                    <>
+                      <div className="mt-2 p-2 rounded-xl bg-slate-950 border border-slate-800 text-[10px] font-mono text-slate-400">
+                        <span className="text-cyan-400">Fuente:</span> {tool.metrics.databaseId} · {tool.metrics.collection}
+                      </div>
+                      {toolMetrics[tool.id]?.loading ? (
+                        <div className="mt-2 p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-400">
+                          Cargando métricas...
+                        </div>
+                      ) : toolMetrics[tool.id]?.error ? (
+                        <div className="mt-2 p-3 rounded-xl bg-rose-950/30 border border-rose-500/20 text-xs text-rose-300">
+                          No se pudieron cargar las métricas. Revisa los permisos de lectura de la base de datos de la herramienta.
+                        </div>
+                      ) : (
+                        <div className="mt-2 grid grid-cols-2 gap-2">
+                          <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
+                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400">
+                              <Eye className="w-3.5 h-3.5 text-cyan-400" />
+                              Visitas
+                            </div>
+                            <p className="mt-1 text-lg font-black text-white">
+                              {toolMetrics[tool.id]?.visits ?? 0}
+                            </p>
+                          </div>
+                          <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
+                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400">
+                              <Users className="w-3.5 h-3.5 text-amber-400" />
+                              Jugadores
+                            </div>
+                            <p className="mt-1 text-lg font-black text-white">
+                              {toolMetrics[tool.id]?.players ?? 0}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </>
                   )}
                   <div className="flex items-center justify-between mt-4">
                     <span className="text-[10px] text-slate-500 truncate max-w-[55%]">{tool.url}</span>
