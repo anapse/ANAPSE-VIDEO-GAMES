@@ -40,11 +40,8 @@ const MainAppContent: React.FC = () => {
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
-  // Count one website visit per browser session. Reloads in the same tab do not inflate the counter.
+  // Record the visit once per browser session. The analytics service owns the session guard.
   useEffect(() => {
-    const visitKey = 'anapse_platform_visit_recorded';
-    if (sessionStorage.getItem(visitKey) === '1') return;
-    sessionStorage.setItem(visitKey, '1');
     void recordPlatformVisit();
   }, [recordPlatformVisit]);
 
