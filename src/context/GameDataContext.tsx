@@ -133,7 +133,7 @@ interface GameDataContextType {
   addDonation: (donationData: { gameId: string; gameName: string; amount: number; message?: string; isPublic: boolean; paymentMethod: string }) => Promise<void>;
   addCategory: (category: Category) => Promise<void>;
   deleteCategory: (categoryId: string) => Promise<void>;
-  addOrUpdateTool: (toolData: Omit<ToolItem, 'id' | 'createdAt'> & { id?: string }) => Promise<void>;
+  addOrUpdateTool: (toolData: Omit<ToolItem, 'id'> & { id?: string }) => Promise<void>;
   deleteTool: (toolId: string) => Promise<void>;
   submitScore: (gameId: string, score: number, playerName?: string) => Promise<void>;
   scores: Score[];
@@ -375,9 +375,7 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const unsubTools = onSnapshot(
         collection(db, 'tools'),
         (snapshot) => {
-          const remote = snapshot.docs
-            .map((d) => ({ id: d.id, ...d.data() } as ToolItem))
-            .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+          const remote = snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as ToolItem));
           setTools(remote);
         },
         (error) => {
@@ -1173,30 +1171,23 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
-  const addOrUpdateTool = async (toolData: Omit<ToolItem, 'id' | 'createdAt'> & { id?: string }) => {
+  const addOrUpdateTool = async (toolData: Omit<ToolItem, 'id'> & { id?: string }) => {
     const toolId = toolData.id?.trim() || 'tool-' + Date.now();
-    const now = new Date().toISOString();
-    const existing = tools.find((tool) => tool.id === toolId);
-    const payload: ToolItem = {
-      id: toolId,
+    const payload: Omit<ToolItem, 'id'> = {
       name: toolData.name.trim(),
       description: toolData.description.trim(),
       url: toolData.url.trim(),
-      icon: toolData.icon?.trim() || '🛠️',
       imageUrl: toolData.imageUrl?.trim() || '',
-      category: toolData.category?.trim() || 'General',
-      featured: toolData.featured ?? false,
       visible: toolData.visible ?? true,
-      order: Number.isFinite(toolData.order) ? toolData.order : tools.length,
-      createdAt: existing?.createdAt || now,
-      updatedAt: now,
     };
+
     setTools((prev) => {
-      const next = prev.some((tool) => tool.id === toolId)
-        ? prev.map((tool) => (tool.id === toolId ? payload : tool))
-        : [...prev, payload];
-      return next.sort((a, b) => a.order - b.order);
+      const item = { id: toolId, ...payload };
+      return prev.some((tool) => tool.id === toolId)
+        ? prev.map((tool) => (tool.id === toolId ? item : tool))
+        : [...prev, item];
     });
+
     try {
       await setDoc(doc(db, 'tools', toolId), payload);
     } catch (err) {
