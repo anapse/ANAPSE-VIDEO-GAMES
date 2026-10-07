@@ -1256,7 +1256,6 @@ export const AdminDashboard: React.FC = () => {
               tools.map((tool) => (
                 <div key={tool.id} className="p-4 rounded-2xl bg-slate-900 border border-slate-800">
                   <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0"><span className="text-3xl">🛠️</span><div className="min-w-0"><p className="font-black text-white truncate">{tool.name}</p><p className="text-[10px] text-slate-500 font-mono truncate">{tool.id}</p></div></div>
                     <span className={tool.visible ? 'text-[10px] font-black px-2 py-1 rounded-lg bg-emerald-500/15 text-emerald-300' : 'text-[10px] font-black px-2 py-1 rounded-lg bg-slate-800 text-slate-500'}>{tool.visible ? 'PUBLICADA' : 'OCULTA'}</span>
                   </div>
                   <p className="text-xs text-slate-400 mt-3 line-clamp-2">{tool.description}</p>
