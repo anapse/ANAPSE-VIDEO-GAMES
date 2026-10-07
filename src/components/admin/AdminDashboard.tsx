@@ -105,6 +105,8 @@ export const AdminDashboard: React.FC = () => {
     url: '',
     imageUrl: '',
     visible: true,
+    metricsDatabaseId: '',
+    metricsCollection: '',
   });
 
   // Moderation filter and search states
@@ -241,6 +243,8 @@ export const AdminDashboard: React.FC = () => {
       url: '',
       imageUrl: '',
       visible: true,
+      metricsDatabaseId: '',
+      metricsCollection: '',
     });
   };
 
@@ -251,7 +255,21 @@ export const AdminDashboard: React.FC = () => {
       return;
     }
     try {
-      await addOrUpdateTool({ ...(editingTool ? { id: editingTool.id } : {}), ...toolForm });
+      await addOrUpdateTool({
+        ...(editingTool ? { id: editingTool.id } : {}),
+        name: toolForm.name,
+        description: toolForm.description,
+        url: toolForm.url,
+        imageUrl: toolForm.imageUrl,
+        visible: toolForm.visible,
+        metrics:
+          toolForm.metricsDatabaseId.trim() && toolForm.metricsCollection.trim()
+            ? {
+                databaseId: toolForm.metricsDatabaseId.trim(),
+                collection: toolForm.metricsCollection.trim(),
+              }
+            : undefined,
+      });
       showNotification(editingTool ? 'Herramienta actualizada correctamente' : 'Herramienta creada correctamente');
       resetToolForm();
     } catch {
@@ -267,6 +285,8 @@ export const AdminDashboard: React.FC = () => {
       url: tool.url,
       imageUrl: tool.imageUrl || '',
       visible: tool.visible,
+      metricsDatabaseId: tool.metrics?.databaseId || '',
+      metricsCollection: tool.metrics?.collection || '',
     });
   };
 
@@ -1272,6 +1292,16 @@ export const AdminDashboard: React.FC = () => {
               <div><label className="block font-bold text-slate-300 mb-1">URL *</label><input type="url" value={toolForm.url} onChange={(e) => setToolForm((p) => ({ ...p, url: e.target.value }))} required className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white" placeholder="https://..." /></div>
               <div className="sm:col-span-2"><label className="block font-bold text-slate-300 mb-1">Descripción *</label><textarea rows={2} value={toolForm.description} onChange={(e) => setToolForm((p) => ({ ...p, description: e.target.value }))} required className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white resize-none" /></div>
               <div className="sm:col-span-2"><label className="block font-bold text-slate-300 mb-1">Imagen (URL opcional)</label><input type="url" value={toolForm.imageUrl} onChange={(e) => setToolForm((p) => ({ ...p, imageUrl: e.target.value }))} className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white" placeholder="https://..." /></div>
+              <div className="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-300 mb-1">Base de datos de métricas</label>
+                  <input value={toolForm.metricsDatabaseId} onChange={(e) => setToolForm((p) => ({ ...p, metricsDatabaseId: e.target.value }))} className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono" placeholder="ID de la base Firestore" />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-300 mb-1">Colección de métricas</label>
+                  <input value={toolForm.metricsCollection} onChange={(e) => setToolForm((p) => ({ ...p, metricsCollection: e.target.value }))} className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono" placeholder="Ej: visits" />
+                </div>
+              </div>
               <div className="flex items-center gap-4 pt-5">
                 <label className="flex items-center gap-2 text-slate-300 font-bold"><input type="checkbox" checked={toolForm.visible} onChange={(e) => setToolForm((p) => ({ ...p, visible: e.target.checked }))} /> Visible</label>
               </div>
@@ -1291,6 +1321,11 @@ export const AdminDashboard: React.FC = () => {
                     <span className={tool.visible ? 'text-[10px] font-black px-2 py-1 rounded-lg bg-emerald-500/15 text-emerald-300' : 'text-[10px] font-black px-2 py-1 rounded-lg bg-slate-800 text-slate-500'}>{tool.visible ? 'PUBLICADA' : 'OCULTA'}</span>
                   </div>
                   <p className="text-xs text-slate-400 mt-3 line-clamp-2">{tool.description}</p>
+                  {tool.metrics && (
+                    <div className="mt-2 p-2 rounded-xl bg-slate-950 border border-slate-800 text-[10px] font-mono text-slate-400">
+                      <span className="text-cyan-400">Métricas:</span> {tool.metrics.databaseId} · {tool.metrics.collection}
+                    </div>
+                  )}
                   <div className="flex items-center justify-between mt-4">
                     <span className="text-[10px] text-slate-500 truncate max-w-[55%]">{tool.url}</span>
                     <div className="flex gap-1.5">
