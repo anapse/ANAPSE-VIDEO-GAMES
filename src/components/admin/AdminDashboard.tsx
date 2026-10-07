@@ -49,7 +49,7 @@ import {
 } from 'lucide-react';
 import { useGameData } from '../../context/GameDataContext';
 import { useAuth } from '../../context/AuthContext';
-import { Game, GameStatus, Proposal, Category, UserRole, MascotConfig, Report, ModerationLog } from '../../types';
+import { Game, GameStatus, Proposal, Category, UserRole, MascotConfig, Report, ModerationLog, ToolItem } from '../../types';
 import { GameEditorModal } from './GameEditorModal';
 import { SpecSyncViewer } from './SpecSyncViewer';
 import { UserBadge, isUserOnline } from '../UserBadge';
@@ -81,6 +81,9 @@ export const AdminDashboard: React.FC = () => {
     updateMascotConfig,
     supportSettings,
     updateSupportSettings,
+    tools,
+    addOrUpdateTool,
+    deleteTool,
   } = useGameData();
 
   const { profile, isAdmin, isModerator } = useAuth();
@@ -95,6 +98,18 @@ export const AdminDashboard: React.FC = () => {
   const [dashboardZoom, setDashboardZoom] = useState<number>(100);
   const [newCatName, setNewCatName] = useState('');
   const [newMascotMessage, setNewMascotMessage] = useState('');
+  const [editingTool, setEditingTool] = useState<ToolItem | null>(null);
+  const [toolForm, setToolForm] = useState({
+    name: '',
+    description: '',
+    url: '',
+    icon: '🛠️',
+    imageUrl: '',
+    category: 'General',
+    featured: false,
+    visible: true,
+    order: 0,
+  });
 
   // Moderation filter and search states
   const [commentSearch, setCommentSearch] = useState('');
@@ -145,6 +160,7 @@ export const AdminDashboard: React.FC = () => {
     { id: 'repos', label: 'Repositorios', icon: '🔗' },
     { id: 'firebase', label: 'Firebase', icon: '🔥' },
     { id: 'recursos', label: 'Recursos', icon: '🖼️' },
+    { id: 'herramientas', label: 'Herramientas', icon: '🛠️', count: tools.length },
     { id: 'anuncios', label: 'Anuncios', icon: '📢', count: announcements.length },
     { id: 'config', label: 'Configuración', icon: '⚙️' },
   ];
@@ -219,6 +235,51 @@ export const AdminDashboard: React.FC = () => {
     });
     setNewCatName('');
     showNotification('Categoría agregada correctamente');
+  };
+
+  const resetToolForm = () => {
+    setEditingTool(null);
+    setToolForm({
+      name: '',
+      description: '',
+      url: '',
+      icon: '🛠️',
+      imageUrl: '',
+      category: 'General',
+      featured: false,
+      visible: true,
+      order: tools.length,
+    });
+  };
+
+  const handleSaveTool = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!toolForm.name.trim() || !toolForm.description.trim() || !toolForm.url.trim()) {
+      showNotification('Completa nombre, descripción y URL', 'error');
+      return;
+    }
+    try {
+      await addOrUpdateTool({ ...(editingTool ? { id: editingTool.id } : {}), ...toolForm });
+      showNotification(editingTool ? 'Herramienta actualizada correctamente' : 'Herramienta creada correctamente');
+      resetToolForm();
+    } catch {
+      showNotification('No se pudo guardar la herramienta', 'error');
+    }
+  };
+
+  const handleEditTool = (tool: ToolItem) => {
+    setEditingTool(tool);
+    setToolForm({
+      name: tool.name,
+      description: tool.description,
+      url: tool.url,
+      icon: tool.icon || '🛠️',
+      imageUrl: tool.imageUrl || '',
+      category: tool.category || 'General',
+      featured: tool.featured,
+      visible: tool.visible,
+      order: tool.order,
+    });
   };
 
   const handleAddMascotMessage = (e: React.FormEvent) => {
@@ -1199,6 +1260,63 @@ export const AdminDashboard: React.FC = () => {
                 )}
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* 🛠️ HERRAMIENTAS (Admin only) */}
+      {isAdmin && activeTab === 'herramientas' && (
+        <div className="space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h3 className="text-lg font-black text-white font-['Orbitron']">Herramientas del Portal ({tools.length})</h3>
+              <p className="text-xs text-slate-400">Las herramientas se publican y administran exclusivamente desde este panel.</p>
+            </div>
+            <button onClick={resetToolForm} className="px-4 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs flex items-center gap-2">
+              <Plus className="w-4 h-4" /> Nueva herramienta
+            </button>
+          </div>
+
+          <form onSubmit={handleSaveTool} className="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
+            <h4 className="text-sm font-black text-white font-['Orbitron']">{editingTool ? 'EDITAR HERRAMIENTA' : 'NUEVA HERRAMIENTA'}</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div><label className="block font-bold text-slate-300 mb-1">Nombre *</label><input value={toolForm.name} onChange={(e) => setToolForm((p) => ({ ...p, name: e.target.value }))} required className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white" /></div>
+              <div><label className="block font-bold text-slate-300 mb-1">URL *</label><input type="url" value={toolForm.url} onChange={(e) => setToolForm((p) => ({ ...p, url: e.target.value }))} required className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white" placeholder="https://..." /></div>
+              <div className="sm:col-span-2"><label className="block font-bold text-slate-300 mb-1">Descripción *</label><textarea rows={2} value={toolForm.description} onChange={(e) => setToolForm((p) => ({ ...p, description: e.target.value }))} required className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white resize-none" /></div>
+              <div><label className="block font-bold text-slate-300 mb-1">Icono / Emoji</label><input value={toolForm.icon} onChange={(e) => setToolForm((p) => ({ ...p, icon: e.target.value }))} className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white" placeholder="🛠️" /></div>
+              <div><label className="block font-bold text-slate-300 mb-1">Categoría</label><input value={toolForm.category} onChange={(e) => setToolForm((p) => ({ ...p, category: e.target.value }))} className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white" placeholder="IA, Desarrollo, Utilidades..." /></div>
+              <div className="sm:col-span-2"><label className="block font-bold text-slate-300 mb-1">Imagen (URL opcional)</label><input type="url" value={toolForm.imageUrl} onChange={(e) => setToolForm((p) => ({ ...p, imageUrl: e.target.value }))} className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white" placeholder="https://..." /></div>
+              <div><label className="block font-bold text-slate-300 mb-1">Orden</label><input type="number" value={toolForm.order} onChange={(e) => setToolForm((p) => ({ ...p, order: Number(e.target.value) || 0 }))} className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white" /></div>
+              <div className="flex items-center gap-4 pt-5">
+                <label className="flex items-center gap-2 text-slate-300 font-bold"><input type="checkbox" checked={toolForm.visible} onChange={(e) => setToolForm((p) => ({ ...p, visible: e.target.checked }))} /> Visible</label>
+                <label className="flex items-center gap-2 text-slate-300 font-bold"><input type="checkbox" checked={toolForm.featured} onChange={(e) => setToolForm((p) => ({ ...p, featured: e.target.checked }))} /> Destacada</label>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              {editingTool && <button type="button" onClick={resetToolForm} className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs">Cancelar</button>}
+              <button type="submit" className="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs">{editingTool ? 'Guardar cambios' : 'Publicar herramienta'}</button>
+            </div>
+          </form>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {tools.length === 0 ? <div className="md:col-span-2 p-10 text-center rounded-3xl bg-slate-900 border border-slate-800 text-sm text-slate-500 font-bold">No hay herramientas registradas. Crea la primera desde este panel.</div> :
+              tools.map((tool) => (
+                <div key={tool.id} className="p-4 rounded-2xl bg-slate-900 border border-slate-800">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0"><span className="text-3xl">{tool.icon || '🛠️'}</span><div className="min-w-0"><p className="font-black text-white truncate">{tool.name}</p><p className="text-[10px] text-slate-500 font-mono truncate">{tool.id}</p></div></div>
+                    <span className={tool.visible ? 'text-[10px] font-black px-2 py-1 rounded-lg bg-emerald-500/15 text-emerald-300' : 'text-[10px] font-black px-2 py-1 rounded-lg bg-slate-800 text-slate-500'}>{tool.visible ? 'PUBLICADA' : 'OCULTA'}</span>
+                  </div>
+                  <p className="text-xs text-slate-400 mt-3 line-clamp-2">{tool.description}</p>
+                  <div className="flex items-center justify-between mt-4">
+                    <span className="text-[10px] text-slate-500">Orden: {tool.order}{tool.featured ? ' · ⭐ Destacada' : ''}</span>
+                    <div className="flex gap-1.5">
+                      <button onClick={() => handleEditTool(tool)} className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-400" title="Editar"><Edit2 className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => { if (confirm('¿Eliminar ' + tool.name + '?')) { void deleteTool(tool.id); showNotification('Herramienta eliminada'); } }} className="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400" title="Eliminar"><Trash2 className="w-3.5 h-3.5" /></button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            }
           </div>
         </div>
       )}
