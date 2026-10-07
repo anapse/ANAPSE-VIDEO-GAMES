@@ -1,8 +1,12 @@
 import React from 'react';
-import { ExternalLink, Wrench } from 'lucide-react';
+import { Wrench, Play } from 'lucide-react';
 import { useGameData } from '../context/GameDataContext';
 
-export const ToolsView: React.FC = () => {
+interface ToolsViewProps {
+  onOpenTool: (tool: import('../types').ToolItem) => void;
+}
+
+export const ToolsView: React.FC<ToolsViewProps> = ({ onOpenTool }) => {
   const { tools } = useGameData();
   const visibleTools = tools.filter((tool) => tool.visible);
 
@@ -41,9 +45,9 @@ export const ToolsView: React.FC = () => {
                   </div>
                 </div>
                 <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300 min-h-[60px]">{tool.description}</p>
-                <a href={tool.url} target="_blank" rel="noopener noreferrer" className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-3 transition-all active:scale-95">
-                  Abrir herramienta <ExternalLink className="w-4 h-4" />
-                </a>
+                <button type="button" onClick={() => onOpenTool(tool)} className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-3 transition-all active:scale-95">
+                  Abrir herramienta <Play className="w-4 h-4 fill-current" />
+                </button>
               </div>
             </article>
           ))}
