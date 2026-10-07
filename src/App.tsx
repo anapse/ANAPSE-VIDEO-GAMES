@@ -183,6 +183,7 @@ const MainAppContent: React.FC = () => {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
                   onOpenNewProposal={() => setIsNewProposalOpen(true)}
+                  onOpenTool={setActiveToolModal}
                 />
               )}
 
