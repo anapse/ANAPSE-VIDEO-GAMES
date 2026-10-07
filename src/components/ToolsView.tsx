@@ -1,47 +1,59 @@
 import React from 'react';
-import { ExternalLink, Wrench } from 'lucide-react';
+import { ExternalLink, Wrench, Star } from 'lucide-react';
+import { useGameData } from '../context/GameDataContext';
 
 export const ToolsView: React.FC = () => {
+  const { tools } = useGameData();
+  const visibleTools = tools.filter((tool) => tool.visible).sort((a, b) => {
+    if (a.featured !== b.featured) return Number(b.featured) - Number(a.featured);
+    return a.order - b.order;
+  });
+
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-in fade-in">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-in fade-in">
       <div className="text-center max-w-2xl mx-auto space-y-2">
         <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-xs font-extrabold font-['Orbitron']">
           <Wrench className="w-4 h-4" />
           HERRAMIENTAS ANAPSE
         </div>
-        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-['Orbitron']">
-          Herramientas
-        </h1>
-        <p className="text-sm text-slate-600 dark:text-slate-300">
-          Utilidades y proyectos interactivos creados por ANAPSE.
-        </p>
+        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-['Orbitron']">Herramientas</h1>
+        <p className="text-sm text-slate-600 dark:text-slate-300">Utilidades y proyectos interactivos creados por ANAPSE.</p>
       </div>
 
-      <div className="max-w-md mx-auto rounded-3xl p-6 bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border border-slate-200 dark:border-slate-800 shadow-xl">
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-4xl">
-            🐨
-          </div>
-          <div className="min-w-0">
-            <h2 className="text-xl font-black text-slate-900 dark:text-white">Mascoticas IA</h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Tu mascota virtual inteligente</p>
-          </div>
+      {visibleTools.length === 0 ? (
+        <div className="max-w-xl mx-auto rounded-3xl p-10 text-center bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border border-slate-200 dark:border-slate-800 shadow-xl">
+          <div className="text-5xl mb-4">🛠️</div>
+          <h2 className="text-lg font-black text-slate-900 dark:text-white">No hay herramientas publicadas</h2>
+          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Las nuevas herramientas aparecerán aquí cuando sean publicadas desde el panel de administración.</p>
         </div>
-
-        <p className="mt-5 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-          Adopta una mascota, conversa con ella, cuídala y aprende jugando.
-        </p>
-
-        <a
-          href="https://anapse.github.io/MascoticasIA/"
-          target="_blank"
-          rel="noreferrer"
-          className="mt-5 w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-3 transition-all active:scale-95"
-        >
-          Abrir Mascoticas IA
-          <ExternalLink className="w-4 h-4" />
-        </a>
-      </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {visibleTools.map((tool) => (
+            <article key={tool.id} className={tool.featured ? 'relative overflow-hidden rounded-3xl bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border border-slate-200 dark:border-slate-800 shadow-xl ring-2 ring-amber-400/50' : 'relative overflow-hidden rounded-3xl bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border border-slate-200 dark:border-slate-800 shadow-xl'}>
+              {tool.imageUrl ? (
+                <img src={tool.imageUrl} alt="" className="w-full h-36 object-cover" />
+              ) : (
+                <div className="w-full h-36 bg-gradient-to-br from-amber-500/20 via-cyan-500/10 to-emerald-500/20 flex items-center justify-center">
+                  <span className="text-6xl">{tool.icon || '🛠️'}</span>
+                </div>
+              )}
+              <div className="p-5 space-y-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    {tool.category && <span className="text-[10px] uppercase tracking-wider font-black text-cyan-500">{tool.category}</span>}
+                    <h2 className="text-lg font-black text-slate-900 dark:text-white">{tool.name}</h2>
+                  </div>
+                  {tool.featured && <Star className="w-5 h-5 text-amber-400 fill-amber-400 shrink-0" />}
+                </div>
+                <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300 min-h-[60px]">{tool.description}</p>
+                <a href={tool.url} target="_blank" rel="noopener noreferrer" className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-3 transition-all active:scale-95">
+                  Abrir herramienta <ExternalLink className="w-4 h-4" />
+                </a>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
