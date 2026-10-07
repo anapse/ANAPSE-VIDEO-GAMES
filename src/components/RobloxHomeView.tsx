@@ -15,6 +15,8 @@ import { Game } from '../types';
 import { useGameData } from '../context/GameDataContext';
 import { GameCard } from './GameCard';
 import { ASSETS } from '../lib/assets';
+import { ToolItem } from '../types';
+import { ToolsView } from './ToolsView';
 
 interface RobloxHomeViewProps {
   onPlayGame: (game: Game) => void;
@@ -23,6 +25,7 @@ interface RobloxHomeViewProps {
   onDonateGame: (game: Game) => void;
   onNavigateTab: (tab: string) => void;
   onOpenNewProposal: () => void;
+  onOpenTool: (tool: ToolItem) => void;
 }
 
 export const RobloxHomeView: React.FC<RobloxHomeViewProps> = ({
@@ -32,6 +35,7 @@ export const RobloxHomeView: React.FC<RobloxHomeViewProps> = ({
   onDonateGame,
   onNavigateTab,
   onOpenNewProposal,
+  onOpenTool,
 }) => {
   const { games, proposals, comments, loadingGames, gamesError } = useGameData();
 
@@ -241,6 +245,11 @@ export const RobloxHomeView: React.FC<RobloxHomeViewProps> = ({
           </div>
         </section>
       )}
+
+      {/* 6. 🛠️ HERRAMIENTAS — debajo del catálogo de juegos */}
+      <section className="space-y-4">
+        <ToolsView onOpenTool={onOpenTool} />
+      </section>
 
       {/* 6. 💡 TÚ PUEDES ELEGIR EL PRÓXIMO */}
       <section className="space-y-4">
