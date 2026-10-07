@@ -20,6 +20,7 @@ import { MascotPet } from './components/MascotPet';
 import { MobileNav } from './components/MobileNav';
 import { Footer } from './components/Footer';
 import { AdBanner } from './components/AdBanner';
+import { ToolsView } from './components/ToolsView';
 import { Game } from './types';
 import { ASSETS } from './lib/assets';
 import { X, Home, Gamepad2, Sparkles, Flame, Hammer, Lightbulb, MessageSquare, Heart } from 'lucide-react';
@@ -96,6 +97,7 @@ const MainAppContent: React.FC = () => {
     { id: 'proposals', label: 'Proponer Juego', icon: Lightbulb },
     { id: 'community', label: 'Comunidad', icon: MessageSquare },
     { id: 'support', label: 'Apoyar ANAPSE', icon: Heart },
+    { id: 'tools', label: 'Herramientas', icon: Hammer },
   ];
 
   return (
@@ -202,6 +204,8 @@ const MainAppContent: React.FC = () => {
               {currentTab === 'community' && <CommunityFeed />}
 
               {currentTab === 'support' && <SupportView />}
+
+              {currentTab === 'tools' && <ToolsView />}
 
               {currentTab === 'admin' && <AdminDashboard />}
             </>
