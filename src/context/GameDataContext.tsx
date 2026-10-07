@@ -3,12 +3,13 @@ import {
   collection,
   doc,
   onSnapshot,
+  getDocs,
   setDoc,
   updateDoc,
   deleteDoc,
   increment,
 } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from '../lib/firebase';
+import { db, getToolMetricsDb, handleFirestoreError, OperationType } from '../lib/firebase';
 import {
   Game,
   Category,
@@ -27,6 +28,7 @@ import {
   Report,
   ModerationLog,
   ToolItem,
+  ToolMetrics,
 } from '../types';
 
 export const DEFAULT_SUPPORT_SETTINGS: SupportSettings = {
@@ -92,6 +94,7 @@ interface GameDataContextType {
   donations: Donation[];
   announcements: Announcement[];
   tools: ToolItem[];
+  toolMetrics: Record<string, ToolMetrics>;
   selectedGame: Game | null;
   activeGameModal: Game | null;
   userLikes: Record<string, boolean>;
@@ -157,6 +160,7 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [donations, setDonations] = useState<Donation[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [tools, setTools] = useState<ToolItem[]>([]);
+  const [toolMetrics, setToolMetrics] = useState<Record<string, ToolMetrics>>({});
   const [usersCount, setUsersCount] = useState<number>(0);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
@@ -476,6 +480,92 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       console.warn('Realtime listeners fallback to local state:', e);
     }
   }, [activeGameModal]);
+
+  // Load metrics for tools from their configured Firestore database.
+  // Only administrators request external tool metrics.
+  useEffect(() => {
+    const isAdminUser =
+      profile?.role === 'ADMINISTRADOR' ||
+      currentUser?.email === 'elherreroanapse@gmail.com' ||
+      currentUser?.email === 'anapse_video@hotmail.com';
+
+    if (!isAdminUser) {
+      setToolMetrics({});
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadToolMetrics = async () => {
+      const configuredTools = tools.filter(
+        (tool) => tool.visible && tool.metrics?.databaseId && tool.metrics.collection
+      );
+
+      if (configuredTools.length === 0) {
+        setToolMetrics({});
+        return;
+      }
+
+      setToolMetrics((prev) => {
+        const next = { ...prev };
+        configuredTools.forEach((tool) => {
+          next[tool.id] = {
+            visits: prev[tool.id]?.visits || 0,
+            players: prev[tool.id]?.players || 0,
+            loading: true,
+          };
+        });
+        return next;
+      });
+
+      await Promise.all(
+        configuredTools.map(async (tool) => {
+          try {
+            const metricsDb = getToolMetricsDb(tool.metrics!.databaseId);
+            const snapshot = await getDocs(collection(metricsDb, tool.metrics!.collection));
+            const players = new Set<string>();
+
+            snapshot.docs.forEach((item) => {
+              const userId = item.data().userId;
+              if (typeof userId === 'string' && userId.trim()) {
+                players.add(userId.trim());
+              }
+            });
+
+            if (!cancelled) {
+              setToolMetrics((prev) => ({
+                ...prev,
+                [tool.id]: {
+                  visits: snapshot.size,
+                  players: players.size,
+                  loading: false,
+                },
+              }));
+            }
+          } catch (error) {
+            console.error('Tool metrics error:', tool.id, error);
+            if (!cancelled) {
+              setToolMetrics((prev) => ({
+                ...prev,
+                [tool.id]: {
+                  visits: 0,
+                  players: 0,
+                  loading: false,
+                  error: error instanceof Error ? error.message : String(error),
+                },
+              }));
+            }
+          }
+        })
+      );
+    };
+
+    void loadToolMetrics();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [tools, profile?.role, currentUser?.email]);
 
   // Listen to user-specific likes, votes, and comment likes in real-time from Firestore
   useEffect(() => {
@@ -1277,6 +1367,7 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         donations,
         announcements,
         tools,
+        toolMetrics,
         selectedGame,
         activeGameModal,
         userLikes,
