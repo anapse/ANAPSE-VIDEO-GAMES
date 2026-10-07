@@ -109,6 +109,13 @@ export interface ToolItem {
   };
 }
 
+export interface ToolMetrics {
+  visits: number;
+  players: number;
+  loading: boolean;
+  error?: string;
+}
+
 export interface UserProfile {
   uid: string;
   displayName: string;
