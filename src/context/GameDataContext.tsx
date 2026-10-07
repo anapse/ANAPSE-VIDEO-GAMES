@@ -1489,15 +1489,7 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     totalDonations: donations.reduce((acc, d) => acc + d.amount, 0),
     totalProposals: proposals.length,
     topGamesByPlays: [...games].sort((a, b) => b.playsCount - a.playsCount).slice(0, 5).map((g) => ({ name: g.name, count: g.playsCount })),
-    dailyVisits: platformDailyVisits.length > 0 ? platformDailyVisits : [
-      { date: 'Lun', visits: Math.floor(games.reduce((acc, g) => acc + (g.viewsCount || 0), 0) * 0.1), plays: Math.floor(games.reduce((acc, g) => acc + (g.playsCount || 0), 0) * 0.1) },
-      { date: 'Mar', visits: Math.floor(games.reduce((acc, g) => acc + (g.viewsCount || 0), 0) * 0.12), plays: Math.floor(games.reduce((acc, g) => acc + (g.playsCount || 0), 0) * 0.12) },
-      { date: 'Mié', visits: Math.floor(games.reduce((acc, g) => acc + (g.viewsCount || 0), 0) * 0.14), plays: Math.floor(games.reduce((acc, g) => acc + (g.playsCount || 0), 0) * 0.14) },
-      { date: 'Jue', visits: Math.floor(games.reduce((acc, g) => acc + (g.viewsCount || 0), 0) * 0.15), plays: Math.floor(games.reduce((acc, g) => acc + (g.playsCount || 0), 0) * 0.15) },
-      { date: 'Vie', visits: Math.floor(games.reduce((acc, g) => acc + (g.viewsCount || 0), 0) * 0.18), plays: Math.floor(games.reduce((acc, g) => acc + (g.playsCount || 0), 0) * 0.18) },
-      { date: 'Sáb', visits: Math.floor(games.reduce((acc, g) => acc + (g.viewsCount || 0), 0) * 0.2), plays: Math.floor(games.reduce((acc, g) => acc + (g.playsCount || 0), 0) * 0.2) },
-      { date: 'Dom', visits: 0, uniqueVisitors: 0, plays: 0 },
-    ],
+    dailyVisits: platformDailyVisits,
     topSources: platformSources,
   };
 
