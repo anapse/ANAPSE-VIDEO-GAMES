@@ -902,7 +902,7 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const source = (params.get('utm_source') || referrerHost || 'direct').trim().toLowerCase().slice(0, 80);
     const medium = (params.get('utm_medium') || (referrerHost ? 'referral' : 'direct')).trim().toLowerCase().slice(0, 40);
     const campaign = (params.get('utm_campaign') || '').trim().toLowerCase().slice(0, 100);
-    const sourceId = (source + '__' + medium).replace(/[^a-z0-9_-]/g, '_').slice(0, 140);
+    const sourceId = (source + '__' + medium + '__' + (campaign || 'none')).replace(/[^a-z0-9_-]/g, '_').slice(0, 140);
     const timestamp = new Date().toISOString();
 
     try {
