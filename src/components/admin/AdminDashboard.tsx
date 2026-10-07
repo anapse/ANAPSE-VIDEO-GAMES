@@ -1255,7 +1255,8 @@ export const AdminDashboard: React.FC = () => {
             {tools.length === 0 ? <div className="md:col-span-2 p-10 text-center rounded-3xl bg-slate-900 border border-slate-800 text-sm text-slate-500 font-bold">No hay herramientas registradas. Crea la primera desde este panel.</div> :
               tools.map((tool) => (
                 <div key={tool.id} className="p-4 rounded-2xl bg-slate-900 border border-slate-800">
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0"><span className="text-3xl">🛠️</span><p className="font-black text-white truncate">{tool.name}</p></div>
                     <span className={tool.visible ? 'text-[10px] font-black px-2 py-1 rounded-lg bg-emerald-500/15 text-emerald-300' : 'text-[10px] font-black px-2 py-1 rounded-lg bg-slate-800 text-slate-500'}>{tool.visible ? 'PUBLICADA' : 'OCULTA'}</span>
                   </div>
                   <p className="text-xs text-slate-400 mt-3 line-clamp-2">{tool.description}</p>
@@ -1283,7 +1284,7 @@ export const AdminDashboard: React.FC = () => {
                           <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
                             <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400">
                               <Users className="w-3.5 h-3.5 text-amber-400" />
-                              Jugadores
+                              Usos
                             </div>
                             <p className="mt-1 text-lg font-black text-white">
                               {toolMetrics[tool.id]?.players ?? 0}
