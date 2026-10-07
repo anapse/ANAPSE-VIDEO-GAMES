@@ -103,12 +103,8 @@ export const AdminDashboard: React.FC = () => {
     name: '',
     description: '',
     url: '',
-    icon: '🛠️',
     imageUrl: '',
-    category: 'General',
-    featured: false,
     visible: true,
-    order: 0,
   });
 
   // Moderation filter and search states
@@ -243,12 +239,8 @@ export const AdminDashboard: React.FC = () => {
       name: '',
       description: '',
       url: '',
-      icon: '🛠️',
       imageUrl: '',
-      category: 'General',
-      featured: false,
       visible: true,
-      order: tools.length,
     });
   };
 
@@ -273,12 +265,8 @@ export const AdminDashboard: React.FC = () => {
       name: tool.name,
       description: tool.description,
       url: tool.url,
-      icon: tool.icon || '🛠️',
       imageUrl: tool.imageUrl || '',
-      category: tool.category || 'General',
-      featured: tool.featured,
       visible: tool.visible,
-      order: tool.order,
     });
   };
 
@@ -1283,13 +1271,9 @@ export const AdminDashboard: React.FC = () => {
               <div><label className="block font-bold text-slate-300 mb-1">Nombre *</label><input value={toolForm.name} onChange={(e) => setToolForm((p) => ({ ...p, name: e.target.value }))} required className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white" /></div>
               <div><label className="block font-bold text-slate-300 mb-1">URL *</label><input type="url" value={toolForm.url} onChange={(e) => setToolForm((p) => ({ ...p, url: e.target.value }))} required className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white" placeholder="https://..." /></div>
               <div className="sm:col-span-2"><label className="block font-bold text-slate-300 mb-1">Descripción *</label><textarea rows={2} value={toolForm.description} onChange={(e) => setToolForm((p) => ({ ...p, description: e.target.value }))} required className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white resize-none" /></div>
-              <div><label className="block font-bold text-slate-300 mb-1">Icono / Emoji</label><input value={toolForm.icon} onChange={(e) => setToolForm((p) => ({ ...p, icon: e.target.value }))} className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white" placeholder="🛠️" /></div>
-              <div><label className="block font-bold text-slate-300 mb-1">Categoría</label><input value={toolForm.category} onChange={(e) => setToolForm((p) => ({ ...p, category: e.target.value }))} className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white" placeholder="IA, Desarrollo, Utilidades..." /></div>
               <div className="sm:col-span-2"><label className="block font-bold text-slate-300 mb-1">Imagen (URL opcional)</label><input type="url" value={toolForm.imageUrl} onChange={(e) => setToolForm((p) => ({ ...p, imageUrl: e.target.value }))} className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white" placeholder="https://..." /></div>
-              <div><label className="block font-bold text-slate-300 mb-1">Orden</label><input type="number" value={toolForm.order} onChange={(e) => setToolForm((p) => ({ ...p, order: Number(e.target.value) || 0 }))} className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white" /></div>
               <div className="flex items-center gap-4 pt-5">
                 <label className="flex items-center gap-2 text-slate-300 font-bold"><input type="checkbox" checked={toolForm.visible} onChange={(e) => setToolForm((p) => ({ ...p, visible: e.target.checked }))} /> Visible</label>
-                <label className="flex items-center gap-2 text-slate-300 font-bold"><input type="checkbox" checked={toolForm.featured} onChange={(e) => setToolForm((p) => ({ ...p, featured: e.target.checked }))} /> Destacada</label>
               </div>
             </div>
             <div className="flex justify-end gap-2">
@@ -1303,12 +1287,12 @@ export const AdminDashboard: React.FC = () => {
               tools.map((tool) => (
                 <div key={tool.id} className="p-4 rounded-2xl bg-slate-900 border border-slate-800">
                   <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0"><span className="text-3xl">{tool.icon || '🛠️'}</span><div className="min-w-0"><p className="font-black text-white truncate">{tool.name}</p><p className="text-[10px] text-slate-500 font-mono truncate">{tool.id}</p></div></div>
+                    <div className="flex items-center gap-3 min-w-0"><span className="text-3xl">🛠️</span><div className="min-w-0"><p className="font-black text-white truncate">{tool.name}</p><p className="text-[10px] text-slate-500 font-mono truncate">{tool.id}</p></div></div>
                     <span className={tool.visible ? 'text-[10px] font-black px-2 py-1 rounded-lg bg-emerald-500/15 text-emerald-300' : 'text-[10px] font-black px-2 py-1 rounded-lg bg-slate-800 text-slate-500'}>{tool.visible ? 'PUBLICADA' : 'OCULTA'}</span>
                   </div>
                   <p className="text-xs text-slate-400 mt-3 line-clamp-2">{tool.description}</p>
                   <div className="flex items-center justify-between mt-4">
-                    <span className="text-[10px] text-slate-500">Orden: {tool.order}{tool.featured ? ' · ⭐ Destacada' : ''}</span>
+                    <span className="text-[10px] text-slate-500 truncate max-w-[55%]">{tool.url}</span>
                     <div className="flex gap-1.5">
                       <button onClick={() => handleEditTool(tool)} className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-400" title="Editar"><Edit2 className="w-3.5 h-3.5" /></button>
                       <button onClick={() => { if (confirm('¿Eliminar ' + tool.name + '?')) { void deleteTool(tool.id); showNotification('Herramienta eliminada'); } }} className="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400" title="Eliminar"><Trash2 className="w-3.5 h-3.5" /></button>
