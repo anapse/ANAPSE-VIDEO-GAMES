@@ -36,13 +36,37 @@ service cloud.firestore {
       return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
     }
 
-    // Platform analytics: public website visit counter.
+    // Platform analytics: anonymous traffic counters. These counters never store IP addresses or personal data.
     match /analytics/{docId} {
       allow read: if true;
-      allow create: if docId == 'platform' && request.resource.data.totalVisits == 1;
+      allow create: if docId == 'platform' &&
+        request.resource.data.totalVisits == 1 &&
+        (request.resource.data.totalUniqueVisitors == 0 || request.resource.data.totalUniqueVisitors == 1);
       allow update: if docId == 'platform' &&
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['totalVisits', 'updatedAt']) &&
-        request.resource.data.totalVisits == resource.data.totalVisits + 1;
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['totalVisits', 'totalUniqueVisitors', 'updatedAt']) &&
+        request.resource.data.totalVisits == resource.data.totalVisits + 1 &&
+        (request.resource.data.totalUniqueVisitors == resource.data.totalUniqueVisitors ||
+         request.resource.data.totalUniqueVisitors == resource.data.totalUniqueVisitors + 1);
+    }
+
+    match /analytics/daily/{dateId} {
+      allow read: if true;
+      allow create: if request.resource.data.visits == 1 &&
+        (request.resource.data.uniqueVisitors == 0 || request.resource.data.uniqueVisitors == 1);
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['date', 'visits', 'uniqueVisitors', 'updatedAt']) &&
+        request.resource.data.visits == resource.data.visits + 1 &&
+        (request.resource.data.uniqueVisitors == resource.data.uniqueVisitors ||
+         request.resource.data.uniqueVisitors == resource.data.uniqueVisitors + 1);
+    }
+
+    match /analytics/sources/{sourceId} {
+      allow read: if true;
+      allow create: if request.resource.data.visits == 1 &&
+        (request.resource.data.uniqueVisitors == 0 || request.resource.data.uniqueVisitors == 1);
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['source', 'medium', 'campaign', 'visits', 'uniqueVisitors', 'updatedAt']) &&
+        request.resource.data.visits == resource.data.visits + 1 &&
+        (request.resource.data.uniqueVisitors == resource.data.uniqueVisitors ||
+         request.resource.data.uniqueVisitors == resource.data.uniqueVisitors + 1);
     }
 
     // Games collection
