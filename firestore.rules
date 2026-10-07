@@ -45,8 +45,11 @@ service cloud.firestore {
       allow update: if docId == 'platform' &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['totalVisits', 'totalUniqueVisitors', 'updatedAt']) &&
         request.resource.data.totalVisits == resource.data.totalVisits + 1 &&
-        (request.resource.data.totalUniqueVisitors == resource.data.totalUniqueVisitors ||
-         request.resource.data.totalUniqueVisitors == resource.data.totalUniqueVisitors + 1);
+        (
+          !resource.data.keys().hasAny(['totalUniqueVisitors']) ||
+          request.resource.data.totalUniqueVisitors == resource.data.totalUniqueVisitors ||
+          request.resource.data.totalUniqueVisitors == resource.data.totalUniqueVisitors + 1
+        );
     }
 
     match /analytics/daily/{dateId} {
