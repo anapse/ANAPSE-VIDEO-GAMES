@@ -21,9 +21,10 @@ import { MobileNav } from './components/MobileNav';
 import { Footer } from './components/Footer';
 import { AdBanner } from './components/AdBanner';
 import { ToolsView } from './components/ToolsView';
-import { Game } from './types';
+import { Game, ToolItem } from './types';
 import { ASSETS } from './lib/assets';
 import { X, Home, Gamepad2, Sparkles, Flame, Hammer, Lightbulb, MessageSquare, Heart } from 'lucide-react';
+import { ToolModalPlayer } from './components/ToolModalPlayer';
 
 const MainAppContent: React.FC = () => {
   const { games, selectedGame, setSelectedGame, activeGameModal, setActiveGameModal, recordPlatformVisit } = useGameData();
@@ -35,6 +36,7 @@ const MainAppContent: React.FC = () => {
   const [isNewProposalOpen, setIsNewProposalOpen] = useState(false);
   const [shareModalGame, setShareModalGame] = useState<Game | null>(null);
   const [donationModalGame, setDonationModalGame] = useState<Game | null>(null);
+  const [activeToolModal, setActiveToolModal] = useState<ToolItem | null>(null);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
@@ -205,7 +207,7 @@ const MainAppContent: React.FC = () => {
 
               {currentTab === 'support' && <SupportView />}
 
-              {currentTab === 'tools' && <ToolsView />}
+              {currentTab === 'tools' && <ToolsView onOpenTool={setActiveToolModal} />}
 
               {currentTab === 'admin' && <AdminDashboard />}
             </>
@@ -267,6 +269,13 @@ const MainAppContent: React.FC = () => {
 
       {/* Game Modal Launcher */}
       <AuthModal />
+      {activeToolModal && (
+        <ToolModalPlayer
+          tool={activeToolModal}
+          onClose={() => setActiveToolModal(null)}
+        />
+      )}
+
       {activeGameModal && (
         <GameModalPlayer
           game={activeGameModal}
