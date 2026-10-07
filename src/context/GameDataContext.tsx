@@ -1173,12 +1173,23 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const addOrUpdateTool = async (toolData: Omit<ToolItem, 'id'> & { id?: string }) => {
     const toolId = toolData.id?.trim() || 'tool-' + Date.now();
+    const metricsDatabaseId = toolData.metrics?.databaseId?.trim() || '';
+    const metricsCollection = toolData.metrics?.collection?.trim() || '';
+
     const payload: Omit<ToolItem, 'id'> = {
       name: toolData.name.trim(),
       description: toolData.description.trim(),
       url: toolData.url.trim(),
       imageUrl: toolData.imageUrl?.trim() || '',
       visible: toolData.visible ?? true,
+      ...(metricsDatabaseId && metricsCollection
+        ? {
+            metrics: {
+              databaseId: metricsDatabaseId,
+              collection: metricsCollection,
+            },
+          }
+        : {}),
     };
 
     setTools((prev) => {
