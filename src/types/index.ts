@@ -103,6 +103,10 @@ export interface ToolItem {
   url: string;
   imageUrl?: string;
   visible: boolean;
+  metrics?: {
+    databaseId: string;
+    collection: string;
+  };
 }
 
 export interface UserProfile {
