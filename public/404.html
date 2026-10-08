@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>ANAPSE</title>
+  <script>
+    (function () {
+      var path = window.location.pathname.replace(/\/$/, '');
+      var adminPath = '/ANAPSE-VIDEO-GAMES/admin';
+      if (path === adminPath) {
+        window.location.replace('/ANAPSE-VIDEO-GAMES/?admin=1');
+      }
+    })();
+  </script>
+</head>
+<body></body>
+</html>
