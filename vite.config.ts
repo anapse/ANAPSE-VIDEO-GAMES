@@ -5,7 +5,8 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
-    base: '/ANAPSE-VIDEO-GAMES/',
+    // The site is served from the custom domain anapsevideogame.click, so assets must resolve from the domain root.
+    base: '/',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
