@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Mail, Lock, LogIn, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-export const AuthModal: React.FC = () => {
+export const AuthModal: React.FC<{ forceOpen?: boolean }> = ({ forceOpen = false }) => {
   const {
     showAuthModal,
     setShowAuthModal,
@@ -17,7 +17,7 @@ export const AuthModal: React.FC = () => {
   const [authError, setAuthError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  if (!showAuthModal) return null;
+  if (!showAuthModal && !forceOpen) return null;
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,12 +54,14 @@ export const AuthModal: React.FC = () => {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in">
       <div className="relative w-full max-w-sm rounded-3xl bg-white dark:bg-slate-900 p-6 border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
         
+        {!forceOpen && (
         <button
           onClick={() => setShowAuthModal(false)}
           className="absolute top-4 right-4 p-1.5 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400"
         >
           <X className="w-4 h-4" />
         </button>
+        )}
 
         <div className="text-center space-y-1">
           <h3 className="text-base font-black text-slate-900 dark:text-white font-['Orbitron']">
