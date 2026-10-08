@@ -52,7 +52,7 @@ service cloud.firestore {
         );
     }
 
-    match /analytics/daily/{dateId} {
+    match /analyticsDaily/{dateId} {
       allow read: if true;
       allow create: if request.resource.data.visits == 1 &&
         (request.resource.data.uniqueVisitors == 0 || request.resource.data.uniqueVisitors == 1);
@@ -62,7 +62,7 @@ service cloud.firestore {
          request.resource.data.uniqueVisitors == resource.data.uniqueVisitors + 1);
     }
 
-    match /analytics/visitors/{visitorId} {
+    match /analyticsVisitors/{visitorId} {
       allow read: if true;
       allow create: if request.resource.data.firstSeenAt is string &&
         request.resource.data.lastSeenAt is string;
@@ -71,7 +71,7 @@ service cloud.firestore {
         request.resource.data.lastSeenAt is string;
     }
 
-    match /analytics/sources/{sourceId} {
+    match /analyticsSources/{sourceId} {
       allow read: if true;
       allow create: if request.resource.data.visits == 1 &&
         (request.resource.data.uniqueVisitors == 0 || request.resource.data.uniqueVisitors == 1);
