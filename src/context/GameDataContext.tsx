@@ -505,8 +505,8 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         });
 
         const [dailySnapshots, sourcesSnapshot] = await Promise.all([
-          Promise.all(dates.map((date) => getDoc(doc(db, 'analytics', 'daily', date)))),
-          getDocs(collection(db, 'analytics', 'sources')),
+          Promise.all(dates.map((date) => getDoc(doc(db, 'analyticsDaily', date)))),
+          getDocs(collection(db, 'analyticsSources')),
         ]);
 
         if (cancelled) return;
@@ -887,7 +887,7 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const uniqueDateKey = 'anapse_unique_visit_date_v2';
     const isUniqueToday = localStorage.getItem(uniqueDateKey) !== today;
 
-    const visitorDocRef = doc(db, 'analytics', 'visitors', visitorId);
+    const visitorDocRef = doc(db, 'analyticsVisitors', visitorId);
     const visitorSnapshot = await getDoc(visitorDocRef);
     const isNewVisitor = !visitorSnapshot.exists();
 
@@ -917,7 +917,7 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           { merge: true }
         ),
         setDoc(
-          doc(db, 'analytics', 'daily', today),
+          doc(db, 'analyticsDaily', today),
           {
             date: today,
             visits: increment(1),
@@ -935,7 +935,7 @@ export const GameDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           { merge: true }
         ),
         setDoc(
-          doc(db, 'analytics', 'sources', sourceId),
+          doc(db, 'analyticsSources', sourceId),
           {
             source,
             medium,
