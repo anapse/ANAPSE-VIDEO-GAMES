@@ -323,7 +323,7 @@ export default function App() {
     <ThemeProvider>
       <AuthProvider>
         <GameDataProvider>
-          {(window.location.pathname.endsWith('/admin') || new URLSearchParams(window.location.search).get('admin') === '1') ? <AdminRoute /> : <MainAppContent />}
+          {(/^\/ANAPSE-VIDEO-GAMES\/admin\/?$/.test(window.location.pathname) || new URLSearchParams(window.location.search).get('admin') === '1') ? <AdminRoute /> : <MainAppContent />}
         </GameDataProvider>
       </AuthProvider>
     </ThemeProvider>
