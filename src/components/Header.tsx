@@ -178,8 +178,8 @@ export const Header: React.FC<HeaderProps> = ({
                     <button
                       onClick={() => {
                         setSelectedGame(null);
-                        setCurrentTab('admin');
                         setShowRoleMenu(false);
+                        window.location.href = `${window.location.origin}/ANAPSE-VIDEO-GAMES/admin`;
                       }}
                       className={`w-full text-left px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-2 mt-1 border-b border-slate-100 dark:border-slate-800 ${
                         isAdmin
