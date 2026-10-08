@@ -25,6 +25,7 @@ import { Game, ToolItem } from './types';
 import { ASSETS } from './lib/assets';
 import { X, Home, Gamepad2, Sparkles, Flame, Hammer, Lightbulb, MessageSquare, Heart } from 'lucide-react';
 import { ToolModalPlayer } from './components/ToolModalPlayer';
+import { AdminRoute } from './components/admin/AdminRoute';
 
 const MainAppContent: React.FC = () => {
   const { games, selectedGame, setSelectedGame, activeGameModal, setActiveGameModal, recordPlatformVisit } = useGameData();
@@ -322,7 +323,7 @@ export default function App() {
     <ThemeProvider>
       <AuthProvider>
         <GameDataProvider>
-          <MainAppContent />
+          {window.location.pathname.endsWith('/admin') ? <AdminRoute /> : <MainAppContent />}
         </GameDataProvider>
       </AuthProvider>
     </ThemeProvider>
