@@ -125,7 +125,7 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
                 <div className="flex flex-wrap items-center gap-2 pt-1">
                   <button type="button" onClick={() => setShowRatingPicker((open) => !open)} aria-label="Valorar juego" aria-expanded={showRatingPicker} title="Valorar juego" className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 -ml-2 text-sm font-bold text-amber-300 hover:bg-white/10 transition-colors">
                     <Star className="w-4 h-4 fill-amber-400 text-amber-300" />
-                    <span>{game.ratingsCount > 0 ? game.ratingAvg.toFixed(1) : '0'}/5</span>
+                    <span>{userRating || 0}/5</span>
                   </button>
                   <span className="text-[11px] text-slate-300/80">{game.ratingsCount} valoraciones</span>
                   {showRatingPicker && <div className="flex items-center gap-0.5 rounded-xl bg-slate-950/95 border border-amber-400/30 px-1.5 py-1 shadow-xl">{[1, 2, 3, 4, 5].map((star) => <button key={star} type="button" aria-label={star + ' estrellas'} onClick={() => { handleRatingClick(star); setShowRatingPicker(false); }} onMouseEnter={() => setStarHover(star)} onMouseLeave={() => setStarHover(null)} className="p-1 hover:scale-110 transition-transform"><Star className={"w-4 h-4 " + ((starHover !== null ? star <= starHover : star <= userRating) ? "fill-amber-400 text-amber-300" : "text-slate-500")} /></button>)}</div>}
