@@ -50,7 +50,7 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 shadow-xs h-16 sm:h-18 flex items-center transition-colors">
+    <header className="sticky top-0 z-40 bg-[#f5efe3] dark:bg-[#302b23] border-b border-[#d8cbb5] dark:border-[#514638] shadow-xs h-16 sm:h-18 flex items-center transition-colors">
       <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 flex items-center justify-between gap-3 sm:gap-4">
         
         {/* Left: Mobile Menu Toggle + Official Brand Logo */}
@@ -112,7 +112,7 @@ export const Header: React.FC<HeaderProps> = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Buscar..."
-              className="w-full pl-10 pr-8 py-2 text-xs sm:text-sm bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/80 focus:border-amber-500 dark:focus:border-amber-400 rounded-2xl text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 transition-all"
+              className="w-full pl-10 pr-8 py-2 text-xs sm:text-sm bg-[#fffaf1] dark:bg-[#40382d] border border-[#d8cbb5] dark:border-[#5b4f3f] focus:border-amber-500 dark:focus:border-amber-400 rounded-2xl text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 transition-all"
             />
             {searchQuery && (
               <button
