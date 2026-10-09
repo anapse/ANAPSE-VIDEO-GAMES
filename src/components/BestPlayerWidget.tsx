@@ -73,18 +73,14 @@ export const BestPlayerWidget: React.FC<BestPlayerWidgetProps> = ({ game }) => {
   }, [game.gameId, game.rankingConfig]);
 
   return (
-    <div className="p-2 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800 text-xs space-y-0.5">
-      <div className="flex items-center gap-1 text-amber-500 font-bold font-['Orbitron'] text-[10px] tracking-wider">
-        <Trophy className="w-3 h-3" />
-        <span>MEJOR JUGADOR</span>
-      </div>
+    <div className="px-5 pb-4 pt-1">
       {topPlayer ? (
-        <div className="flex items-center justify-between text-slate-800 dark:text-slate-200">
-          <span className="font-bold truncate max-w-[110px]" title={topPlayer.name}>{topPlayer.name}</span>
-          <span className="font-mono font-black text-amber-600 dark:text-amber-400">⭐ {topPlayer.score}</span>
+        <div className="flex items-center justify-between gap-4 rounded-xl bg-white/5 border border-white/10 px-4 py-3">
+          <span className="font-bold text-white truncate min-w-0" title={topPlayer.name}>{topPlayer.name}</span>
+          <span className="font-mono font-black text-amber-300 shrink-0 flex items-center gap-1.5"><Trophy className="w-4 h-4" />{topPlayer.score.toLocaleString()}</span>
         </div>
       ) : (
-        <p className="text-[11px] text-slate-400 italic">Aún no hay puntuaciones</p>
+        <div className="rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-xs text-slate-400">Aún no hay puntuaciones registradas</div>
       )}
     </div>
   );
