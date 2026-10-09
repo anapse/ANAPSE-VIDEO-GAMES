@@ -221,8 +221,8 @@ export const GameModalPlayer: React.FC<GameModalPlayerProps> = ({
 
   // PRE-GAME INFO MODAL MODE
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-slate-950/80  animate-in fade-in">
-      <div className="relative w-full max-w-md mx-auto p-6 rounded-3xl bg-white/95 dark:bg-slate-900/95  border border-slate-200/80 dark:border-slate-800 shadow-2xl text-center space-y-5 animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/80 backdrop-blur-sm animate-in fade-in overflow-y-auto">
+      <div className="relative w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto mx-auto p-5 sm:p-6 rounded-3xl bg-white/95 dark:bg-slate-900/95 border border-slate-200/80 dark:border-slate-800 shadow-2xl text-center space-y-4 sm:space-y-5 animate-in zoom-in-95 duration-200">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -233,8 +233,8 @@ export const GameModalPlayer: React.FC<GameModalPlayerProps> = ({
         </button>
 
         {/* Logo / Portada */}
-        <div className="w-20 h-20 rounded-2xl overflow-hidden mx-auto border border-slate-200 dark:border-slate-700 shadow-sm bg-slate-100 dark:bg-slate-800">
-          <img src={game.mainImage} alt={game.name} className="w-full h-full object-cover" />
+        <div className="w-20 h-20 rounded-2xl overflow-hidden mx-auto border border-slate-200 dark:border-slate-700 shadow-sm bg-slate-100 dark:bg-slate-800 shrink-0">
+          <img src={game.mainImage} alt={game.name} className="w-full h-full object-contain p-1" />
         </div>
 
         {/* Nombre y frase */}
