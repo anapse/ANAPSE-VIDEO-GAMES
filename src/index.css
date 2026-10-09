@@ -10,11 +10,11 @@
   }
 
   .dark {
-    --bg-main: #0F172A;
-    --bg-surface: #1E293B;
+    --bg-main: #29251F;
+    --bg-surface: #393329;
     --text-primary: #F8FAFC;
-    --text-secondary: #94A3B8;
-    --border-subtle: #334155;
+    --text-secondary: #D6CBB8;
+    --border-subtle: #5B5142;
   }
 
   body {
@@ -46,7 +46,7 @@
   background: #334155;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #0284C7;
+  background: #D97706;
 }
 
 @keyframes wiggle {
@@ -57,3 +57,8 @@
 .animate-wiggle {
   animation: wiggle 1s ease-in-out infinite;
 }
+
+
+/* Paleta cálida ANAPSE: menos azul, más contraste con el paisaje */
+.dark body { background-color: #29251F; }
+.dark ::-webkit-scrollbar-thumb { background: #8A7960; }
