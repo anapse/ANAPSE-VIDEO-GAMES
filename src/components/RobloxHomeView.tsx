@@ -67,7 +67,7 @@ export const RobloxHomeView: React.FC<RobloxHomeViewProps> = ({
           }}
           className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-900/30 to-slate-900/40" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/10 to-black/15" />
         <div className="relative z-10 space-y-2 max-w-2xl">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-xs font-bold font-['Orbitron']">
             <Gamepad2 className="w-3.5 h-3.5" />
@@ -113,13 +113,13 @@ export const RobloxHomeView: React.FC<RobloxHomeViewProps> = ({
         </div>
 
         {gamesError ? (
-          <div className="p-8 text-center rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-red-200 dark:border-red-900/50 space-y-2">
+          <div className="p-8 text-center rounded-2xl bg-[#f5efe3] dark:bg-[#302b23] border border-red-200 dark:border-red-900/50 space-y-2">
             <Gamepad2 className="w-8 h-8 mx-auto text-red-500" />
             <h3 className="text-sm font-bold text-slate-900 dark:text-white">No se pudo cargar el catálogo</h3>
             <p className="text-xs text-slate-600 dark:text-slate-400">{gamesError}</p>
           </div>
         ) : loadingGames ? (
-          <div className="p-8 text-center rounded-2xl bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 space-y-3">
+          <div className="p-8 text-center rounded-2xl bg-[#f5efe3] dark:bg-[#302b23] border border-slate-200 dark:border-slate-800 space-y-3">
             <div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto" />
             <p className="text-xs text-slate-500 dark:text-slate-400">Cargando catálogo oficial desde Firebase...</p>
           </div>
@@ -179,7 +179,7 @@ export const RobloxHomeView: React.FC<RobloxHomeViewProps> = ({
 
       {/* Propuestas de la comunidad */}
       <section className="space-y-4">
-        <div className="rounded-2xl p-5 sm:p-6 bg-white/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-4">
+        <div className="rounded-2xl p-5 sm:p-6 bg-[#f5efe3] dark:bg-[#302b23] border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-4">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white font-['Orbitron'] flex items-center gap-2">
