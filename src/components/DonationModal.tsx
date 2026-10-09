@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import { X, Heart, Sparkles, Check, CreditCard, Smartphone, DollarSign } from 'lucide-react';
+import { X, Heart, Copy, Check, Smartphone, DollarSign, QrCode, ExternalLink } from 'lucide-react';
 import { Game } from '../types';
 import { useGameData } from '../context/GameDataContext';
-import { useAuth } from '../context/AuthContext';
-import confetti from 'canvas-confetti';
 
 interface DonationModalProps {
   game: Game | null;
@@ -11,188 +9,100 @@ interface DonationModalProps {
 }
 
 export const DonationModal: React.FC<DonationModalProps> = ({ game, onClose }) => {
-  const { addDonation } = useGameData();
-  const { profile } = useAuth();
-
-  const [presetAmount, setPresetAmount] = useState<number | 'custom'>(5);
-  const [customAmount, setCustomAmount] = useState('15');
-  const [message, setMessage] = useState('');
-  const [isPublic, setIsPublic] = useState(true);
-  const [paymentMethod, setPaymentMethod] = useState<'Yape' | 'Plin' | 'Tarjeta' | 'PayPal'>('Yape');
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const { supportSettings } = useGameData();
+  const [copiedPhone, setCopiedPhone] = useState(false);
 
   if (!game) return null;
 
-  const actualAmount = presetAmount === 'custom' ? parseFloat(customAmount) || 5 : presetAmount;
-
-  const handleDonate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsProcessing(true);
-
-    await new Promise((r) => setTimeout(r, 600)); // Simulate gateway
-
-    await addDonation({
-      gameId: game.gameId,
-      gameName: game.name,
-      amount: actualAmount,
-      message: message.trim() || undefined,
-      isPublic,
-      paymentMethod,
-    });
-
-    setIsProcessing(false);
-    setSuccess(true);
-    confetti({ particleCount: 80, spread: 80, origin: { y: 0.6 } });
-
-    setTimeout(() => {
-      onClose();
-    }, 2000);
+  const yapePhone = supportSettings?.yape?.phone || '+51 912391502';
+  const paypalEmail = supportSettings?.paypal?.email || 'anapse_j@yahoo.es';
+  const handleCopyYape = async () => {
+    try {
+      await navigator.clipboard.writeText(yapePhone);
+      setCopiedPhone(true);
+      window.setTimeout(() => setCopiedPhone(false), 2200);
+    } catch {
+      setCopiedPhone(false);
+    }
   };
 
+  const paypalUrl = supportSettings?.paypal?.url ||
+    `https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=${encodeURIComponent(paypalEmail)}`;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in">
-      <div className="relative w-full max-w-md rounded-3xl bg-slate-900 border border-rose-500/30 shadow-2xl p-6 sm:p-8 space-y-6">
-        
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/65 backdrop-blur-sm animate-in fade-in" onClick={onClose}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="donation-modal-title"
+        className="relative w-full max-w-md rounded-3xl bg-white/95 dark:bg-[#302b23]/95 border border-amber-200/70 dark:border-amber-100/15 shadow-2xl p-5 sm:p-6 space-y-5"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-3 border-b border-slate-200/80 dark:border-white/10 pb-4">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-rose-500/20 text-rose-400">
-              <Heart className="w-5 h-5 fill-rose-400" />
+            <div className="p-2.5 rounded-2xl bg-rose-500/10 text-rose-500">
+              <Heart className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-lg font-black text-white font-['Orbitron']">
-                APOYAR A {game.name}
+              <h3 id="donation-modal-title" className="text-base font-black text-slate-900 dark:text-white font-['Orbitron']">
+                APOYAR ANAPSE
               </h3>
-              <p className="text-xs text-slate-400">Impulsa el desarrollo de este juego</p>
+              <p className="text-xs text-slate-600 dark:text-slate-300 mt-1">
+                Ayuda a seguir desarrollando {game.name}.
+              </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white"
-          >
+          <button onClick={onClose} aria-label="Cerrar" className="p-2 rounded-xl bg-slate-100 dark:bg-white/10 text-slate-500 hover:text-slate-900 dark:hover:text-white">
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {success ? (
-          <div className="py-8 text-center space-y-3 animate-in zoom-in-95">
-            <div className="w-16 h-16 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center mx-auto text-3xl">
-              ❤️
-            </div>
-            <h4 className="text-xl font-black text-white font-['Orbitron']">¡MUCHAS GRACIAS!</h4>
-            <p className="text-xs text-slate-300 max-w-xs mx-auto">
-              Tu apoyo de <b>S/ {actualAmount}</b> ayuda directamente a los creadores de <b>{game.name}</b>.
-            </p>
-          </div>
-        ) : (
-          <form onSubmit={handleDonate} className="space-y-4 text-xs">
-            
-            {/* Amount Selection */}
-            <div>
-              <label className="block font-bold text-slate-300 mb-2">Selecciona el monto de apoyo:</label>
-              <div className="grid grid-cols-4 gap-2">
-                {[3, 5, 10].map((amt) => (
-                  <button
-                    key={amt}
-                    type="button"
-                    onClick={() => setPresetAmount(amt)}
-                    className={`py-3 rounded-2xl font-black font-['Orbitron'] text-sm transition-all ${
-                      presetAmount === amt
-                        ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20 scale-102'
-                        : 'bg-slate-950 border border-slate-800 text-slate-300 hover:border-rose-500/40'
-                    }`}
-                  >
-                    S/ {amt}
-                  </button>
-                ))}
-                <button
-                  type="button"
-                  onClick={() => setPresetAmount('custom')}
-                  className={`py-3 rounded-2xl font-black font-['Orbitron'] text-xs transition-all ${
-                    presetAmount === 'custom'
-                      ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20 scale-102'
-                      : 'bg-slate-950 border border-slate-800 text-slate-300 hover:border-rose-500/40'
-                  }`}
-                >
-                  OTRO
-                </button>
-              </div>
+        <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-300">
+          Selecciona un método y completa el pago en la aplicación correspondiente. Abrir este panel o copiar los datos no registra una donación.
+        </p>
 
-              {presetAmount === 'custom' && (
-                <div className="mt-2 relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-slate-400">S/</span>
-                  <input
-                    type="number"
-                    min="1"
-                    step="1"
-                    value={customAmount}
-                    onChange={(e) => setCustomAmount(e.target.value)}
-                    placeholder="Monto personalizado"
-                    className="w-full pl-8 pr-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white font-mono font-bold focus:outline-none focus:border-rose-400"
-                  />
-                </div>
-              )}
+        {(supportSettings?.yape?.enabled ?? true) && (
+          <div className="rounded-2xl p-4 bg-purple-500/5 border border-purple-300/50 dark:border-purple-400/20 space-y-3">
+            <div className="flex items-center gap-2 text-purple-700 dark:text-purple-300 font-bold text-xs">
+              <Smartphone className="w-4 h-4" /> YAPE
             </div>
-
-            {/* Payment Method */}
-            <div>
-              <label className="block font-bold text-slate-300 mb-1.5">Método de Pago:</label>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {(['Yape', 'Plin', 'Tarjeta', 'PayPal'] as const).map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    onClick={() => setPaymentMethod(m)}
-                    className={`p-2 rounded-xl text-xs font-bold border transition-all ${
-                      paymentMethod === m
-                        ? 'bg-indigo-950 border-indigo-400 text-cyan-300'
-                        : 'bg-slate-950 border-slate-800 text-slate-400'
-                    }`}
-                  >
-                    {m}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Message Input */}
-            <div>
-              <label className="block font-bold text-slate-300 mb-1">Escribe un mensaje de aliento:</label>
-              <textarea
-                rows={2}
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="¡Gran juego! Sigan con más niveles..."
-                className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-500 focus:outline-none focus:border-rose-400 resize-none"
-              />
-            </div>
-
-            {/* Public toggle checkbox */}
-            <div className="flex items-center gap-2 p-2 rounded-xl bg-slate-950/60 border border-slate-800">
-              <input
-                type="checkbox"
-                id="public-toggle"
-                checked={isPublic}
-                onChange={(e) => setIsPublic(e.target.checked)}
-                className="w-4 h-4 rounded text-rose-500 focus:ring-0 cursor-pointer"
-              />
-              <label htmlFor="public-toggle" className="text-xs text-slate-300 font-medium cursor-pointer">
-                ☑ Publicar mi mensaje en la ficha de {game.name}
-              </label>
-            </div>
-
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={isProcessing || actualAmount <= 0}
-              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-400 hover:to-pink-400 text-white font-black text-sm font-['Orbitron'] tracking-wider shadow-lg shadow-rose-500/25 flex items-center justify-center gap-2 active:scale-95 transition-all"
-            >
-              <Heart className="w-4 h-4 fill-white" />
-              <span>{isProcessing ? 'PROCESANDO...' : `APOYAR CON S/ ${actualAmount}`}</span>
+            <p className="text-base font-black font-mono tracking-wide text-slate-900 dark:text-white">{yapePhone}</p>
+            {supportSettings?.yape?.holderName && <p className="text-[10px] text-slate-500 dark:text-slate-400">{supportSettings.yape.holderName}</p>}
+            <button onClick={handleCopyYape} className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center justify-center gap-2">
+              {copiedPhone ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              {copiedPhone ? 'Número copiado' : 'Copiar número de Yape'}
             </button>
-          </form>
+          </div>
         )}
+
+        {(supportSettings?.paypal?.enabled ?? true) && (
+          <div className="rounded-2xl p-4 bg-sky-500/5 border border-sky-300/50 dark:border-sky-400/20 space-y-3">
+            <div className="flex items-center gap-2 text-sky-700 dark:text-sky-300 font-bold text-xs">
+              <DollarSign className="w-4 h-4" /> PAYPAL
+            </div>
+            <p className="text-xs font-bold font-mono break-all text-slate-900 dark:text-white">{paypalEmail}</p>
+            <a href={paypalUrl} target="_blank" rel="noopener noreferrer" className="w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold flex items-center justify-center gap-2">
+              <ExternalLink className="w-4 h-4" /> Abrir PayPal
+            </a>
+          </div>
+        )}
+
+        {supportSettings?.qr?.enabled && supportSettings.qr.imageUrl && (
+          <div className="rounded-2xl p-4 bg-amber-500/5 border border-amber-300/50 dark:border-amber-400/20 space-y-3 text-center">
+            <div className="flex items-center justify-center gap-2 text-amber-700 dark:text-amber-300 font-bold text-xs">
+              <QrCode className="w-4 h-4" /> QR DE PAGO
+            </div>
+            <img src={supportSettings.qr.imageUrl} alt="QR de pago de ANAPSE" className="w-36 h-36 object-contain mx-auto rounded-xl bg-white p-2" />
+            <p className="text-[10px] text-slate-600 dark:text-slate-300">Escanea el código desde tu aplicación de pago.</p>
+          </div>
+        )}
+
+        <p className="text-[10px] text-slate-500 dark:text-slate-400 text-center">
+          No se mostrará ninguna confirmación ni se contabilizará un aporte sin verificación del pago.
+        </p>
+        <button onClick={onClose} className="w-full py-2.5 rounded-xl bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-200 text-xs font-bold hover:bg-slate-200 dark:hover:bg-white/15">
+          Cerrar
+        </button>
       </div>
     </div>
   );
