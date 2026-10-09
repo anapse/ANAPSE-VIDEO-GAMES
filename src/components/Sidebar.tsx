@@ -76,7 +76,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <aside
-      className={`hidden md:flex flex-col shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-r border-slate-200/80 dark:border-slate-800/80 min-h-[calc(100vh-4.5rem)] p-2 sm:p-3 select-none sticky top-18 transition-all duration-300 ${
+      className={`hidden md:flex flex-col shrink-0 bg-[#f5efe3] dark:bg-[#302b23] border-r border-[#d8cbb5] dark:border-[#514638] min-h-[calc(100vh-4.5rem)] p-2 sm:p-3 select-none sticky top-18 transition-all duration-300 ${
         collapsed ? 'w-16 items-center' : 'w-56 lg:w-60'
       }`}
     >
