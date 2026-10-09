@@ -25,7 +25,7 @@ export const GameCard: React.FC<GameCardProps> = ({
   return (
     <div
       onClick={() => onViewDetails(game)}
-      className="group cursor-pointer rounded-2xl overflow-hidden bg-transparent border border-white/20 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col"
+      className="group cursor-pointer rounded-2xl overflow-hidden bg-white/15 dark:bg-stone-950/25 backdrop-blur-xl border border-white/45 dark:border-amber-100/20 shadow-[0_8px_24px_rgba(25,20,12,0.22),inset_0_1px_0_rgba(255,255,255,0.35)] hover:shadow-[0_18px_36px_rgba(25,20,12,0.34),inset_0_1px_0_rgba(255,255,255,0.45)] hover:-translate-y-2 hover:scale-[1.015] transition-all duration-300 flex flex-col"
     >
       {/* Portada protagonista: más grande y sin una franja inferior de controles */}
       <div className="relative aspect-[4/3] overflow-hidden bg-transparent group/thumb">
@@ -67,7 +67,7 @@ export const GameCard: React.FC<GameCardProps> = ({
       </div>
 
       {/* Pie compacto: solo nombre y valoración */}
-      <div className="px-3 py-2.5 flex flex-col gap-1.5 bg-transparent">
+      <div className="px-3 py-2.5 flex flex-col gap-1.5 bg-white/20 dark:bg-stone-950/25 backdrop-blur-lg border-t border-white/30 dark:border-white/10">
         <h3 className="text-xs sm:text-sm font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)] font-['Plus_Jakarta_Sans'] group-hover:text-amber-300 transition-colors line-clamp-1">
           {game.name}
         </h3>
