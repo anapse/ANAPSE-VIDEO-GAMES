@@ -1,19 +1,10 @@
 import React, { useState } from 'react';
-import { Heart, Check, DollarSign, Facebook, ExternalLink, QrCode, Copy, Smartphone, MessageCircle } from 'lucide-react';
+import { Heart, DollarSign, Facebook, ExternalLink, QrCode, Copy, Smartphone, MessageCircle } from 'lucide-react';
 import { useGameData } from '../context/GameDataContext';
-import confetti from 'canvas-confetti';
 
 export const SupportView: React.FC = () => {
-  const { addDonation, supportSettings } = useGameData();
-
-  const [presetAmount, setPresetAmount] = useState<number | 'custom'>(5);
-  const [customAmount, setCustomAmount] = useState('15');
-  const [message, setMessage] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const { supportSettings } = useGameData();
   const [copiedPhone, setCopiedPhone] = useState(false);
-
-  const actualAmount = presetAmount === 'custom' ? parseFloat(customAmount) || 5 : presetAmount;
 
   const handleCopyYape = () => {
     if (supportSettings?.yape?.phone) {
@@ -23,29 +14,7 @@ export const SupportView: React.FC = () => {
     }
   };
 
-  const handleRegisterDonation = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsProcessing(true);
 
-    await new Promise((r) => setTimeout(r, 500));
-
-    await addDonation({
-      gameId: 'anapse-general',
-      gameName: 'ANAPSE VIDEO GAMES',
-      amount: actualAmount,
-      message: message.trim() || undefined,
-      isPublic: true,
-      paymentMethod: 'Yape / PayPal',
-    });
-
-    setIsProcessing(false);
-    setSuccess(true);
-    confetti({ particleCount: 80, spread: 80, origin: { y: 0.6 } });
-    setTimeout(() => {
-      setSuccess(false);
-      setMessage('');
-    }, 4000);
-  };
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-in fade-in">
@@ -191,93 +160,18 @@ export const SupportView: React.FC = () => {
 
       </div>
 
-      {/* 3. SELECCIÓN DE MONTO RÁPIDO & MENSAJE */}
-      <div className="rounded-3xl p-6 sm:p-8 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/70 dark:border-slate-800/70 shadow-lg space-y-5">
+      {/* Aviso transparente: no se registran donaciones desde esta página */}
+      <div className="rounded-3xl p-5 sm:p-6 bg-white/65 dark:bg-slate-900/55 backdrop-blur-md border border-amber-200/70 dark:border-amber-900/40 shadow-lg space-y-2">
         <h2 className="text-sm font-bold text-slate-900 dark:text-white font-['Orbitron'] flex items-center gap-2">
-          <Heart className="w-4 h-4 text-rose-500 fill-rose-500" />
-          <span>Registrar Monto de Apoyo</span>
+          <Heart className="w-4 h-4 text-rose-500" />
+          <span>¿Cómo colaborar?</span>
         </h2>
-
-        <form onSubmit={handleRegisterDonation} className="space-y-4">
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-              Selecciona o ingresa la cantidad ($ USD):
-            </label>
-            <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
-              {(supportSettings.customAmounts || [2, 5, 10, 20]).map((amt) => (
-                <button
-                  type="button"
-                  key={amt}
-                  onClick={() => setPresetAmount(amt)}
-                  className={`py-2.5 rounded-2xl text-xs font-extrabold transition-all ${
-                    presetAmount === amt
-                      ? 'bg-rose-600 text-white shadow-xs'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
-                  }`}
-                >
-                  ${amt}
-                </button>
-              ))}
-
-              <button
-                type="button"
-                onClick={() => setPresetAmount('custom')}
-                className={`py-2.5 rounded-2xl text-xs font-extrabold transition-all ${
-                  presetAmount === 'custom'
-                    ? 'bg-rose-600 text-white shadow-xs'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
-                }`}
-              >
-                Otro
-              </button>
-            </div>
-
-            {presetAmount === 'custom' && (
-              <div className="pt-2">
-                <input
-                  type="number"
-                  value={customAmount}
-                  onChange={(e) => setCustomAmount(e.target.value)}
-                  placeholder="Monto personalizado USD"
-                  className="w-full p-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:border-rose-500"
-                />
-              </div>
-            )}
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-              Mensaje para los creadores (Opcional):
-            </label>
-            <input
-              type="text"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="¡Sigan adelante equipo ANAPSE!"
-              className="w-full p-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-rose-500"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={isProcessing}
-            className="w-full py-3 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs tracking-wider shadow-md active:scale-98 transition-all flex items-center justify-center gap-2"
-          >
-            {success ? (
-              <>
-                <Check className="w-4 h-4" />
-                <span>¡MUCHAS GRACIAS POR TU APOYO!</span>
-              </>
-            ) : isProcessing ? (
-              <span>Registrando...</span>
-            ) : (
-              <>
-                <Heart className="w-4 h-4 fill-white" />
-                <span>REGISTRAR MI APOYO (${actualAmount} USD)</span>
-              </>
-            )}
-          </button>
-        </form>
+        <p className="text-xs sm:text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+          Elige uno de los métodos de pago disponibles y completa la operación en la aplicación correspondiente. Copiar un número o abrir un enlace no significa que se haya realizado una donación.
+        </p>
+        <p className="text-[11px] text-slate-500 dark:text-slate-400">
+          Esta página no registra aportes ni muestra confirmaciones de pago automáticamente.
+        </p>
       </div>
 
       {/* 4. REDES SOCIALES & FACEBOOK */}
