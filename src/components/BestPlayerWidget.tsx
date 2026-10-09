@@ -73,15 +73,15 @@ export const BestPlayerWidget: React.FC<BestPlayerWidgetProps> = ({ game }) => {
   }, [game.gameId, game.rankingConfig]);
 
   return (
-    <div className="inline-flex max-w-full min-w-0 items-center gap-2 rounded-xl bg-white/10 border border-white/15 px-3 py-2 shadow-sm backdrop-blur-sm">
-      <Trophy className="w-4 h-4 text-amber-300 shrink-0" />
+    <div className="inline-flex max-w-full min-w-0 items-center gap-2 rounded-xl bg-white/35 dark:bg-stone-900/25 border border-white/45 dark:border-amber-100/15 px-3 py-2 shadow-[0_3px_10px_rgba(80,55,20,0.08)] backdrop-blur-sm">
+      <Trophy className="w-4 h-4 text-amber-600 dark:text-amber-300 shrink-0" />
       {topPlayer ? (
         <>
-          <span className="max-w-[120px] sm:max-w-[160px] font-bold text-white text-xs truncate" title={topPlayer.name}>{topPlayer.name}</span>
-          <span className="font-mono font-black text-amber-300 text-xs shrink-0">{topPlayer.score.toLocaleString()}</span>
+          <span className="max-w-[120px] sm:max-w-[160px] font-bold text-slate-800 dark:text-white text-xs truncate" title={topPlayer.name}>{topPlayer.name}</span>
+          <span className="font-mono font-black text-amber-700 dark:text-amber-300 text-xs shrink-0">{topPlayer.score.toLocaleString()}</span>
         </>
       ) : (
-        <span className="text-xs text-slate-300 whitespace-nowrap">Sin récord</span>
+        <span className="text-xs text-slate-600 dark:text-slate-300 whitespace-nowrap">Sin récord</span>
       )}
     </div>
   );
