@@ -45,9 +45,6 @@ export const ToolsView: React.FC<ToolsViewProps> = ({ onOpenTool }) => {
                   </div>
                 </div>
                 <p className="text-[11px] leading-relaxed text-slate-800 dark:text-slate-100 min-h-[42px]">{tool.description}</p>
-                <button type="button" onClick={() => onOpenTool(tool)} className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-2.5 text-xs mt-auto transition-all active:scale-95">
-                  Abrir herramienta <Play className="w-4 h-4 fill-current" />
-                </button>
               </div>
             </article>
           ))}
