@@ -11,8 +11,8 @@ export const ToolsView: React.FC<ToolsViewProps> = ({ onOpenTool }) => {
   const visibleTools = tools.filter((tool) => tool.visible);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-in fade-in">
-      <div className="text-center max-w-2xl mx-auto space-y-2">
+    <div className="w-full mx-auto py-4 space-y-5 animate-in fade-in">
+      <div className="text-left space-y-1.5">
         <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-xs font-extrabold font-['Orbitron']">
           <Wrench className="w-4 h-4" />
           HERRAMIENTAS ANAPSE
@@ -28,24 +28,24 @@ export const ToolsView: React.FC<ToolsViewProps> = ({ onOpenTool }) => {
           <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Las nuevas herramientas aparecerán aquí cuando sean publicadas desde el panel de administración.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
           {visibleTools.map((tool) => (
-            <article key={tool.id} className="relative overflow-hidden rounded-3xl bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border border-slate-200 dark:border-slate-800 shadow-xl">
+            <article key={tool.id} className="group cursor-pointer overflow-hidden rounded-2xl bg-transparent border border-white/20 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col">
               {tool.imageUrl ? (
-                <img src={tool.imageUrl} alt="" className="w-full h-36 object-cover" />
+                <div className="relative aspect-[4/3] overflow-hidden bg-transparent flex items-center justify-center"><img src={tool.imageUrl} alt={tool.name} className="w-full h-full object-contain p-1.5 transition-transform duration-300 group-hover:scale-[1.02]" loading="lazy" /></div>
               ) : (
-                <div className="w-full h-36 bg-gradient-to-br from-amber-500/20 via-cyan-500/10 to-emerald-500/20 flex items-center justify-center">
+                <div className="w-full aspect-[4/3] bg-transparent flex items-center justify-center">
                   <span className="text-6xl">🛠️</span>
                 </div>
               )}
-              <div className="p-5 space-y-4">
+              <div className="px-3 py-2.5 space-y-2 bg-transparent flex flex-col flex-1">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <h2 className="text-lg font-black text-slate-900 dark:text-white">{tool.name}</h2>
+                    <h2 className="text-xs sm:text-sm font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)] font-['Plus_Jakarta_Sans'] line-clamp-1">{tool.name}</h2>
                   </div>
                 </div>
-                <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300 min-h-[60px]">{tool.description}</p>
-                <button type="button" onClick={() => onOpenTool(tool)} className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-3 transition-all active:scale-95">
+                <p className="text-[11px] leading-relaxed text-white/90 drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)] min-h-[42px]">{tool.description}</p>
+                <button type="button" onClick={() => onOpenTool(tool)} className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-2.5 text-xs mt-auto transition-all active:scale-95">
                   Abrir herramienta <Play className="w-4 h-4 fill-current" />
                 </button>
               </div>
