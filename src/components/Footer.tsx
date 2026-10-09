@@ -41,7 +41,7 @@ export const Footer: React.FC<FooterProps> = ({ onTabChange }) => {
   const remainingOnlineCount = onlineModerators.length - 3;
 
   return (
-    <footer className="relative z-10 w-full bg-[#f5efe3] dark:bg-[#302b23] border-t border-[#d8cbb5] dark:border-[#514638] text-slate-500 dark:text-slate-400 text-xs mt-16 pb-20 lg:pb-12 pt-12 transition-colors">
+    <footer className="relative z-10 w-full bg-[#f5efe3]/65 dark:bg-[#302b23]/55 backdrop-blur-[2px] border-t border-white/35 dark:border-amber-100/10 shadow-[0_-6px_24px_rgba(35,25,10,0.06)] text-slate-600 dark:text-slate-300 text-xs mt-16 pb-20 lg:pb-12 pt-12 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8">
           
