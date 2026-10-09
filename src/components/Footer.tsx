@@ -41,14 +41,14 @@ export const Footer: React.FC<FooterProps> = ({ onTabChange }) => {
   const remainingOnlineCount = onlineModerators.length - 3;
 
   return (
-    <footer className="relative z-10 w-full bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs mt-16 pb-20 lg:pb-12 pt-12 transition-colors">
+    <footer className="relative z-10 w-full bg-[#f5efe3] dark:bg-[#302b23] border-t border-[#d8cbb5] dark:border-[#514638] text-slate-500 dark:text-slate-400 text-xs mt-16 pb-20 lg:pb-12 pt-12 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8">
           
           {/* Brand & Mission */}
           <div className="space-y-3 sm:col-span-2 md:col-span-2">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-500 to-amber-500 p-0.5 shadow-xs flex items-center justify-center overflow-hidden">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 p-0.5 shadow-xs flex items-center justify-center overflow-hidden">
                 <img
                   src={ASSETS.logo}
                   alt="ANAPSE Logo"
@@ -71,7 +71,7 @@ export const Footer: React.FC<FooterProps> = ({ onTabChange }) => {
             </p>
             <ul className="space-y-1.5 text-xs">
               <li>
-                <button onClick={() => onTabChange('games')} className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">
+                <button onClick={() => onTabChange('games')} className="hover:text-amber-700 dark:hover:text-amber-400 transition-colors">
                   Catálogo de Juegos
                 </button>
               </li>
@@ -103,7 +103,7 @@ export const Footer: React.FC<FooterProps> = ({ onTabChange }) => {
             
             {/* 👥 COMUNIDAD */}
             <div className="space-y-1">
-              <p className="font-bold text-slate-900 dark:text-white uppercase text-[11px] tracking-wider font-['Orbitron'] flex items-center gap-1.5 text-cyan-600 dark:text-cyan-400">
+              <p className="font-bold text-slate-900 dark:text-white uppercase text-[11px] tracking-wider font-['Orbitron'] flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
                 <Users className="w-3.5 h-3.5" />
                 <span>COMUNIDAD</span>
               </p>
