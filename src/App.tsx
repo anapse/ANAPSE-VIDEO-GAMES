@@ -111,10 +111,9 @@ const MainAppContent: React.FC = () => {
           onError={(e) => {
             (e.target as HTMLElement).style.display = 'none';
           }}
-          className="w-full h-full object-cover opacity-95 dark:opacity-75 scale-102"
+          className="w-full h-full object-cover opacity-100 scale-102"
         />
         {/* Capa ultra sutil e iluminada para ver el paisaje como un mapa de fondo */}
-        <div className="absolute inset-0 bg-white/20 dark:bg-slate-950/50 backdrop-blur-[1px]" />
       </div>
       )}
       
