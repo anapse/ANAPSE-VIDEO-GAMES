@@ -6,7 +6,6 @@ import {
   MessageSquare,
   Share2,
   Send,
-  Trophy,
   Bookmark,
   ChevronLeft,
 } from 'lucide-react';
@@ -143,21 +142,18 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
             </button>
           </div>
 
-          {/* Acciones rápidas: interacción y compartir */}
+          {/* Acciones y récord compacto en la misma franja */}
           <div className="flex flex-wrap items-center gap-2 pt-4 border-t border-white/10">
             <button type="button" onClick={() => toggleLikeGame(game.gameId)} aria-label="Me gusta" title="Me gusta" className={"inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold border shadow-sm transition-all hover:-translate-y-0.5 " + (isLiked ? "bg-rose-500 text-white border-rose-400" : "bg-slate-950/45 text-slate-100 border-white/10 hover:bg-rose-950/60")}><Heart className={"w-4 h-4 " + (isLiked ? "fill-current" : "")} /><span>{game.likesCount}</span></button>
             <button type="button" onClick={() => toggleFollowGame(game.gameId)} aria-label={isFollowed ? "Dejar de seguir" : "Seguir juego"} title={isFollowed ? "Dejar de seguir" : "Seguir juego"} className={"rounded-xl p-2.5 border shadow-sm transition-all hover:-translate-y-0.5 " + (isFollowed ? "bg-amber-400 text-slate-950 border-amber-300" : "bg-slate-950/45 text-slate-100 border-white/10 hover:bg-amber-950/60")}><Bookmark className={"w-4 h-4 " + (isFollowed ? "fill-current" : "")} /></button>
             <button type="button" onClick={() => onDonate(game)} aria-label="Apoyar ANAPSE" title="Apoyar ANAPSE" className="rounded-xl p-2.5 bg-rose-600 hover:bg-rose-500 text-white border border-rose-400 shadow-sm transition-all hover:-translate-y-0.5"><Heart className="w-4 h-4 fill-current" /></button>
             <button type="button" onClick={() => onShare(game)} aria-label="Compartir juego" title="Compartir juego" className="rounded-xl p-2.5 bg-slate-950/45 text-slate-100 border border-white/10 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-indigo-500/30"><Share2 className="w-4 h-4" /></button>
             <button type="button" onClick={() => setShowCommentsModal(true)} aria-label="Ver y escribir comentarios" title="Comentarios" className="inline-flex items-center gap-1.5 rounded-xl p-2.5 bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-400 shadow-sm transition-all hover:-translate-y-0.5"><MessageSquare className="w-4 h-4" /><span className="text-xs font-bold">{gameComments.length}</span></button>
+            <div className="ml-auto min-w-0 max-w-full">
+              <BestPlayerWidget game={game} />
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* Récord integrado en una sola tarjeta */}
-      <div className="rounded-2xl overflow-hidden bg-slate-950/85 dark:bg-slate-950/90 backdrop-blur-md border border-white/10 shadow-[0_12px_32px_rgba(5,10,25,0.32)]">
-        <div className="flex items-center gap-2 px-5 pt-4 pb-2 text-amber-300"><Trophy className="w-4 h-4" /><h2 className="text-base font-bold font-['Orbitron']">Récord</h2></div>
-        <BestPlayerWidget game={game} />
       </div>
 
 
