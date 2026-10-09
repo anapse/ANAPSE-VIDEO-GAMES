@@ -93,19 +93,19 @@ export const RobloxHomeView: React.FC<RobloxHomeViewProps> = ({
 
       {/* Un único catálogo principal, ordenado por fecha de publicación */}
       <section id="recent-games-section" className="space-y-4 scroll-mt-20">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 dark:border-slate-800 pb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
           <div>
-            <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white font-['Orbitron'] flex items-center gap-2">
+            <h2 className="inline-flex w-fit items-center gap-2 rounded-xl border border-amber-400/35 bg-white/35 dark:bg-stone-900/25 backdrop-blur-sm px-3 py-2 text-lg sm:text-xl font-bold text-slate-900 dark:text-white font-['Orbitron'] shadow-[0_3px_10px_rgba(80,55,20,0.08)]">
               <Sparkles className="w-5 h-5 text-amber-500" />
               <span>Juegos</span>
             </h2>
-            <p className="text-xs text-slate-600 dark:text-slate-300 mt-1">
+            <p className="text-xs text-slate-800 dark:text-slate-100 font-medium mt-1 drop-shadow-[0_1px_2px_rgba(255,255,255,0.55)]">
               Encuentra tus favoritos o descubre lo último que publicamos.
             </p>
           </div>
           <button
             onClick={() => onNavigateTab('games')}
-            className="self-start sm:self-auto text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1"
+            className="self-start sm:self-auto rounded-xl border border-amber-400/45 bg-white/35 dark:bg-stone-900/25 backdrop-blur-sm px-3 py-2 text-xs font-bold text-amber-800 dark:text-amber-300 hover:bg-amber-100/60 dark:hover:bg-stone-800/40 shadow-[0_3px_10px_rgba(80,55,20,0.08)] transition-colors flex items-center gap-1"
           >
             <span>Ver catálogo y filtros</span>
             <ChevronRight className="w-3.5 h-3.5" />
@@ -179,7 +179,7 @@ export const RobloxHomeView: React.FC<RobloxHomeViewProps> = ({
 
       {/* Propuestas de la comunidad */}
       <section className="space-y-4">
-        <div className="rounded-2xl p-5 sm:p-6 bg-[#f5efe3] dark:bg-[#302b23] border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-4">
+        <div className="rounded-2xl p-5 sm:p-6 bg-white/25 dark:bg-stone-950/20 backdrop-blur-sm border border-white/35 dark:border-amber-100/15 shadow-[0_5px_18px_rgba(40,30,15,0.10)] space-y-4">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white font-['Orbitron'] flex items-center gap-2">
