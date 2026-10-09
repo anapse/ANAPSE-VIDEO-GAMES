@@ -26,7 +26,7 @@ export const GameModalPlayer: React.FC<GameModalPlayerProps> = ({
   const [iframeError, setIframeError] = useState(false);
 
   // Quick Start Screen state
-  const [gameStarted, setGameStarted] = useState(false);
+  const [gameStarted, setGameStarted] = useState(true);
   const [activeTab, setActiveTab] = useState<'start' | 'how' | 'ranking'>('start');
   const [showExitPrompt, setShowExitPrompt] = useState(false);
   const historyEntryAddedRef = useRef(false);
