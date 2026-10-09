@@ -30,7 +30,7 @@ export const ToolsView: React.FC<ToolsViewProps> = ({ onOpenTool }) => {
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
           {visibleTools.map((tool) => (
-            <article key={tool.id} className="group cursor-pointer overflow-hidden rounded-2xl bg-transparent border border-white/20 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col">
+            <article key={tool.id} className="group cursor-pointer overflow-hidden rounded-2xl bg-white/15 dark:bg-stone-950/25 backdrop-blur-xl border border-white/45 dark:border-amber-100/20 shadow-[0_8px_24px_rgba(25,20,12,0.22),inset_0_1px_0_rgba(255,255,255,0.35)] hover:shadow-[0_18px_36px_rgba(25,20,12,0.34),inset_0_1px_0_rgba(255,255,255,0.45)] hover:-translate-y-2 hover:scale-[1.015] transition-all duration-300 flex flex-col">
               {tool.imageUrl ? (
                 <div className="relative aspect-[4/3] overflow-hidden bg-transparent flex items-center justify-center"><img src={tool.imageUrl} alt={tool.name} className="w-full h-full object-contain p-1.5 transition-transform duration-300 group-hover:scale-[1.02]" loading="lazy" /></div>
               ) : (
@@ -38,7 +38,7 @@ export const ToolsView: React.FC<ToolsViewProps> = ({ onOpenTool }) => {
                   <span className="text-6xl">🛠️</span>
                 </div>
               )}
-              <div className="px-3 py-2.5 space-y-2 bg-transparent flex flex-col flex-1">
+              <div className="px-3 py-2.5 space-y-2 bg-white/20 dark:bg-stone-950/25 backdrop-blur-lg border-t border-white/30 dark:border-white/10 flex flex-col flex-1">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <h2 className="text-xs sm:text-sm font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)] font-['Plus_Jakarta_Sans'] line-clamp-1">{tool.name}</h2>
