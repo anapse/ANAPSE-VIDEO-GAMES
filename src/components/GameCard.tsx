@@ -32,7 +32,7 @@ export const GameCard: React.FC<GameCardProps> = ({
         <img
           src={game.mainImage}
           alt={game.name}
-          className="w-full h-full object-cover group-hover/thumb:scale-105 transition-transform duration-300"
+          className="w-full h-full object-contain p-1.5 group-hover/thumb:scale-[1.02] transition-transform duration-300"
           loading="lazy"
         />
 
