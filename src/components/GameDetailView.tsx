@@ -12,7 +12,6 @@ import {
 } from 'lucide-react';
 import { Game } from '../types';
 import { useGameData } from '../context/GameDataContext';
-import { useAuth } from '../context/AuthContext';
 import confetti from 'canvas-confetti';
 import { BestPlayerWidget } from './BestPlayerWidget';
 
@@ -70,20 +69,9 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
 
   const getPortalShareUrl = () => `${window.location.origin}${window.location.pathname}#game-${game.gameId}`;
 
-  const getWhatsAppShareUrl = () => {
-    const text = encodeURIComponent(
-      `¡Juega ${game.name} gratis en ANAPSE VIDEO GAMES! 🦊🥚\n\n${getPortalShareUrl()}`
-    );
-    return `https://api.whatsapp.com/send?text=${text}`;
-  };
 
-  const getEmailShareUrl = () => {
-    const subject = encodeURIComponent(`🎮 Juega ${game.name} gratis`);
-    const body = encodeURIComponent(
-      `Te invito a jugar ${game.name} gratis en ANAPSE VIDEO GAMES:\n\n${getPortalShareUrl()}`
-    );
-    return `mailto:?subject=${subject}&body=${body}`;
-  };
+
+
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 animate-in fade-in">
