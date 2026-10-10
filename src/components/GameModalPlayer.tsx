@@ -40,8 +40,8 @@ export const GameModalPlayer: React.FC<GameModalPlayerProps> = ({
   const getGameLaunchUrl = (rawUrl: string): string => {
     try {
       const url = new URL(rawUrl);
-      const basePath = url.pathname.replace(/\\/+$/, '');
-      url.pathname = `${basePath}/jugar`.replace(/^\\/\\/+, '/');
+      const basePath = url.pathname.replace(/\/+$/, '');
+      url.pathname = `${basePath}/jugar`.replace(/^\/+/, '/');
       url.search = '';
       url.searchParams.set('pw', '16546203');
       url.hash = '';
