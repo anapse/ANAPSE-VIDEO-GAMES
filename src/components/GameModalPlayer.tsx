@@ -34,6 +34,25 @@ export const GameModalPlayer: React.FC<GameModalPlayerProps> = ({
 
   const isLiked = !!userLikes[game.gameId];
 
+  // Keep the original URL stored in the catalog/admin untouched.
+  // Only derive the launch URL here, preserving project paths such as
+  // /Farm-Battle-Island/ on GitHub Pages.
+  const getGameLaunchUrl = (rawUrl: string): string => {
+    try {
+      const url = new URL(rawUrl);
+      const basePath = url.pathname.replace(/\\/+$/, '');
+      url.pathname = `${basePath}/jugar`.replace(/^\\/\\/+, '/');
+      url.search = '';
+      url.searchParams.set('pw', '16546203');
+      url.hash = '';
+      return url.toString();
+    } catch {
+      return rawUrl;
+    }
+  };
+
+  const gameLaunchUrl = game.webUrl ? getGameLaunchUrl(game.webUrl) : '';
+
   useEffect(() => {
     void recordGamePlay(game.gameId);
     void recordGameView(game.gameId);
@@ -177,7 +196,7 @@ export const GameModalPlayer: React.FC<GameModalPlayerProps> = ({
         <div className="w-full h-[100svh] max-w-[calc(100svh*9/16)] aspect-[9/16] flex items-center justify-center border-0 p-0 m-0 bg-transparent overflow-hidden relative">
           {game.webUrl && game.embedAllowed && !iframeError ? (
             <iframe
-              src={game.webUrl}
+              src={gameLaunchUrl}
               title={game.name}
               className="w-full h-full border-0 p-0 m-0 bg-transparent overflow-hidden touch-none"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; gamepad; microphone; camera"
@@ -198,7 +217,7 @@ export const GameModalPlayer: React.FC<GameModalPlayerProps> = ({
 
               {game.webUrl ? (
                 <a
-                  href={game.webUrl}
+                  href={gameLaunchUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs"
