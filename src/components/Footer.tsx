@@ -43,10 +43,10 @@ export const Footer: React.FC<FooterProps> = ({ onTabChange }) => {
   return (
     <footer className="relative z-10 w-full bg-[#f5efe3]/65 dark:bg-[#302b23]/55 backdrop-blur-[2px] border-t border-white/35 dark:border-amber-100/10 shadow-[0_-6px_24px_rgba(35,25,10,0.06)] text-slate-600 dark:text-slate-300 text-xs mt-16 pb-20 lg:pb-12 pt-12 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
           
           {/* Brand & Mission */}
-          <div className="space-y-3 sm:col-span-2 md:col-span-2">
+          <div className="space-y-3 sm:col-span-2 lg:col-span-2">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 p-0.5 shadow-xs flex items-center justify-center overflow-hidden">
                 <img
@@ -71,29 +71,63 @@ export const Footer: React.FC<FooterProps> = ({ onTabChange }) => {
             </p>
             <ul className="space-y-1.5 text-xs">
               <li>
-                <button onClick={() => onTabChange('games')} className="hover:text-amber-700 dark:hover:text-amber-400 transition-colors">
+                <button onClick={() => onTabChange('games')} className="hover:text-amber-700 dark:hover:text-amber-400 transition-colors text-left">
                   Catálogo de Juegos
                 </button>
               </li>
               <li>
-                <button onClick={() => onTabChange('proposals')} className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">
+                <button onClick={() => onTabChange('proposals')} className="hover:text-amber-700 dark:hover:text-amber-400 transition-colors text-left">
                   Propuestas de la Comunidad
                 </button>
               </li>
               <li>
-                <button onClick={() => onTabChange('community')} className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">
+                <button onClick={() => onTabChange('community')} className="hover:text-amber-700 dark:hover:text-amber-400 transition-colors text-left">
                   Muro de la Comunidad
                 </button>
               </li>
               <li>
-                <button onClick={() => onTabChange('support')} className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">
+                <button onClick={() => onTabChange('support')} className="hover:text-amber-700 dark:hover:text-amber-400 transition-colors text-left">
                   Apoyar ANAPSE
                 </button>
               </li>
               <li className="pt-1">
-                <button onClick={() => onTabChange('admin')} className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors text-[11px] text-slate-400">
+                <button onClick={() => onTabChange('admin')} className="hover:text-amber-700 dark:hover:text-amber-400 transition-colors text-[11px] text-slate-400 text-left">
                   Panel de Administración
                 </button>
+              </li>
+            </ul>
+          </div>
+
+          {/* Legal & Transparencia */}
+          <div className="space-y-2">
+            <p className="font-bold text-slate-900 dark:text-white uppercase text-[11px] tracking-wider font-['Orbitron']">
+              Legal y Soporte
+            </p>
+            <ul className="space-y-1.5 text-xs">
+              <li>
+                <a href="/acerca.html" className="hover:text-amber-700 dark:hover:text-amber-400 transition-colors">
+                  Acerca de ANAPSE
+                </a>
+              </li>
+              <li>
+                <a href="/privacidad.html" className="hover:text-amber-700 dark:hover:text-amber-400 transition-colors">
+                  Política de Privacidad
+                </a>
+              </li>
+              <li>
+                <a href="/terminos.html" className="hover:text-amber-700 dark:hover:text-amber-400 transition-colors">
+                  Términos y Condiciones
+                </a>
+              </li>
+              <li>
+                <a href="/contacto.html" className="hover:text-amber-700 dark:hover:text-amber-400 transition-colors">
+                  Contacto y Soporte
+                </a>
+              </li>
+              <li className="pt-0.5">
+                <a href="/ads.txt" target="_blank" rel="noopener noreferrer" className="hover:text-amber-700 dark:hover:text-amber-400 transition-colors text-[11px] text-slate-400">
+                  Archivo ads.txt
+                </a>
               </li>
             </ul>
           </div>

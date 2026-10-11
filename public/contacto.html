@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contacto y Soporte — ANAPSE VIDEO GAMES</title>
+  <meta name="description" content="Ponte en contacto con el equipo de desarrollo de ANAPSE VIDEO GAMES. Soporte técnico, propuestas de videojuegos, reportes de errores y consultas generales." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Orbitron:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #12100e;
+      --card-bg: #1e1b16;
+      --border: #383023;
+      --text: #f3f4f6;
+      --text-muted: #a39c91;
+      --accent: #f59e0b;
+      --accent-glow: rgba(245, 158, 11, 0.15);
+    }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      line-height: 1.7;
+    }
+    header {
+      background: #181511;
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text);
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      margin-left: 1rem;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover, .nav-links a.active {
+      color: var(--accent);
+    }
+    .container {
+      max-width: 860px;
+      margin: 2.5rem auto;
+      padding: 0 1.5rem;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 1.25rem;
+      padding: 2.5rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+    h1, h2, h3 {
+      font-family: 'Orbitron', sans-serif;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-top: 0;
+      color: var(--accent);
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 0.75rem;
+    }
+    h2 {
+      font-size: 1.3rem;
+      margin-top: 2rem;
+      color: #fbbf24;
+    }
+    p, li {
+      color: var(--text-muted);
+      font-size: 0.98rem;
+    }
+    ul {
+      padding-left: 1.5rem;
+      margin: 1rem 0;
+    }
+    li {
+      margin-bottom: 0.5rem;
+    }
+    .badge {
+      display: inline-block;
+      background: var(--accent-glow);
+      color: var(--accent);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      font-family: 'Orbitron', sans-serif;
+      margin-bottom: 1rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+      margin: 2rem 0;
+    }
+    .contact-box {
+      background: rgba(245, 158, 11, 0.05);
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+      border-radius: 1rem;
+      text-align: center;
+    }
+    .contact-box h3 {
+      font-size: 1rem;
+      margin-top: 0;
+      color: var(--accent);
+    }
+    .contact-box p {
+      margin: 0.5rem 0 1rem;
+      font-size: 0.9rem;
+    }
+    .btn {
+      display: inline-block;
+      background: var(--accent);
+      color: #12100e;
+      font-weight: 700;
+      padding: 0.6rem 1.25rem;
+      border-radius: 0.75rem;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: opacity 0.2s;
+    }
+    .btn:hover {
+      opacity: 0.9;
+    }
+    footer {
+      border-top: 1px solid var(--border);
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-top: 4rem;
+    }
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="/" class="brand">
+      <span>🎮 ANAPSE VIDEO GAMES</span>
+    </a>
+    <nav class="nav-links">
+      <a href="/">Inicio</a>
+      <a href="/acerca.html">Acerca de</a>
+      <a href="/privacidad.html">Privacidad</a>
+      <a href="/terminos.html">Términos</a>
+      <a href="/contacto.html" class="active">Contacto</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div class="card">
+      <span class="badge">ATENCIÓN & SOPORTE</span>
+      <h1>Contacto y Soporte</h1>
+      <p>¿Tienes dudas sobre un juego, sugerencias para una nueva mecánica, problemas técnicos o deseas consultar colaboraciones comerciales? En <strong>ANAPSE VIDEO GAMES</strong> estamos encantados de escucharte y responderte con la mayor brevedad posible.</p>
+
+      <div class="grid">
+        <div class="contact-box">
+          <h3>📬 Correo Electrónico Principal</h3>
+          <p>Para consultas generales, sugerencias de juegos, y solicitudes de soporte técnico.</p>
+          <a href="mailto:elherreroanapse@gmail.com" class="btn">elherreroanapse@gmail.com</a>
+        </div>
+
+        <div class="contact-box">
+          <h3>🎮 Contacto Alternativo</h3>
+          <p>Canal directo para temas institucionales y feedback de jugadores veteranos.</p>
+          <a href="mailto:anapse_video@hotmail.com" class="btn">anapse_video@hotmail.com</a>
+        </div>
+
+        <div class="contact-box">
+          <h3>💡 Propuestas de Juegos</h3>
+          <p>Comparte ideas para nuevos títulos en nuestro módulo comunitario interactivo.</p>
+          <a href="/#proposals" class="btn">Ir a Propuestas</a>
+        </div>
+      </div>
+
+      <h2>Tiempos de Respuesta</h2>
+      <p>Nos esforzamos por responder a todos los mensajes en un plazo estimado de <strong>24 a 48 horas hábiles</strong>. Para reportes de incidencias técnicas en juegos específicos (por ejemplo en el minijuego <em>Fox Thief</em>), te agradeceremos incluir:</p>
+      <ul>
+        <li>Nombre del juego o módulo en el que ocurrió el problema.</li>
+        <li>Dispositivo y navegador utilizado (por ejemplo, Google Chrome en Windows 11 o Safari en iPhone).</li>
+        <li>Una breve descripción de los pasos para reproducir el fallo.</li>
+      </ul>
+
+      <h2>Dirección y Datos del Estudio</h2>
+      <p><strong>Estudio:</strong> ANAPSE Video Games Indie Development Studio<br />
+      <strong>Sitio Web Oficial:</strong> https://anapsevideogame.click<br />
+      <strong>Comunidad:</strong> Foro activo en el portal principal con votaciones en tiempo real para nuevos proyectos.</p>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2026 ANAPSE VIDEO GAMES. Todos los derechos reservados. | <a href="/">Volver al Portal</a> | <a href="/privacidad.html">Privacidad</a> | <a href="/terminos.html">Términos</a></p>
+  </footer>
+</body>
+</html>

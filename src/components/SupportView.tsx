@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Heart, DollarSign, Facebook, ExternalLink, QrCode, Copy, Smartphone, MessageCircle } from 'lucide-react';
+import { Heart, DollarSign, Facebook, ExternalLink, QrCode, Copy, Smartphone, MessageCircle, Check } from 'lucide-react';
 import { useGameData } from '../context/GameDataContext';
 
 export const SupportView: React.FC = () => {

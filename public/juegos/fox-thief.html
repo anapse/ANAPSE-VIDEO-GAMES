@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fox Thief Mini-Game — ANAPSE VIDEO GAMES</title>
+  <meta name="description" content="Juega gratis a Fox Thief Mini-Game en tu navegador. Guía de sigilo, controles completos, estrategias y tabla de récords mundiales en ANAPSE." />
+  <link rel="canonical" href="https://anapsevideogame.click/juegos/fox-thief.html" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦊</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Orbitron:wght@700;800&display=swap" rel="stylesheet">
+  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "VideoGame",
+    "name": "Fox Thief Mini-Game",
+    "description": "Juego web de sigilo, recolección y reflejos rápidos donde controlas a un astuto zorro que debe evadir guardias y recolectar gemas.",
+    "genre": ["Arcade", "Sigilo", "Casual"],
+    "gamePlatform": ["Web Browser", "Mobile Browser"],
+    "applicationCategory": "Game",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "author": {
+      "@type": "Organization",
+      "name": "ANAPSE Video Games",
+      "url": "https://anapsevideogame.click/"
+    }
+  }
+  </script>
+
+  <style>
+    :root {
+      --bg: #12100e;
+      --card-bg: #1e1b16;
+      --border: #383023;
+      --text: #f3f4f6;
+      --text-muted: #a39c91;
+      --accent: #f59e0b;
+      --accent-glow: rgba(245, 158, 11, 0.15);
+    }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      line-height: 1.7;
+    }
+    header {
+      background: #181511;
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text);
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      margin-left: 1rem;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover {
+      color: var(--accent);
+    }
+    .container {
+      max-width: 860px;
+      margin: 2.5rem auto;
+      padding: 0 1.5rem;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 1.25rem;
+      padding: 2.5rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+    h1, h2, h3 {
+      font-family: 'Orbitron', sans-serif;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-top: 0;
+      color: var(--accent);
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 0.75rem;
+    }
+    h2 {
+      font-size: 1.3rem;
+      margin-top: 2rem;
+      color: #fbbf24;
+    }
+    p, li {
+      color: var(--text-muted);
+      font-size: 0.98rem;
+    }
+    ul {
+      padding-left: 1.5rem;
+      margin: 1rem 0;
+    }
+    li {
+      margin-bottom: 0.5rem;
+    }
+    .badge {
+      display: inline-block;
+      background: var(--accent-glow);
+      color: var(--accent);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      font-family: 'Orbitron', sans-serif;
+      margin-bottom: 1rem;
+    }
+    .play-banner {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(234, 88, 12, 0.1) 100%);
+      border: 1px solid var(--accent);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      text-align: center;
+      margin: 2rem 0;
+    }
+    .play-btn {
+      display: inline-block;
+      background: #f59e0b;
+      color: #12100e;
+      font-weight: 800;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.1rem;
+      padding: 0.85rem 2rem;
+      border-radius: 0.75rem;
+      text-decoration: none;
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
+      transition: transform 0.2s, background-color 0.2s;
+    }
+    .play-btn:hover {
+      background: #fbbf24;
+      transform: scale(1.03);
+    }
+    .controls-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+    }
+    .controls-table th, .controls-table td {
+      border: 1px solid var(--border);
+      padding: 0.75rem;
+      text-align: left;
+    }
+    .controls-table th {
+      background: rgba(245, 158, 11, 0.1);
+      color: #fbbf24;
+    }
+    footer {
+      border-top: 1px solid var(--border);
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-top: 4rem;
+    }
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="/" class="brand">
+      <span>🎮 ANAPSE VIDEO GAMES</span>
+    </a>
+    <nav class="nav-links">
+      <a href="/">Inicio</a>
+      <a href="/acerca.html">Acerca de</a>
+      <a href="/privacidad.html">Privacidad</a>
+      <a href="/terminos.html">Términos</a>
+      <a href="/contacto.html">Contacto</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div class="card">
+      <span class="badge">MINIJUEGO DESTACADO · 100% GRATIS</span>
+      <h1>🦊 Fox Thief Mini-Game</h1>
+
+      <p><strong>Fox Thief Mini-Game</strong> es una de las experiencias insignia de ANAPSE: un vertiginoso título de sigilo, reflejos y estrategia ambientado en escenarios vigilados. Controlas a un ágil zorro que debe burlar la visión de los guardias, evitar trampas con sensor y recolectar valiosas gemas antes de que suene la alarma general.</p>
+
+      <div class="play-banner">
+        <h3 style="margin-top:0; color:#fff; font-family:'Orbitron', sans-serif;">¿Listo para poner a prueba tu sigilo?</h3>
+        <p style="margin-bottom:1.5rem; color:#f3f4f6;">Juega gratis ahora mismo directamente desde tu navegador, sin descargas ni registros obligatorios.</p>
+        <a href="/#game-fox-thief" class="play-btn">▶️ JUGAR AHORA EN EL PORTAL</a>
+      </div>
+
+      <h2>Controles del Juego</h2>
+      <table class="controls-table">
+        <thead>
+          <tr>
+            <th>Acción</th>
+            <th>Teclado (PC)</th>
+            <th>Pantalla Táctil (Móvil / Tablet)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Moverse (Arriba, Abajo, Izq, Der)</td>
+            <td>Teclas de Flecha o <strong>W, A, S, D</strong></td>
+            <td>Pad virtual / Deslizar con el dedo</td>
+          </tr>
+          <tr>
+            <td>Correr / Sprint Rápido</td>
+            <td>Tecla <strong>Shift</strong> o <strong>Espacio</strong></td>
+            <td>Botón de turbo en pantalla</td>
+          </tr>
+          <tr>
+            <td>Pausar Partida</td>
+            <td>Tecla <strong>Escape</strong> o <strong>P</strong></td>
+            <td>Botón de pausa superior</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Estrategias y Consejos para Récords Altos</h2>
+      <ul>
+        <li><strong>Conos de Visión:</strong> Los guardias patrullan siguiendo rutas fijas pero aumentan su velocidad de giro con cada nivel completado. Estudia su ritmo antes de cruzar pasillos iluminados.</li>
+        <li><strong>Multiplicador de Gemas:</strong> Recolectar varias gemas seguidas sin alertar a los guardias activa un multiplicador de puntuación para el ranking global.</li>
+        <li><strong>Uso medido del Sprint:</strong> El sprint acelera tu movimiento pero genera más ruido en el radio cercano. Úsalo solo para escapar hacia las sombras.</li>
+      </ul>
+
+      <h2>Rankings Globales</h2>
+      <p>Todas las puntuaciones y tiempos récord se sincronizan en los servidores seguros de ANAPSE en la nube. ¡Inicia sesión con tu cuenta de Google para guardar tu mejor récord y competir en la cima de la tabla mundial de jugadores!</p>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2026 ANAPSE VIDEO GAMES. Todos los derechos reservados. | <a href="/">Volver al Portal</a> | <a href="/privacidad.html">Privacidad</a> | <a href="/terminos.html">Términos</a> | <a href="/contacto.html">Contacto</a></p>
+  </footer>
+</body>
+</html>
