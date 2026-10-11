@@ -33,15 +33,21 @@ jobs:
           cache: 'npm'
 
       - name: Install Dependencies
-        run: npm ci
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
 
       - name: Build Application
         run: npm run build
 
       - name: Prepare static files for GitHub Pages
         run: |
-          cp ads.txt dist/ads.txt
-          cp dist/index.html dist/404.html
+          [ -f ads.txt ] && cp -f ads.txt dist/ads.txt || true
+          [ -f public/ads.txt ] && cp -f public/ads.txt dist/ads.txt || true
+          [ ! -f dist/404.html ] && cp dist/index.html dist/404.html || true
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
